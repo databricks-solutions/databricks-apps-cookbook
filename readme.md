@@ -1,3 +1,13 @@
+## Table of Contents
+- [Databricks Apps Cookbook](#-databricks-apps-cookbook)
+- [What is the Databricks Apps Cookbook?](#what-is-the-databricks-apps-cookbook)
+- [Documentation](#documentation)
+- [Getting Started](#getting-started)
+- [Contributions](#contributions)
+- [Support](#support)
+- [License](#license)
+- [Code of Conduct](#code-of-conduct)
+  
 # 📖 Databricks Apps Cookbook 🍳
 
 Ready-to-use code snippets for building data and AI applications using [Databricks Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html).
@@ -18,6 +28,12 @@ Learn more about the Databricks Apps Cookbook on **[apps-cookbook.dev](https://a
 
 Find **deployment instructions** and all **code snippets** on [apps-cookbook.dev](https://apps-cookbook.dev/).
 
+## Getting Started
+To explore the cookbook:
+1. Visit [apps-cookbook.dev](https://apps-cookbook.dev/) for deployment instructions and detailed code snippets.
+2. Browse the recipes and choose one that fits your needs.
+3. Follow the provided guidelines to integrate the recipe into your project.
+
 ## Contributions
 
 We welcome contributions! Submit a [pull request](https://github.com/pbv0/databricks-apps-cookbook/pulls) to add or improve recipes. Raise an [issue](https://github.com/pbv0/databricks-apps-cookbook/issues) to report a bug or raise a feature request.
@@ -33,3 +49,6 @@ Not sure what to contribute? Here are some commonly requested samples:
 ## Support
 
 These samples are experimental and meant for demonstration purposes only. They are provided as-is and without formal support by Databricks. Ensure your organization's security, compliance, and operational best practices are applied before deploying them to production.
+
+## Code of Conduct
+Please review our [Code of Conduct](CODE_OF_CONDUCT.md) to understand our community standards.
