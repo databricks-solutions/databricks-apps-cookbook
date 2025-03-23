@@ -105,6 +105,25 @@ groups = [
             },
         ],
     },
+
+    {
+        "title": "Geo Visualization",
+        "views": [
+            {
+                "label": "Display Geo Input",
+                "help": "Display geo information on a map.",
+                "page": "views/maps_display.py",
+                "icon": ":material/globe:",
+            },
+              {
+                "label": "User Geo Input",
+                "help": "Enable users to select own geo input.",
+                "page": "views/maps_draw.py",
+                "icon": ":material/pin_drop:",
+            },
+        ],
+    },
+
     {
         "title": "Unity Catalog",
         "views": [
