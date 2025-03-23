@@ -2,7 +2,6 @@
 import streamlit as st
 from databricks import sql
 from databricks.sdk.core import Config
-import numpy as np
 import pandas as pd
 
 
