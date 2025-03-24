@@ -107,6 +107,17 @@ groups = [
     },
 
     {
+        "title": "Alerts",
+        "views": [
+            {
+                "label": "List alerts",
+                "help": "List all alerts.",
+                "page": "views/alerts.py",
+                "icon": ":material/notifications_none:",
+            },
+        ],
+    },
+    {
         "title": "Geo Visualization",
         "views": [
             {
@@ -152,16 +163,4 @@ groups = [
             },
         ],
     },
-    
-    {
-        "title": "Unity Catalog",
-        "views": [
-            {
-                "label": "Get Catalogs",
-                "help": "Get meta data.",
-                "page": "views/unity_catalog_get.py",
-                "icon": ":material/lan:",
-            },
-        ],
-    }
 ]
