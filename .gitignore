@@ -1,0 +1,5 @@
+*conf*.json
+.DS_Store
+__pycache__
+.idea/
+.env
