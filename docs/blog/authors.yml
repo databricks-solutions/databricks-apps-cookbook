@@ -1,0 +1,17 @@
+pascal:
+  name: Pascal Vogel
+  title: Solutions Architect at Databricks
+  url: https://www.linkedin.com/in/pascal-vogel/
+  image_url: https://avatars.githubusercontent.com/u/100202393?v=4
+  socials:
+    github: pbv0
+    linkedin: pascal-vogel
+
+antonio:
+  name: Antonio Samaniego Jurado
+  title: Solutions Architect at Databricks
+  url: https://www.linkedin.com/in/antonio-samaniego/
+  image_url: https://avatars.githubusercontent.com/u/35942854?v=4
+  socials:
+    github: samaxtech
+    linkedin: antonio-samaniego

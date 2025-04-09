@@ -1,0 +1,57 @@
+---
+sidebar_position: 1
+---
+
+# Upload a file
+
+This recipe uploads a file to a [Unity Catalog volume](https://docs.databricks.com/en/volumes/index.html) using the [Databricks SDK for Python](https://databricks-sdk-py.readthedocs.io/en/latest/).
+
+## Code snippet
+
+```python title="app.py"
+import io
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+# Read file into bytes
+with open("local_file.csv", "rb") as f:
+    file_bytes = f.read()
+binary_data = io.BytesIO(file_bytes)
+
+# Specify volume path and upload
+volume_path = "main.marketing.raw_files"
+
+parts = volume_path.strip().split(".")
+
+catalog = parts[0]
+schema = parts[1]
+volume_name = parts[2]
+
+volume_file_path = f"/Volumes/{catalog}/{schema}/{volume_name}/local_file.csv"
+w.files.upload(volume_file_path, binary_data, overwrite=True)
+```
+
+## Resources
+
+- [Unity Catalog volume](https://docs.databricks.com/aws/en/files/volumes)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `USE CATALOG` on the catalog of the volume
+- `USE SCHEMA` on the schema of the volume
+- `READ VOLUME` and `WRITE VOLUME` on the volume
+
+See [Privileges required for volume operations](https://docs.databricks.com/en/volumes/privileges.html#privileges-required-for-volume-operations) for more information.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Dash](https://pypi.org/project/dash/) - `dash`
+
+```python title="requirements.txt"
+databricks-sdk
+dash
+```

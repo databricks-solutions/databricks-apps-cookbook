@@ -1,0 +1,32 @@
+---
+sidebar_position: 1
+---
+
+# Get current user
+
+This recipe gets information about the user accessing this Databricks App from their [HTTP headers](https://docs.databricks.com/en/dev-tools/databricks-apps/app-development.html#what-http-headers-are-passed-to-databricks-apps).
+
+## Code snippet
+
+```python title="app.py"
+from flask import request
+
+headers = request.headers
+email = headers.get("X-Forwarded-Email")
+username = headers.get("X-Forwarded-Preferred-Username")
+user = headers.get("X-Forwarded-User")
+ip = headers.get("X-Real-Ip")
+print(f"E-mail: {email}, username: {username}, user: {user}, ip: {ip}")
+```
+
+## Permissions
+
+No permissions configuration required.
+
+## Dependencies
+
+- [Dash](https://pypi.org/project/dash/) - `dash`
+
+```python title="requirements.txt"
+dash
+```

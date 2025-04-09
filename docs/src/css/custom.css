@@ -1,0 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
+
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) important;
+@import "tailwindcss/utilities.css" layer(utilities) important;
+
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@theme {
+  --breakpoint-xs: 25rem;
+  --color-lava-700: #c81f0d;
+  --color-lava-600: #ff3621;
+  --color-lava-500: #ff7364;
+}
+
+:root {
+  --ifm-font-family-base: "DM Sans";
+  --ifm-heading-font-family: "DM Sans";
+  --ifm-font-family-monospace: "DM Mono", monospace;
+
+  --ifm-color-primary: #ff3621;
+  --ifm-color-primary-dark: #ff1c04;
+  --ifm-color-primary-darker: #f51700;
+  --ifm-color-primary-darkest: #ca1300;
+  --ifm-color-primary-light: #ff503e;
+  --ifm-color-primary-lighter: #ff5d4c;
+  --ifm-color-primary-lightest: #ff8477;
+
+  --ifm-background-color: #eeede9;
+  --ifm-navbar-background-color: #f9f7f4;
+  --ifm-footer-background-color: #f9f7f4;
+
+  --ifm-footer-padding-vertical: 1.25rem;
+
+  --ifm-button-border-radius: 0;
+  --ifm-card-border-radius: 0;
+  --ifm-pagination-nav-border-radius: 0;
+  --ifm-code-border-radius: 0;
+
+  --ifm-button-color: white;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #ff3621;
+  --ifm-color-primary-dark: #ff1c04;
+  --ifm-color-primary-darker: #f51700;
+  --ifm-color-primary-darkest: #ca1300;
+  --ifm-color-primary-light: #ff503e;
+  --ifm-color-primary-lighter: #ff5d4c;
+  --ifm-color-primary-lightest: #ff8477;
+
+  --ifm-background-color: #0a2126;
+  --ifm-navbar-background-color: #1b3139;
+  --ifm-footer-background-color: #1b3139;
+  --ifm-footer-color: var(--ifm-navbar-link-color);
+  --ifm-footer-link-color: var(--ifm-navbar-link-color);
+  --ifm-footer-title-color: var(--ifm-navbar-link-color);
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.landing-button-vertical {
+  display: none;
+}
+
+@media screen and (max-width: 25rem) {
+  footer {
+    display: none;
+  }
+
+  .landing-button-horizontal {
+    display: none;
+  }
+
+  .landing-button-vertical {
+    display: block;
+  }
+}

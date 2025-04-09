@@ -1,0 +1,68 @@
+---
+sidebar_position: 1
+---
+
+# Read a table
+
+This recipe reads a [Unity Catalog table](https://docs.databricks.com/aws/en/tables/) using the [Databricks SQL Connector](https://docs.databricks.com/en/dev-tools/python-sql-connector.html).
+
+## Code snippet
+
+```python title="app.py"
+from functools import lru_cache
+from databricks import sql
+from databricks.sdk.core import Config
+
+cfg = Config()  # Set the DATABRICKS_HOST environment variable when running locally
+
+@lru_cache(maxsize=1)
+def get_connection(http_path):
+    return sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        credentials_provider=lambda: cfg.authenticate,
+    )
+
+def read_table(table_name, conn):
+    with conn.cursor() as cursor:
+        query = f"SELECT * FROM {table_name}"
+        cursor.execute(query)
+        return cursor.fetchall_arrow().to_pandas()
+
+http_path_input = "/sql/1.0/warehouses/xxxxxx"
+table_name = "catalog.schema.table"
+conn = get_connection(http_path_input)
+df = read_table(table_name, conn)
+```
+
+:::info
+
+This sample uses Pythons's [lru_cache](https://docs.python.org/3/library/functools.html#functools.lru_cache). Adapt the caching behavior to fit your specific use case.
+
+:::
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/)
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `SELECT` on the Unity Catalog table
+- `CAN USE` on the SQL warehouse
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [Dash](https://pypi.org/project/dash/) - `dash`
+
+```python title="requirements.txt"
+databricks-sdk
+databricks-sql-connector
+dash
+```

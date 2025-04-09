@@ -1,0 +1,52 @@
+---
+sidebar_position: 1
+---
+
+# Embed a dashboard
+
+This recipe embeds a [Databricks AI/BI dashboard](https://docs.databricks.com/aws/en/dashboards/) into a Databricks App.
+
+## Code snippet
+
+```python title="app.py"
+from dash import html
+
+iframe_source = "https://workspace.azuredatabricks.net/embed/dashboardsv3/dashboard-id"
+
+html.Iframe(
+    src=iframe_source,
+    width="700px",
+    height="600px",
+    style={"border": "none"}
+)
+```
+
+:::info
+
+Copy and paste the dashoard embedding URL from the dashboard UI **Share** -> **Embed iframe**.
+
+:::
+
+## Resources
+
+- [AI/BI dashboard](https://docs.databricks.com/aws/en/dashboards/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN VIEW` permission on the dashboard
+
+:::info
+
+A workspace admin needs to enable dashboard embedding in the Security settings of your Databricks workspace for specific domains (e.g., databricksapps.com) or all domains for this sample to work.
+
+:::
+
+## Dependencies
+
+- [Dash](https://pypi.org/project/dash/) - `dash`
+
+```python title="requirements.txt"
+dash
+```

@@ -1,0 +1,99 @@
+---
+sidebar_position: 1
+---
+
+# Chat with a Genie Space
+
+This app uses the [AI/BI Genie](https://www.databricks.com/product/ai-bi) [Conversations API](https://docs.databricks.com/api/workspace/genie) to let users ask questions about your data for instant insights.
+
+## Code snippet
+
+Refer to the Streamlit Cookbook Genie source code for the full implementation.
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+import pandas as pd
+
+w = WorkspaceClient()
+
+genie_space_id = "01efe16a65e21836acefb797ae6a8fe4"
+
+
+def display_message(message):
+    if "content" in message:
+        st.markdown(message["content"])
+    if "data" in message:
+        st.dataframe(message["data"])
+    if "code" in message:
+        with st.expander("Show generated code"):
+            st.code(message["code"], language="sql", wrap_lines=True)
+
+
+def get_query_result(statement_id):
+    # For simplicity, let's say data fits in one chunk, query.manifest.total_chunk_count = 1
+
+    result = w.statement_execution.get_statement(statement_id)
+    return pd.DataFrame(
+        result.result.data_array, columns=[i.name for i in result.manifest.schema.columns]
+    )
+
+
+def process_genie_response(response):
+    for i in response.attachments:
+        if i.text:
+            message = {"role": "assistant", "content": i.text.content}
+            display_message(message)
+        elif i.query:
+            data = get_query_result(i.query.statement_id)
+            message = {
+                "role": "assistant", "content": i.query.description, "data": data, "code": i.query.query
+            }
+            display_message(message)
+
+
+if prompt := st.chat_input("Ask your question..."):
+    # Refer to actual app code for chat history persistence on rerun
+
+    st.chat_message("user").markdown(prompt)
+
+    with st.chat_message("assistant"):
+        if st.session_state.get("conversation_id"):
+            conversation = w.genie.create_message_and_wait(
+                genie_space_id, st.session_state.conversation_id, prompt
+            )
+            process_genie_response(conversation)
+        else:
+            conversation = w.genie.start_conversation_and_wait(genie_space_id, prompt)
+            process_genie_response(conversation)
+```
+
+:::info
+
+Copy and paste the Genie space ID from the Genie UI URL as rooms/SPACE-ID?o=.
+
+:::
+
+## Resources
+
+- [Genie](https://www.databricks.com/what-aibi-genie)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `SELECT` on the Unity Catalog table
+- `CAN USE` the SQL warehouse
+- `CAN VIEW` the Genie Space
+
+## Dependencies
+
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Pandas](https://pypi.org/project/pandas/) - `pandas`
+
+```python title="requirements.txt"
+streamlit
+databricks-sdk
+pandas
+```

@@ -1,0 +1,66 @@
+---
+sidebar_position: 1
+---
+
+# Get current user
+
+This recipe gets information about the user accessing this Databricks App from their [HTTP headers](https://docs.databricks.com/en/dev-tools/databricks-apps/app-development.html#what-http-headers-are-passed-to-databricks-apps).
+
+## Code snippet
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+# Get information from HTTP headers
+headers = st.context.headers
+email = headers.get("X-Forwarded-Email")
+username = headers.get("X-Forwarded-Preferred-Username")
+user = headers.get("X-Forwarded-User")
+ip = headers.get("X-Real-Ip")
+user_access_token = headers.get("X-Forwarded-Access-Token")
+
+# Display information from headers
+st.write(f"E-mail: {email}, username: {username}, user: {user}, ip: {ip}")
+st.write(f"Access token present: {'Yes' if user_access_token else 'No'}")
+
+# If we have a user access token, we can get more information about the user
+if user_access_token:
+    # Initialize WorkspaceClient with the user's token
+    w = WorkspaceClient(token=user_access_token, auth_type="pat")
+    
+    # Get current user information
+    current_user = w.current_user.me()
+    
+    # Display user information
+    st.write(f"""
+        User ID: {current_user.id}
+        Username: {current_user.user_name}
+        Display Name: {current_user.display_name}
+        Active: {current_user.active}
+        Groups: {len(current_user.groups) if current_user.groups else 0} groups
+        Entitlements: {len(current_user.entitlements) if current_user.entitlements else 0} entitlements
+    """)
+```
+
+:::info
+This sample requires [on-behalf-of-user authentication](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-development#-using-the-databricks-apps-authorization-model) to be enabled for your app to access the `X-Forwarded-Access-Token` header. Without this, you will only have access to basic user information from the headers, not the detailed information from the Databricks API. Without the user token present, `w.current_user.me()` will return information about the app service principal.
+:::
+
+## Resources
+
+No Databricks resources are required for this recipe.
+
+## Permissions
+
+No permissions configuration required for accessing headers. To use the `current_user.me()` API, the app must be configured with [on-behalf-of-user authentication](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-development#-using-the-databricks-apps-authorization-model).
+
+## Dependencies
+
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk` (if using `current_user.me()`)
+
+```python title="requirements.txt"
+streamlit
+databricks-sdk
+```

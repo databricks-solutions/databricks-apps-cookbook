@@ -1,0 +1,78 @@
+---
+sidebar_position: 1
+---
+
+# Read a table
+
+This recipe reads a [Unity Catalog table](https://docs.databricks.com/aws/en/tables/) using the [Databricks SQL Connector](https://docs.databricks.com/en/dev-tools/python-sql-connector.html).
+
+## Code snippet
+
+```python title="app.py"
+import streamlit as st
+from databricks import sql
+from databricks.sdk.core import Config
+
+
+cfg = Config()  # Set the DATABRICKS_HOST environment variable when running locally
+
+
+@st.cache_resource # connection is cached
+def get_connection(http_path):
+    return sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        credentials_provider=lambda: cfg.authenticate,
+    )
+
+def read_table(table_name, conn):
+    with conn.cursor() as cursor:
+        query = f"SELECT * FROM {table_name}"
+        cursor.execute(query)
+        return cursor.fetchall_arrow().to_pandas()
+
+http_path_input = st.text_input(
+    "Enter your Databricks HTTP Path:", placeholder="/sql/1.0/warehouses/xxxxxx"
+)
+
+table_name = st.text_input(
+    "Specify a Unity Catalog table name:", placeholder="catalog.schema.table"
+)
+
+if http_path_input and table_name:
+    conn = get_connection(http_path_input)
+    df = read_table(table_name, conn)
+    st.dataframe(df)
+```
+
+:::info
+
+This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) to cache the database connection across users, sessions, and reruns. Use Streamlit's caching decorators to implement a caching strategy that works for your use case.
+
+:::
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/)
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `SELECT` on the Unity Catalog table
+- `CAN USE` on the SQL warehouse
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+
+```python title="requirements.txt"
+databricks-sdk
+databricks-sql-connector
+streamlit
+```

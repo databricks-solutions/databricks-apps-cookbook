@@ -1,0 +1,62 @@
+---
+sidebar_position: 1
+---
+
+# Connect to a cluster
+
+This recipe uses [Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/python/index.html) to execute pre-defined Python or SQL code on a **shared** cluster with UI inputs.
+
+## Code snippet
+
+```python title="app.py"
+import os
+from databricks.connect import DatabricksSession
+
+cluster_id = "0709-132523-cnhxf2p6"
+
+spark = DatabricksSession.builder.remote(
+    host=os.getenv("DATABRICKS_HOST"),
+    cluster_id=cluster_id
+).getOrCreate()
+
+# SQL operations example
+a = "(VALUES (1, 'A1'), (2, 'A2'), (3, 'A3')) AS a(id, value)"
+b = "(VALUES (2, 'B1'), (3, 'B2'), (4, 'B3')) AS b(id, value)"
+
+# Inner join example
+query = f"SELECT a.id, a.value AS value_a, b.value AS value_b FROM {a} INNER JOIN {b} ON a.id = b.id"
+result = spark.sql(query).toPandas()
+print(result)
+
+# Generate sequence
+result = spark.range(10).toPandas()
+print(result)
+```
+
+:::info
+
+You also have the option to [connect to serverless compute using Databricks Connect](https://docs.databricks.com/aws/en/compute/serverless/).
+
+:::
+
+## Resources
+
+- [All-purpose compute](https://docs.databricks.com/aws/en/compute/use-compute) or [serverless compute](https://docs.databricks.com/aws/en/compute/serverless/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN ATTACH TO` permission on the cluster
+
+See [Compute permissions](https://docs.databricks.com/aws/en/compute/clusters-manage#compute-permissions) for more information.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Dash](https://pypi.org/project/dash/) - `dash`
+
+```python title="requirements.txt"
+databricks-sdk
+dash
+```

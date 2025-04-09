@@ -1,0 +1,84 @@
+---
+sidebar_position: 2
+---
+
+# Chat with a Genie Space
+
+This app uses the [AI/BI Genie](https://www.databricks.com/product/ai-bi) [Conversations API](https://docs.databricks.com/api/workspace/genie) to let users ask questions about your data for instant insights.
+
+## Code snippet
+
+Refer to the Dash Cookbook Genie source code for the full implementation.
+
+```python title="app.py"
+import pandas as pd
+from databricks.sdk import WorkspaceClient
+
+
+def get_query_result(statement_id):
+    # For simplicity, let's say data fits in one chunk, query.manifest.total_chunk_count = 1
+
+    result = w.statement_execution.get_statement(statement_id)
+    return pd.DataFrame(
+        result.result.data_array, columns=[i.name for i in result.manifest.schema.columns]
+    )
+
+
+def process_genie_response(response):
+    for i in response.attachments:
+        if i.text:
+            print(f"A: {i.text.content}")
+        elif i.query:
+            data = get_query_result(i.query.statement_id)
+            print(f"A: {i.query.description}")
+            print(f"Data: {data}")
+            print(f"Generated code: {i.query.query}")
+
+
+# Configuration
+w = WorkspaceClient()
+genie_space_id = "01f0023d28a71e599b5a62f4117516d4"
+
+prompt = "Ask a question..."
+follow_up_prompt = "Ask a follow-up..."
+
+# Start the conversation
+conversation = w.genie.start_conversation_and_wait(genie_space_id, prompt)
+process_genie_response(conversation)
+
+# Continue the conversation
+follow_up_conversation = w.genie.create_message_and_wait(
+    genie_space_id, conversation.conversation_id, follow_up_prompt
+)
+process_genie_response(follow_up_conversation)
+```
+
+:::info
+
+Copy and paste the Genie space ID from the Genie UI URL as rooms/SPACE-ID?o=.
+
+:::
+
+## Resources
+
+- [Genie](https://www.databricks.com/what-aibi-genie)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `SELECT` on the Unity Catalog table
+- `CAN USE` the SQL warehouse
+- `CAN VIEW` the Genie Space
+
+## Dependencies
+
+- [Dash](https://pypi.org/project/dash/) - `dash`
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Pandas](https://pypi.org/project/pandas/) - `pandas`
+
+```python title="requirements.txt"
+dash
+databricks-sdk
+pandas
+```
