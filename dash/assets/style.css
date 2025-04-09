@@ -1,0 +1,64 @@
+.group-title:hover {
+    background-color: #e7f1ff;
+    transform: translateX(4px);
+    color: #0d6efd !important;
+}
+
+.recipe-link:hover {
+    background-color: #e7f1ff !important;
+    transform: translateX(4px);
+    color: #0d6efd !important;
+    text-decoration: none;
+}
+
+.card {
+    transition: all 0.2s ease;
+    border: 1px solid #dee2e6;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Sidebar hover effects */
+.sidebar-link {
+    transition: all 0.2s ease !important;
+    background-color: transparent !important;  /* Reset default background */
+}
+
+.sidebar-link:hover {
+    background-color: #e7f1ff !important;
+    transform: translateX(4px);
+    color: #0d6efd !important;
+    text-decoration: none;
+}
+
+/* Group headers in sidebar */
+.sidebar .h6 {
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: -8px;  /* Offset the padding */
+    cursor: pointer;
+}
+
+.sidebar .h6:hover {
+    background-color: #e7f1ff;
+    transform: translateX(4px);
+    color: #0d6efd;
+}
+
+/* Active state for sidebar links */
+.sidebar-link.active:not([href="/"]) {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+}
+
+/* Introduction link should only show highlight on hover */
+.sidebar-link[href="/"] {
+    background-color: transparent !important;
+}
+
+.sidebar-link[href="/"]:hover {
+    background-color: #e7f1ff !important;
+} 

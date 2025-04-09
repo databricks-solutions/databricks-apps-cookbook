@@ -1,0 +1,13 @@
+databricks-connect==16.0.0
+databricks-sdk[openai]==0.46.0
+databricks-sql-connector==4.0.0
+pandas==2.2.3
+dash==2.18.2
+dash-bootstrap-components==1.6.0
+dash-core-components==2.0.0
+dash-html-components==2.0.0
+dash-iconify==0.1.2
+dash-leaflet==1.0.15
+dash-table==5.0.0
+dash_ag_grid==31.3.0
+dash_mantine_components==0.15.3
