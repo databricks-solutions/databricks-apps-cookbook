@@ -157,6 +157,7 @@ with tab_reqs:
         st.markdown(
             """
             **Permissions (app service principal)**
+            * The database instance should be specified in your [**App resources**](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/resources).
             * A PostgreSQL role for the service principal is **required**.
             See [this guide](https://docs.databricks.com/aws/en/oltp/pg-roles?language=PostgreSQL#create-postgres-roles-and-grant-privileges-for-databricks-identities).
             * The PostgreSQL service principal role should have these example grants:
@@ -164,9 +165,9 @@ with tab_reqs:
         )
         st.code(
             '''
-GRANT CONNECT ON DATABASE customer_database TO "<YOUR-SERVICE-PRINCIPAL-ID>";
-GRANT USAGE ON SCHEMA customer_core TO "<YOUR-SERVICE-PRINCIPAL-ID>";
-GRANT SELECT ON TABLE customers_oltp TO "<YOUR-SERVICE-PRINCIPAL-ID>";
+GRANT CONNECT ON DATABASE databricks_postgres TO "099f0306-9e29-4a87-84c0-3046e4bcea02";
+GRANT USAGE ON SCHEMA public TO "099f0306-9e29-4a87-84c0-3046e4bcea02";
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE quotes_history TO "099f0306-9e29-4a87-84c0-3046e4bcea02";
             ''',
             language="sql",
         )
