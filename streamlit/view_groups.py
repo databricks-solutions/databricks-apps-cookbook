@@ -13,6 +13,12 @@ groups = [
         "title": "Tables",
         "views": [
             {
+                "label": "Connect an OLTP database",
+                "help": "Query an OLTP database instance table.",
+                "page": "views/oltp_database_connect.py",
+                "icon": ":material/database:",
+            },
+            {
                 "label": "Read a table",
                 "help": "Query a Unity Catalog Delta table.",
                 "page": "views/tables_read.py",
