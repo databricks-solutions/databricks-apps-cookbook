@@ -11,7 +11,7 @@ from psycopg_pool import ConnectionPool
 st.header("OLTP Database", divider=True)
 st.subheader("Connect a table")
 st.write(
-    "This app connects to a [Databricks Lakebase](https://docs.databricks.com/aws/en/oltp/) OLTP database instance for reads and writes, e.g., of App state. "
+    "This app connects to a [Databricks Lakebase](https://docs.databricks.com/aws/en/oltp/) OLTP database instance for reads and writes, e.g., of an App state. "
     "Provide the instance name, database, schema, and state table."
 )
 
