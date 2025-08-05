@@ -55,6 +55,9 @@ def create_sidebar():
         'Authentication': [
             'Get current user',
             'Retrieve a secret'
+        ],
+        'External Services': [
+            'External Connections'
         ]
     }
     
@@ -73,7 +76,8 @@ def create_sidebar():
         'Retrieve job results': 'material-symbols:list-alt',
         'Connect': 'material-symbols:link',
         'Get current user': 'material-symbols:fingerprint',
-        'Retrieve a secret': 'material-symbols:key'
+        'Retrieve a secret': 'material-symbols:key',
+        'External Connections': 'material-symbols:link'
     }
     
     # Group pages by category
@@ -128,7 +132,7 @@ app.layout = html.Div([
                     }),
                 ], className="sidebar-header"),
                 html.Div(create_sidebar(), className="ps-4")
-            ], width=2, className="bg-light border-end overflow-auto p-0"),
+            ], width=2, className="sidebar overflow-auto p-0"),
             
             dbc.Col([
                 page_container
