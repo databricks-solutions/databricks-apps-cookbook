@@ -521,7 +521,7 @@ def send_external_request(n_clicks, connection, request_type, method, path, head
             request_path = path if path else ""
             
             # Handle MCP requests
-            if request_type == "mcp" and auth_type == "oauth_user_machine_per_user":
+            if request_type == "mcp":
                 # Initialize MCP if not already done
                 global mcp_session_id
                 if not mcp_session_id:
