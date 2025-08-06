@@ -5,9 +5,13 @@ import json
 import re
 
 
+if "mcp_session_id" not in st.session_state:
+    st.session_state.mcp_session_id = None
+
+
 @st.cache_resource
 def get_client_obo() -> WorkspaceClient:
-    user_token = st.context.headers["X-Forwarded-Access-Token"]
+    user_token = st.context.headers.get("x-forwarded-access-token")
     if not user_token:
         st.error("User token is required for OBO authentication")
         return None
@@ -15,15 +19,13 @@ def get_client_obo() -> WorkspaceClient:
     if user_token:
         return WorkspaceClient(
             token=user_token, 
-            auth_type="pat"
+            auth_type="pat",
         )
     
 
 def init_github_mcp_connection(w: WorkspaceClient, uc_connection_name: str):
     """Initialize GitHub MCP and get session ID"""
-    st.session_state.mcp_session_id = None
     try:
-        
         init_json = {
             "jsonrpc": "2.0",
             "id": "init-1",
@@ -70,7 +72,7 @@ def is_connection_login_error(error: str):
 st.header(body="External connections", divider=True)
 st.subheader("Securely call external API services")
 st.write(
-    "This recipe demonstrates how to use Unity Catalog-managed external HTTP connections for secure and governed access, for example, to GitHub, Jira, and Slack."
+    "This recipe demonstrates how to use Unity Catalog-managed external HTTP connections for secure and governed access to MCP and non-MCP servers, for example, to GitHub, or Jira, and Slack."
 )
 
 tab_app, tab_code, tab_config = st.tabs(["Try it", "Code snippet", "Requirements"])
@@ -89,7 +91,7 @@ with tab_app:
     http_method = st.selectbox("HTTP Method", options=["GET", "POST", "PUT", "DELETE", "PATCH"], )
     path = st.text_input("Path", placeholder="/api/endpoint")
     request_type = st.selectbox("Request Type", options=["Non-MCP", "MCP"])
-    request_headers = st.text_area("Request headers", placeholder='{"Content-Type": "application/json"}')
+    request_headers = st.text_area("Request headers", placeholder='{"Content-Type": "application/json"}') or {}
     request_data = st.text_area("Request data", placeholder='{"key": "value"}')
 
     all_fields_filled = path and connection_name != ""
@@ -114,7 +116,7 @@ with tab_app:
         
         if request_data and request_data.strip():
             try:
-                request_data = json.loads(request_data)
+                request_data = json.loads(request_data) if request_data else json.loads(None)
             except json.JSONDecodeError:
                 st.error("❌ Invalid JSON data")
 
@@ -122,7 +124,7 @@ with tab_app:
 
         if request_type == "MCP":
             if not st.session_state.mcp_session_id:
-                session_id, error = init_github_mcp_connection(w)
+                session_id, error = init_github_mcp_connection(w, connection_name)
                 if error:
                     if is_connection_login_error(error):
                         login_url = extract_login_url_from_error(error)
@@ -131,20 +133,24 @@ with tab_app:
                             st.markdown("You need to authenticate with the external connection first.")
                             st.markdown(f"[Login to Connection]({login_url})")
                         else:
-                            st.error("❌ MCP error: {error}")
+                            st.error(f"❌ MCP error: {error}")
                     else:
-                        st.error("❌ MCP initialization error: {error}")
+                        st.error(f"❌ MCP initialization error: {error}")
+
+                st.write("MCP session id", session_id)
 
                 st.session_state.mcp_session_id = session_id
             
             request_headers["Mcp-Session-Id"] = st.session_state.mcp_session_id
+
+        request_data = request_data if request_data else None
 
         response = w.serving_endpoints.http_request(
             conn=connection_name, 
             method=http_method, 
             path=path, 
             headers=request_headers if request_headers else None,
-            json=request_data if request_data else None,
+            json=request_data if request_data else {},
         )
         st.subheader("Response")
         st.json(response.json())
@@ -152,43 +158,106 @@ with tab_app:
 
 
 with tab_code:
-    st.code("""
-import streamlit as st
-from databricks import sql
-from databricks.sdk.core import Config
+    table = [
+        {
+            "type": "Bearer token",
+            "code": """
+            ```python
+            import streamlit as st
+            from databricks.sdk import WorkspaceClient
+            from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
 
-cfg = Config()
+            w = WorkspaceClient()
 
-def get_user_token():
-    headers = st.context.headers
-    user_token = headers["X-Forwarded-Access-Token"]
-    return user_token
+            response = w.serving_endpoints.http_request(
+                conn="github_connection",
+                method=ExternalFunctionRequestHttpMethod.GET,
+                path="/traffic/views",
+                headers={"Accept": "application/vnd.github+json"},
+            )
 
-@st.cache_resource
-def connect_with_obo(http_path, user_token):
-    return sql.connect(
-        server_hostname=cfg.host,
-        http_path=http_path,
-        access_token=user_token
-    )
+            st.json(response.json())
+            ```
+            """,
+        },
+        {
+            "type": "Github MCP with OAuth User to Machine Per User (On-behalf-of-user)",
+            "code": """
+            ```python
+            import streamlit as st
+            from databricks.sdk import WorkspaceClient
+            from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
 
-def execute_query(table_name, conn):
-    with conn.cursor() as cursor:
-        query = f"SELECT * FROM {table_name} LIMIT 10"
-        cursor.execute(query)
-        return cursor.fetchall_arrow().to_pandas()
+            token = st.context.headers.get("x-forwarded-access-token")
+            w = WorkspaceClient(token=token, auth_type="pat")
 
-user_token = get_user_token()
+            response = w.serving_endpoints.http_request(
+                conn="github_u2m",
+                method=ExternalFunctionRequestHttpMethod.GET,
+                path="/user",
+                headers={"Accept": "application/vnd.github+json"},
+            )
 
-http_path = "/sql/1.0/warehouses/abcd1234"
-table_name = "samples.nyctaxi.trips"
+            st.json(response.json())
+            ```
+            """,
+        },
+        {
+            "type": "Github API (Non-MCP) with OAuth User to Machine Per User (On-behalf-of-user)",
+            "code": """
+            ```python
+            import streamlit as st
+            from databricks.sdk import WorkspaceClient
+            from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+            import json
+ 
+            
+            token = st.context.headers.get("x-forwarded-access-token")
+            w = WorkspaceClient(token=token, auth_type="pat")
+            
 
-if st.button("Run Query"):
-    conn = connect_with_obo(http_path, user_token)
-    
-    df = execute_query(table_name, conn)
-    st.dataframe(df)
-""")
+            def init_mcp_session(w: WorkspaceClient, connection_name: str):
+                init_payload = {
+                    "jsonrpc": "2.0",
+                    "id": "init-1",
+                    "method": "initialize",
+                    "params": {}
+                }
+                response = w.serving_endpoints.http_request(
+                    conn=connection_name,
+                    method=ExternalFunctionRequestHttpMethod.POST,
+                    path="/",
+                    json=init_payload,
+                )
+                return response.headers.get("mcp-session-id")
+
+
+            connection_name = "github_u2m_connection"
+            http_method = ExternalFunctionRequestHttpMethod.POST
+            path = "/"
+            headers = {"Content-Type": "application/json"}
+            payload = {"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}
+
+            if st.button("Run"):
+                session_id = init_mcp_session(w, connection_name)
+                headers["Mcp-Session-Id"] = session_id
+
+                response = w.serving_endpoints.http_request(
+                    conn=connection_name,
+                    method=http_method,
+                    path=path,
+                    headers=headers,
+                    json=payload,
+                )
+                st.json(response.json())
+            ```
+            """,
+        },
+    ]
+
+    for i, row in enumerate(table):
+        with st.expander(f"**{row['type']}**", expanded=(i == 0)):
+            st.markdown(row["code"])
 
 with tab_config:
     col1, col2, col3 = st.columns(3)
@@ -196,19 +265,17 @@ with tab_config:
     with col1:
         st.markdown("""
                     **Permissions (user or app service principal)**
-                    * `SELECT` permissions on the tables being queried
-                    * `CAN USE` on the SQL warehouse
+                    * `USE CONNECTION` permission on the HTTP Connection
                     """)
     with col2:
         st.markdown("""
                     **Databricks resources**
-                    * SQL warehouse
-                    * Unity Catalog table
+                    * [Unity Catalog HTTP Connection](https://docs.databricks.com/aws/en/query-federation/http), either MCP or non-MCP
                     """)
     with col3:
         st.markdown("""
                     **Dependencies**
                     * [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
-                    * [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
                     * [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+                    * [MCP](https://pypi.org/project/mcp/) - `mcp[cli]`
                     """)
