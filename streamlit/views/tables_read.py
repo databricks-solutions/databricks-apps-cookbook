@@ -4,7 +4,7 @@ from databricks.sdk.core import Config
 from databricks.sdk import WorkspaceClient
 
 st.header(body="Tables", divider=True)
-st.subheader("Read a table")
+st.subheader("Read a Delta table")
 st.write(
     "This recipe reads a Unity Catalog table using the [Databricks SQL Connector](https://docs.databricks.com/en/dev-tools/python-sql-connector.html)."
 )
