@@ -143,12 +143,23 @@ groups = [
                 "page": "views/users_obo.py",
                 "icon": ":material/key:",
             },
-            {
-                "label": "Retrieve a secret",
-                "help": "Get a sensitive API key without hard-coding it.",
-                "page": "views/secrets_retrieve.py",
-                "icon": ":material/lock:",
-            },
         ],
     },
+    {
+    "title": "External services",
+    "views": [
+        {
+            "label": "External connections",
+            "help": "Connect to a Unity Catalog-governed HTTP endpoint.",
+            "page": "views/external_connections.py",
+            "icon": ":material/link:",
+        },
+        {
+            "label": "Retrieve a secret",
+            "help": "Get a sensitive API key without hard-coding it.",
+            "page": "views/secrets_retrieve.py",
+            "icon": ":material/lock:",
+        },
+    ],
+},
 ]
