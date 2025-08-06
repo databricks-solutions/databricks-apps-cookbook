@@ -19,13 +19,13 @@ groups = [
                 "icon": ":material/database:",
             },
             {
-                "label": "Read a table",
+                "label": "Read a Delta table",
                 "help": "Query a Unity Catalog Delta table.",
                 "page": "views/tables_read.py",
                 "icon": ":material/table_view:",
             },
             {
-                "label": "Edit a table",
+                "label": "Edit a Delta table",
                 "help": "Interactively edit a Delta table in the UI.",
                 "page": "views/tables_edit.py",
                 "icon": ":material/edit_document:",
@@ -148,17 +148,6 @@ groups = [
                 "help": "Get a sensitive API key without hard-coding it.",
                 "page": "views/secrets_retrieve.py",
                 "icon": ":material/lock:",
-            },
-        ],
-    },
-    {
-        "title": "Unity Catalog",
-        "views": [
-            {
-                "label": "Get Catalogs",
-                "help": "Get meta data.",
-                "page": "views/unity_catalog_get.py",
-                "icon": ":material/lan:",
             },
         ],
     },
