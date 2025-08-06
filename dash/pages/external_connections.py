@@ -206,6 +206,7 @@ def layout():
                             color="primary",
                             className="mb-2"
                         ),
+                        html.P("Note: App service principal must have USE CONNECTION privilege on UC connection object", className="text-dark small mb-2"),
                         html.Div(id="response-output", className="bg-light p-3 rounded")
                     ])
                 ])
@@ -224,6 +225,26 @@ response = w.serving_endpoints.http_request(
     conn="github_connection",
     method=ExternalFunctionRequestHttpMethod.GET,
     path="/traffic/views",
+    headers={"Accept": "application/vnd.github+json"},
+)
+
+print(response.json())
+```""",
+                    className="mb-3"
+                ),
+                html.H4("Github Non-MCP API with Oauth On-Behalf-Of User", className="mb-1", style={"margin-top": "0", "padding-top": "0"}),
+                dcc.Markdown(
+                    """```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+from flask import request
+token = request.headers.get("x-forwarded-access-token")
+w = WorkspaceClient(token=token, auth_type="pat")
+
+response = w.serving_endpoints.http_request(
+    conn="github_u2m",
+    method=ExternalFunctionRequestHttpMethod.GET,
+    path="/user",
     headers={"Accept": "application/vnd.github+json"},
 )
 
@@ -389,7 +410,8 @@ app.mount("/", mcp_app)
                             html.Li("Workspace enabled for Unity Catalog"),
                             html.Li("Metastore admin or CREATE CONNECTION privilege"),
                             html.Li("CREATE CATALOG permission on metastore"),
-                            html.Li("USE CONNECTION privilege on connection object")
+                            html.Li("USE CONNECTION privilege on connection object"),
+                            html.Li("App service principal must have USE CONNECTION privilege on UC connection object")
                         ])
                     ]),
                     dbc.Col(md=4, children=[
@@ -418,7 +440,6 @@ app.mount("/", mcp_app)
                         html.Ul([
                             html.Li("Unity Catalog connection"),
                             html.Li("Foreign catalog (optional)"),
-                            html.Li("Serving endpoint"),
                             html.Li("Workspace access")
                         ])
                     ]),
@@ -480,6 +501,7 @@ def reset_workspace_client_on_auth_change(auth_type):
     global w
     w = None  # Reset the global workspace client
     return html.Div([html.P(f"Authentication type changed to: {auth_type}", className="text-info")])
+
 
 @callback(
     Output("response-output", "children", allow_duplicate=True),
