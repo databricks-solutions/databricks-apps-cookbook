@@ -154,7 +154,7 @@ def process_genie_response(response):
             message = {"role": "assistant", "content": i.text.content}
             display_message(message)
         elif i.query:
-            data = get_query_result(i.query.statement_id)
+            data = get_query_result(response.query_result.statement_id)
             message = {
                 "role": "assistant", "content": i.query.description, "data": data, "code": i.query.query
             }
