@@ -1,64 +1,411 @@
-.group-title:hover {
-    background-color: #e7f1ff;
-    transform: translateX(4px);
-    color: #0d6efd !important;
+/* Global styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #333;
+    line-height: 1.6;
 }
 
-.recipe-link:hover {
-    background-color: #e7f1ff !important;
-    transform: translateX(4px);
-    color: #0d6efd !important;
-    text-decoration: none;
+/* Header styling */
+h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.25rem;
 }
 
-.card {
-    transition: all 0.2s ease;
-    border: 1px solid #dee2e6;
+h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
 }
 
-.card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
 }
 
-/* Sidebar hover effects */
+h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+/* Section dividers */
+hr {
+    border: none;
+    height: 1px;
+    background-color: #007bff;
+    margin: 0.75rem 0;
+}
+
+/* Sidebar styling */
+.sidebar {
+    background-color: #f8f8f8;
+    border-right: 1px solid #e9ecef;
+    padding: 1rem 0;
+}
+
 .sidebar-link {
     transition: all 0.2s ease !important;
-    background-color: transparent !important;  /* Reset default background */
+    background-color: transparent !important;
+    color: #333 !important;
+    padding: 0.5rem 1rem;
+    border-radius: 0;
+    border-left: 3px solid transparent;
+    font-weight: 400;
 }
 
 .sidebar-link:hover {
-    background-color: #e7f1ff !important;
-    transform: translateX(4px);
-    color: #0d6efd !important;
+    background-color: #e9ecef !important;
+    color: #333 !important;
     text-decoration: none;
+    border-left-color: #007bff;
+}
+
+.sidebar-link.active {
+    background-color: #e9ecef !important;
+    color: #333 !important;
+    border-left-color: #007bff;
+    font-weight: 500;
 }
 
 /* Group headers in sidebar */
 .sidebar .h6 {
-    transition: all 0.2s ease;
-    padding: 4px 8px;
+    font-weight: 600;
+    color: #333;
+    padding: 0.75rem 1rem 0.25rem 1rem;
+    margin: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Card styling */
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Form styling */
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.form-control {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: #495057;
+    border-color: #495057;
     border-radius: 4px;
-    margin-left: -8px;  /* Offset the padding */
-    cursor: pointer;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    min-width: 120px;
 }
 
-.sidebar .h6:hover {
-    background-color: #e7f1ff;
+.btn-primary:hover {
+    background-color: #343a40;
+    border-color: #343a40;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Tab styling */
+.nav-tabs {
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 1rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.6rem 1rem;
+    margin-right: 0;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: #333;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.nav-tabs .nav-link.active {
+    border-bottom-color: #007bff;
+    color: #007bff;
+    background-color: transparent;
+    font-weight: 600;
+}
+
+/* Tab content - ensure visibility */
+.tab-pane {
+    display: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.tab-pane.active {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Hide all inactive tab content */
+.tab-pane:not(.active) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Remove top padding from tab content */
+.tab-content > .tab-pane {
+    margin-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove any default Bootstrap tab padding */
+.nav-tabs + .tab-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.tab-content .tab-pane {
+    margin-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Completely remove all spacing from tab content */
+.tab-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove spacing from tab content children */
+.tab-content > * {
+    margin-top: 0 !important;
+}
+
+/* Specific targeting for the code snippet tab */
+.tab-pane[data-tab-id="tab-code"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.tab-pane[data-tab-id="tab-code"] > *:first-child {
+    margin-top: 0 !important;
+}
+
+/* Force zero spacing for all tab content */
+.tab-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.tab-content .tab-pane {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Override any Bootstrap default tab spacing */
+.nav-tabs ~ .tab-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Target the specific tab content area */
+[data-tab-id="tab-code"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove any inherited spacing from parent containers */
+.container-fluid .tab-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure inactive tabs are completely hidden */
+[role="tabpanel"]:not(.active) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Code blocks */
+code {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #333;
+}
+
+/* Links */
+a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* List styling */
+ul {
+    padding-left: 1.5rem;
+}
+
+li {
+    margin-bottom: 0.25rem;
+}
+
+/* Introduction page styling */
+.recipe-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-bottom: 0.25rem;
+}
+
+.recipe-link:hover {
+    background-color: #e9ecef;
+    color: #333;
+    text-decoration: none;
     transform: translateX(4px);
-    color: #0d6efd;
 }
 
-/* Active state for sidebar links */
-.sidebar-link.active:not([href="/"]) {
-    background-color: #e7f1ff !important;
-    color: #0d6efd !important;
+/* Alert styling */
+.alert {
+    border-radius: 4px;
+    border: none;
+    padding: 0.75rem 1rem;
 }
 
-/* Introduction link should only show highlight on hover */
-.sidebar-link[href="/"] {
-    background-color: transparent !important;
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
 }
 
-.sidebar-link[href="/"]:hover {
-    background-color: #e7f1ff !important;
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Spinner styling */
+.spinner-border {
+    color: #007bff;
+}
+
+/* Dropdown styling */
+.dropdown-menu {
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    color: #333;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* Container spacing */
+.container-fluid {
+    padding: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0.75rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Debug: ensure all content is visible */
+* {
+    visibility: visible !important;
+}
+
+.tab-pane, .tab-content {
+    display: block !important;
+    visibility: visible !important;
 } 

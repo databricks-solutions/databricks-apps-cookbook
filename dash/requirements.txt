@@ -1,7 +1,6 @@
-databricks-connect==16.0.0
-databricks-sdk[openai]==0.46.0
-databricks-sql-connector==4.0.0
-pandas==2.2.3
+databricks-connect>=16.0.0
+databricks-sql-connector>=4.0.0
+pandas>=2.2.3
 dash==2.18.2
 dash-bootstrap-components==1.6.0
 dash-core-components==2.0.0
@@ -11,3 +10,7 @@ dash-leaflet==1.0.15
 dash-table==5.0.0
 dash_ag_grid==31.3.0
 dash_mantine_components==0.15.3
+fastapi>=0.115.12
+mcp[cli]>=1.8.1
+uvicorn>=0.34.2
+databricks-sdk>=0.60.0

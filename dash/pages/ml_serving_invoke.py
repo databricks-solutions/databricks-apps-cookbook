@@ -38,7 +38,8 @@ MODEL_EXAMPLES = [
         "type": "Traditional Models (e.g., scikit-learn, XGBoost)",
         "param": "dataframe_split",
         "description": "JSON-serialized DataFrame in split orientation.",
-        "code": '''from databricks.sdk import WorkspaceClient
+        "code": """```python
+from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
@@ -48,13 +49,15 @@ response = w.serving_endpoints.query(
         "columns": ["feature1", "feature2"],
         "data": [[1.5, 2.5]]
     }
-)'''
+)
+```"""
     },
     {
         "type": "Traditional Models",
         "param": "dataframe_records",
         "description": "JSON-serialized DataFrame in records orientation.",
-        "code": '''from databricks.sdk import WorkspaceClient
+        "code": """```python
+from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
@@ -64,13 +67,15 @@ response = w.serving_endpoints.query(
         "feature1": [1.5],
         "feature2": [2.5]
     }
-)'''
+)
+```"""
     },
     {
         "type": "TensorFlow and PyTorch Models",
         "param": "instances",
         "description": "Tensor inputs in row format.",
-        "code": '''from databricks.sdk import WorkspaceClient
+        "code": """```python
+from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
@@ -78,13 +83,15 @@ tensor_input = [[1.0, 2.0, 3.0]]
 response = w.serving_endpoints.query(
     name="tensor-processing-model",
     instances=tensor_input,
-)'''
+)
+```"""
     },
     {
         "type": "TensorFlow and PyTorch Models",
         "param": "inputs",
         "description": "Tensor inputs in columnar format.",
-        "code": '''from databricks.sdk import WorkspaceClient
+        "code": """```python
+from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
@@ -95,205 +102,131 @@ tensor_input = {
 response = w.serving_endpoints.query(
     name="tensor-processing-model",
     inputs=tensor_input,
-)'''
+)
+```"""
     },
     {
-        "type": "Completions Models",
-        "param": "prompt",
-        "description": "Input text for completion tasks.",
-        "code": '''from databricks.sdk import WorkspaceClient
-
-w = WorkspaceClient()
-
-response = w.serving_endpoints.query(
-    name="llm-text-completions-model",
-    prompt="Generate a recipe for building scalable Databricks Apps.",
-    temperature=0.5,
-)'''
-    },
-    {
-        "type": "Chat Models",
+        "type": "Large Language Models (LLMs)",
         "param": "messages",
-        "description": "List of chat messages for conversational models.",
-        "code": '''from databricks.sdk import WorkspaceClient
+        "description": "Chat messages for LLM inference.",
+        "code": """```python
+from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
 
 w = WorkspaceClient()
 
 response = w.serving_endpoints.query(
-    name="chat-assistant-model",
+    name="llm-model",
     messages=[
-        ChatMessage(
-            role=ChatMessageRole.SYSTEM, 
-            content="You are a helpful assistant.",
-        ),
-        ChatMessage(
-            role=ChatMessageRole.USER, 
-            content="Provide tips for deploying Databricks Apps.",
-        ),
+        ChatMessage(role=ChatMessageRole.SYSTEM, content="You are a helpful assistant."),
+        ChatMessage(role=ChatMessageRole.USER, content="Hello, how are you?")
     ],
-)'''
-    },
-    {
-        "type": "Embeddings Models",
-        "param": "input",
-        "description": "Input text for embedding tasks.",
-        "code": '''from databricks.sdk import WorkspaceClient
-
-w = WorkspaceClient()
-
-response = w.serving_endpoints.query(
-    name="embedding-model",
-    input="Databricks provides a unified analytics platform.",
-)'''
+    temperature=0.7
+)
+```"""
     }
 ]
 
 def layout():
-    endpoint_names = get_endpoints()
-    
-    # Create model selection interface based on authentication status
-    if endpoint_names:
-        model_selector = dcc.Dropdown(
-            id="model-select",
-            options=[{"label": name, "value": name} for name in endpoint_names],
-            className="mb-3"
-        )
-    else:
-        model_selector = html.Div([
-            dbc.Alert([
-                "Unable to fetch model endpoints. Please ensure you have:",
-                html.Ul([
-                    html.Li("Valid Databricks authentication credentials"),
-                    html.Li([
-                        html.A("CAN QUERY permission", 
-                              href="https://docs.databricks.com/en/machine-learning/model-serving/model-serving-permissions.html",
-                              target="_blank",
-                              className="alert-link"),
-                        " on the model serving endpoints"
-                    ])
-                ])
-            ], color="warning", className="mb-3"),
-            dcc.Input(
-                id="model-select",
-                type="text",
-                placeholder="Enter model endpoint name manually",
-                className="form-control mb-3",
-                style={
-                    "backgroundColor": "#f8f9fa",
-                    "border": "1px solid #dee2e6",
-                    "boxShadow": "inset 0 1px 2px rgba(0,0,0,0.075)"
-                }
-            )
-        ])
-    
     return dbc.Container([
-        html.H1("AI / ML", className="my-4"),
+        # Header section matching Streamlit style
+        dbc.Row([
+            dbc.Col([
+                html.H1("AI / ML", className="mb-2"),
+                html.Hr(className="mb-3"),
         html.H2("Invoke a model", className="mb-3"),
         html.P([
             "This recipe invokes a model hosted on Mosaic AI Model Serving and returns the result. ",
             "Choose either a traditional ML model or a large language model (LLM)."
-        ], className="mb-4"),
+                ], className="mb-4")
+            ])
+        ]),
         
+        # Tabbed layout matching Streamlit style
         dbc.Tabs([
+            # Try it tab
             dbc.Tab([
                 dbc.Row([
                     dbc.Col([
-                        dbc.Label("Select a model served by Model Serving", className="fw-bold mb-2"),
-                        model_selector
-                    ], width=8),
+                        dbc.Card([
+                            dbc.CardBody([
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Label("Select a model served by Model Serving", className="form-label fw-bold"),
+                                        dcc.Dropdown(
+                                            id="model-select",
+                                            options=[{"label": endpoint, "value": endpoint} for endpoint in get_endpoints()],
+                                            placeholder="Select a model...",
+                                            className="mb-3"
+                                        )
+                                    ], md=8),
                     dbc.Col([
-                        dbc.Label("Model type", className="fw-bold mb-2"),
-                        dbc.RadioItems(
+                                        html.Label("Model type", className="form-label fw-bold"),
+                                        dcc.RadioItems(
                             id="model-type",
                             options=[
-                                {"label": "LLM", "value": "LLM"},
-                                {"label": "Traditional ML", "value": "Traditional ML"}
+                                                {"label": "LLM", "value": "llm"},
+                                                {"label": "Traditional ML", "value": "ml"}
                             ],
-                            value="LLM",
+                                            value="llm",
                             className="mb-3"
                         )
-                    ], width=4)
+                                    ], md=4)
                 ]),
                 html.Div(id="model-inputs"),
                 html.Div(id="model-output", className="mt-3")
-            ], label="Try it", tab_id="tab-1"),
-            
-            dbc.Tab([
-                dbc.Accordion([
-                    dbc.AccordionItem(
-                        [
-                            html.P(example["description"]),
-                            dcc.Markdown(f'''```python\n{example["code"]}\n```''')
-                        ],
-                        title=f"{example['type']} ({example['param']})"
-                    ) for example in MODEL_EXAMPLES
-                ], start_collapsed=True, className="mb-4"),
-                
-                html.Div([
-                    html.H4("Extensions", className="mt-4 mb-3"),
-                    html.Ul([
-                        html.Li([
-                            html.A("Gradio", href="https://www.gradio.app/", target="_blank"),
-                            ": Enable ML prototyping with pre-built interactive components for models involving images, audio, or video."
-                        ]),
-                        html.Li([
-                            html.A("Dash", href="https://dash.plotly.com/", target="_blank"),
-                            ": Build interactive, data-rich visualizations to explore and analyze the behavior of your ML models in depth."
-                        ]),
-                        html.Li([
-                            html.A("Shiny", href="https://shiny.posit.co/", target="_blank"),
-                            ": Build AI chat apps."
-                        ]),
-                        html.Li([
-                            html.A("LangChain on Databricks", href="https://python.langchain.com/docs/integrations/providers/databricks", target="_blank"),
-                            ": Excels at chaining LLM calls, integration with external APIs, and managing conversational contexts."
+                            ])
                         ])
-                    ], className="mb-3"),
-                    html.P([
-                        "Also, check out ",
-                        html.A("Databricks Serving Query API", 
-                              href="https://docs.databricks.com/api/workspace/servingendpoints/query",
-                              target="_blank"),
-                        ". It provides the example responses and optional arguments for the above ",
-                        html.Em("Implement"),
-                        " cases."
-                    ])
-                ], className="alert alert-info")
-            ], label="Code snippets", tab_id="tab-2"),
-            
-            dbc.Tab([
-                dbc.Row([
-                    dbc.Col([
-                        html.H4("Permissions (app service principal)", className="mb-3"),
-                        html.Ul([
-                            dcc.Markdown("**```CAN QUERY```** on the model serving endpoint")
-                        ], className="mb-4")
-                    ]),
-                    dbc.Col([
-                        html.H4("Databricks resources", className="mb-3"),
-                        html.Ul([
-                            html.Li("Model serving endpoint")
-                        ], className="mb-4")
-                    ]),
-                    dbc.Col([
-                        html.H4("Dependencies", className="mb-3"),
-                        html.Ul([
-                            dcc.Markdown("* [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`"),
-                            dcc.Markdown("* [Dash](https://pypi.org/project/dash/) - `dash`")
-                        ], className="mb-4")
                     ])
                 ])
-            ], label="Requirements", tab_id="tab-3")
-        ], id="tabs", active_tab="tab-1", className="mb-4")
-    ], fluid=True, className="py-4")
+            ], label="Try it", tab_id="tab-try"),
+            
+            # Code snippets tab
+            dbc.Tab([
+                html.H4("Model Examples", className="mb-2"),
+                *[html.Div([
+                    html.H5(example["type"], className="mb-1"),
+                    html.P(f"Parameter: {example['param']}", className="text-muted mb-1"),
+                    html.P(example["description"], className="text-muted mb-1"),
+                    dcc.Markdown(example["code"], className="mb-2")
+                ]) for example in MODEL_EXAMPLES]
+            ], label="Code snippets", tab_id="tab-code"),
+            
+            # Requirements tab
+            dbc.Tab([
+                dbc.Row([
+                    dbc.Col(md=4, children=[
+                        html.H5("Permissions", className="mb-3"),
+                        html.Ul([
+                            html.Li("Model serving endpoint access"),
+                            html.Li("Workspace authentication")
+                        ])
+                    ]),
+                    dbc.Col(md=4, children=[
+                        html.H5("Databricks Resources", className="mb-3"),
+                        html.Ul([
+                            html.Li("Model serving endpoint"),
+                            html.Li("Registered model in Unity Catalog")
+                        ])
+                    ]),
+                    dbc.Col(md=4, children=[
+                        html.H5("Dependencies", className="mb-3"),
+                        html.Ul([
+                            html.Li("databricks-sdk"),
+                            html.Li("dash")
+                        ])
+                    ])
+                ])
+            ], label="Requirements", tab_id="tab-requirements")
+        ], id="tabs", active_tab="tab-try")
+    ], fluid=True)
 
 @callback(
     Output("model-inputs", "children"),
     Input("model-type", "value")
 )
 def update_model_inputs(model_type):
-    if model_type == "LLM":
+    if model_type == "llm":
         return html.Div([
             dbc.Label("Temperature", className="fw-bold mb-2"),
             dcc.Slider(
