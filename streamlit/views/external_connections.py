@@ -67,18 +67,6 @@ def is_connection_login_error(error: str):
     return "Credential for user identity" in error and "Please login first to the connection" in error
 
 
-HTTP_METHODS = [
-    {"label": "GET", "value": "GET"},
-    {"label": "POST", "value": "POST"}
-]
-
-AUTH_TYPES = [
-    {"label": "Bearer token", "value": "bearer_token"},
-    {"label": "OAuth User to Machine Per User", "value": "oauth_user_machine_per_user"},
-    {"label": "OAuth Machine to Machine", "value": "oauth_machine_machine"}
-]
-
-
 st.header(body="External connections", divider=True)
 st.subheader("Securely call external API services")
 st.write(
@@ -96,14 +84,13 @@ with tab_app:
     connection_name = st.text_input("Connection Name", placeholder="Enter connection name...")
     auth_mode = st.radio(
         "Authentication Mode:",
-        ["Bearer token", "OAuth User to Machine Per User", "OAuth Machine to Machine"],
-        help="Bearer token is the user token.",
+        ["Bearer token", "OAuth User to Machine Per User (On-behalf-of-user)", "OAuth Machine to Machine"],
     )
     http_method = st.selectbox("HTTP Method", options=["GET", "POST", "PUT", "DELETE", "PATCH"], )
     path = st.text_input("Path", placeholder="/api/endpoint")
     request_type = st.selectbox("Request Type", options=["Non-MCP", "MCP"])
-    request_headers = st.text_area("Request headers", value='{"Content-Type": "application/json"}')
-    request_data = st.text_area("Request data", value='{"key": "value"}')
+    request_headers = st.text_area("Request headers", placeholder='{"Content-Type": "application/json"}')
+    request_data = st.text_area("Request data", placeholder='{"key": "value"}')
 
     all_fields_filled = path and connection_name != ""
     if not all_fields_filled:
@@ -113,7 +100,7 @@ with tab_app:
     if st.button("Send Request"):
         if auth_mode == "Bearer token":
             w = WorkspaceClient()
-        elif auth_mode == "OAuth User to Machine Per User":
+        elif auth_mode == "OAuth User to Machine Per User (On-behalf-of-user)":
             w = get_client_obo()
         elif auth_mode == "OAuth Machine to Machine":
             # TODO: Add OAuth Machine-to-Machine logic
@@ -156,8 +143,8 @@ with tab_app:
             conn=connection_name, 
             method=http_method, 
             path=path, 
-            headers=request_headers,
-            json=request_data,
+            headers=request_headers if request_headers else None,
+            json=request_data if request_data else None,
         )
         st.subheader("Response")
         st.json(response.json())
