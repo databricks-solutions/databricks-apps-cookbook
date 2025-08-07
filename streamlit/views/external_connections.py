@@ -32,20 +32,21 @@ with tab_app:
         icon="ℹ️",
     )
 
-    connection_name = st.text_input("Unity Catalog Connection Name", placeholder="Enter connection name...", help="See [this guide](https://docs.databricks.com/aws/en/query-federation/http)")
+    connection_name = st.text_input("Unity Catalog Connection name:", placeholder="Enter connection name...", help="See [this guide](https://docs.databricks.com/aws/en/query-federation/http)")
     auth_mode = st.radio(
-        "Authentication Mode:",
-        ["Bearer token", "OAuth User to Machine Per User (On-behalf-of-user)", "OAuth Machine to Machine"],
+        "Authentication mode:",
+        ["OAuth User to Machine Per User (On-behalf-of-user)", "Bearer token", "OAuth Machine to Machine"],
     )
-    http_method = st.selectbox("HTTP Method", options=["GET", "POST", "PUT", "DELETE", "PATCH"], )
-    path = st.text_input("Path", placeholder="/api/endpoint")
-    request_headers = st.text_area("Request headers", placeholder='{"Content-Type": "application/json"}') or {}
-    request_data = st.text_area("Request data", placeholder='{"key": "value"}')
+    http_method = st.selectbox("HTTP method:", options=["GET", "POST", "PUT", "DELETE", "PATCH"], )
+    path = st.text_input("Path:", placeholder="/api/endpoint")
+    request_headers = st.text_area("Request headers:", placeholder='{"Content-Type": "application/json"}') or {}
+    request_data = st.text_area("Request data:", placeholder='{"key": "value"}')
 
-    all_fields_filled = path and connection_name != ""
+    all_fields_filled = path and connection_name
     if not all_fields_filled:
         st.info("Please fill in all required fields to run a query.")
 
+    connection_name = connection_name.replace(" ", "") if connection_name else ""
 
     if st.button("Send Request"):
         if auth_mode == "Bearer token":
@@ -84,27 +85,6 @@ with tab_app:
 
 with tab_code:
     table = [
-        {
-            "type": "Bearer token",
-            "code": """
-            ```python
-            import streamlit as st
-            from databricks.sdk import WorkspaceClient
-            from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
-
-            w = WorkspaceClient()
-
-            response = w.serving_endpoints.http_request(
-                conn="github_connection",
-                method=ExternalFunctionRequestHttpMethod.GET,
-                path="/traffic/views",
-                headers={"Accept": "application/vnd.github+json"},
-            )
-
-            st.json(response.json())
-            ```
-            """,
-        },
         {
             "type": "OAuth User to Machine Per User (On-behalf-of-user)",
             "code": """
@@ -156,6 +136,27 @@ with tab_code:
             ```
             """,
         },
+        {
+            "type": "Bearer token",
+            "code": """
+            ```python
+            import streamlit as st
+            from databricks.sdk import WorkspaceClient
+            from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+
+            w = WorkspaceClient()
+
+            response = w.serving_endpoints.http_request(
+                conn="github_connection",
+                method=ExternalFunctionRequestHttpMethod.GET,
+                path="/traffic/views",
+                headers={"Accept": "application/vnd.github+json"},
+            )
+
+            st.json(response.json())
+            ```
+            """,
+        }
     ]
 
     for i, row in enumerate(table):

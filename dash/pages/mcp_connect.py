@@ -113,7 +113,7 @@ def layout():
                     dbc.CardBody([
                         dbc.Row([
                             dbc.Col([
-                                dbc.Label("Unity Catalog Connection name", className="form-label"),
+                                dbc.Label("Unity Catalog Connection name:", className="form-label"),
                                 dcc.Input(
                                     id="connection-mcp-select",
                                     placeholder="Enter HTTP connection name...",
@@ -123,7 +123,7 @@ def layout():
                         ]),
                         dbc.Row([
                             dbc.Col([
-                                dbc.Label("Auth Type", className="form-label"),
+                                dbc.Label("Authentication mode:", className="form-label"),
                                 dcc.Dropdown(
                                     id="auth-type-mcp-select",
                                     options=[
@@ -131,12 +131,12 @@ def layout():
                                         {"label": "OAuth User to Machine Per User", "value": "oauth_user_machine_per_user"},
                                         {"label": "OAuth Machine to Machine", "value": "oauth_machine_machine"}
                                     ],
-                                    value="bearer_token",
+                                    value="oauth_user_machine_per_user",
                                     className="mb-2"
                                 )
                             ], md=6),
                             dbc.Col([
-                                dbc.Label("HTTP Method", className="form-label"),
+                                dbc.Label("HTTP method:", className="form-label"),
                                 dcc.Dropdown(
                                     id="method-mcp-select",
                                     options=[
@@ -350,6 +350,8 @@ def reset_workspace_client_on_auth_change(auth_type):
 def send_external_request(n_clicks, connection, method, body, auth_type):
     if not all([connection, method]):
         return html.Div([html.P("Please fill in all required fields: Connection and Method", className="text-danger")])
+    
+    connection = connection.replace(" ", "")
     
     try:
         request_headers = {"Content-Type": "application/json"}

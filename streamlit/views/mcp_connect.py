@@ -95,8 +95,9 @@ with tab_app:
     if not all_fields_filled:
         st.info("Please fill in all required fields to run a query.")
 
+    connection_name = connection_name.replace(" ", "") if connection_name else ""
 
-    if st.button("Send request"):
+    if st.button("Send Request"):
         if auth_mode == "Bearer token":
             w = WorkspaceClient()
         elif auth_mode == "OAuth User to Machine Per User (On-behalf-of-user)":

@@ -81,7 +81,7 @@ def layout():
                     dbc.CardBody([
                         dbc.Row([
                             dbc.Col([
-                                dbc.Label("Connection Name", className="form-label"),
+                                dbc.Label("Unity Catalog Connection name:", className="form-label"),
                                 dcc.Input(
                                     id="connection-select",
                                     placeholder="Enter connection name...",
@@ -91,7 +91,7 @@ def layout():
                         ]),
                         dbc.Row([
                             dbc.Col([
-                                dbc.Label("Auth Type", className="form-label"),
+                                dbc.Label("Authentication mode:", className="form-label"),
                                 dcc.Dropdown(
                                     id="auth-type-select",
                                     options=[
@@ -104,7 +104,7 @@ def layout():
                                 )
                             ], md=6),
                             dbc.Col([
-                                dbc.Label("HTTP Method", className="form-label"),
+                                dbc.Label("HTTP method:", className="form-label"),
                                 dcc.Dropdown(
                                     id="method-select",
                                     options=[
@@ -118,7 +118,7 @@ def layout():
                         ]),
                         dbc.Row([
                             dbc.Col([
-                                html.Label("Path", className="form-label"),
+                                html.Label("Path:", className="form-label"),
                                 dcc.Input(
                                     id="path-input",
                                     type="text",
@@ -128,7 +128,7 @@ def layout():
                             ], md=6),
                             # Request Body (JSON)
                             dbc.Col([
-                                dbc.Label("JSON", className="form-label"),
+                                dbc.Label("Request data:", className="form-label"),
                                 dcc.Textarea(
                                     id="body-input",
                                     placeholder='{"key": "value"}',
@@ -139,7 +139,7 @@ def layout():
                         ]),
                         dbc.Row([
                             dbc.Col([
-                                html.Label("Headers", className="form-label"),
+                                html.Label("Request headers:", className="form-label"),
                                 dcc.Textarea(
                                     id="headers-input",
                                     placeholder='{"Content-Type": "application/json"}',
@@ -306,6 +306,8 @@ def reset_workspace_client_on_auth_change(auth_type):
 def send_external_request(n_clicks, connection, method, path, headers, body, auth_type):
     if not all([connection, method]):
         return html.Div([html.P("Please fill in all required fields: Connection and Method", className="text-danger")])
+    
+    connection = connection.replace(" ", "")
     
     try:
         # Parse headers JSON
