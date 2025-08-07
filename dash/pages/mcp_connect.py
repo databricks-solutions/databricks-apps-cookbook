@@ -113,7 +113,7 @@ def layout():
     return dbc.Container([
         # Header
         html.Div([
-            html.H1("AI/ML", className="mb-1"),
+            html.H1("AI / ML", className="mb-1"),
             html.P("Connect to remote MCP servers using Databricks Unity Catalog (UC) connections. This feature allows you to connect remote MCP servers like Slack, Jira, Gmail, Github or any service with an API using HTTP requests. ", className="text-muted mb-4"),
             html.P("You should set up your UC external connections in Databricks Unity Catalog first before testing them here.", className="text-muted mb-4"),
         ], className="mb-4"),
@@ -128,7 +128,7 @@ def layout():
                             dbc.Col([
                                 dbc.Label("Unity Catalog Connection name", className="form-label"),
                                 dcc.Input(
-                                    id="connection-select",
+                                    id="connection-mcp-select",
                                     placeholder="Enter HTTP connection name...",
                                     className="form-control mb-2"
                                 )
@@ -162,35 +162,16 @@ def layout():
                             ], md=6),
                         ]),
                         dbc.Row([
-                            dbc.Col([
-                                html.Label("Path", className="form-label"),
-                                dcc.Input(
-                                    id="path-input",
-                                    type="text",
-                                    placeholder="/api/endpoint",
-                                    className="form-control mb-2"
-                                )
-                            ], md=6),
                             # Request Body (JSON)
                             dbc.Col([
                                 dbc.Label("JSON", className="form-label"),
                                 dcc.Textarea(
-                                    id="body-input",
+                                    id="body-mcp-input",
                                     placeholder='{"key": "value"}',
                                     className="form-control",
                                     style={"height": "100px"}
                                 )
                             ], width=6),
-                        ]),
-                        dbc.Row([
-                            dbc.Col([
-                                html.Label("Headers", className="form-label"),
-                                dcc.Textarea(
-                                    id="headers-input",
-                                    placeholder='{"Content-Type": "application/json"}',
-                                    className="form-control mb-2"
-                                )
-                            ], md=6),
                         ]),
                         dbc.Button(
                             "Send Request",
@@ -300,24 +281,6 @@ print(response.json())
                             html.Li("USE CONNECTION privilege on connection object"),
                             html.Li("App service principal must have USE CONNECTION privilege on UC connection object")
                         ])
-                    ]),
-                    dbc.Col(md=4, children=[
-                        html.H5("Compute Requirements", className="mb-2"),
-                        html.Ul([
-                            html.Li("Databricks Runtime 15.4 LTS or above"),
-                            html.Li("Standard or Dedicated access mode"),
-                            html.Li("SQL warehouses: Pro or Serverless (2023.40+)"),
-                            html.Li("Network connectivity to target systems")
-                        ])
-                    ]),
-                    dbc.Col(md=4, children=[
-                        html.H5("Authentication Methods", className="mb-2"),
-                        html.Ul([
-                            html.Li("Bearer token (simple token-based)"),
-                            html.Li("OAuth 2.0 Machine-to-Machine"),
-                            html.Li("OAuth 2.0 User-to-Machine Shared"),
-                            html.Li("OAuth 2.0 User-to-Machine Per User")
-                        ])
                     ])
                 ]),
                 html.Hr(),
@@ -360,9 +323,8 @@ print(response.json())
 # Callback to initialize WorkspaceClient when user first interacts with the page
 @callback(
     Output("mcp-output", "children", allow_duplicate=True),
-    [Input("connection-select", "value"),
-     Input("method-select", "value"),
-     Input("path-input", "value"),
+    [Input("connection-mcp-select", "value"),
+     Input("method-mcp-select", "value"),
      Input("auth-type-select", "value")],
     prevent_initial_call=True
 )
@@ -392,26 +354,18 @@ def reset_workspace_client_on_auth_change(auth_type):
 @callback(
     Output("mcp-output", "children", allow_duplicate=True),
     [Input("send-request-btn", "n_clicks")],
-    [State("connection-select", "value"),
+    [State("connection-mcp-select", "value"),
      State("method-select", "value"),
-     State("path-input", "value"),
-     State("headers-input", "value"),
-     State("body-input", "value"),
-     State("auth-type-select", "value")],
+     State("body-mcp-input", "value"),
+     State("auth-type-mcp-select", "value")],
     prevent_initial_call=True
 )
-def send_external_request(n_clicks, connection, method, path, headers, body, auth_type):
+def send_external_request(n_clicks, connection, method, body, auth_type):
     if not all([connection, method]):
         return html.Div([html.P("Please fill in all required fields: Connection and Method", className="text-danger")])
     
     try:
-        # Parse headers JSON
-        headers_dict = {}
-        if headers and headers.strip():
-            try:
-                headers_dict = json.loads(headers)
-            except json.JSONDecodeError:
-                return html.Div([html.P("❌ Invalid JSON in headers", className="text-danger")])
+        headers = {}
         
         # Parse body JSON
         body_data = None
@@ -424,8 +378,7 @@ def send_external_request(n_clicks, connection, method, path, headers, body, aut
         if w is not None:
             method_enum = getattr(ExternalFunctionRequestHttpMethod, method)
             
-            # Use empty string if no path provided
-            request_path = path if path else ""
+            request_path = "/"
             
             # Initialize MCP if not already done
             global mcp_session_id
@@ -462,14 +415,14 @@ def send_external_request(n_clicks, connection, method, path, headers, body, aut
                 mcp_session_id = session_id
                 
                 # Add MCP session ID to headers
-                headers_dict["Mcp-Session-Id"] = mcp_session_id
+                headers["Mcp-Session-Id"] = mcp_session_id
                 
                 # Use json parameter for MCP requests
                 response = w.serving_endpoints.http_request(
                     conn=connection, 
                     method=method_enum, 
                     path=request_path, 
-                    headers=headers_dict, 
+                    headers=headers, 
                     json=body_data
                 )
             else:
@@ -479,7 +432,7 @@ def send_external_request(n_clicks, connection, method, path, headers, body, aut
                         conn=connection, 
                         method=method_enum, 
                         path=request_path, 
-                        headers=headers_dict, 
+                        headers=headers, 
                         json=body_data
                     )
                 else:
@@ -487,7 +440,7 @@ def send_external_request(n_clicks, connection, method, path, headers, body, aut
                         conn=connection, 
                         method=method_enum, 
                         path=request_path, 
-                        headers=headers_dict
+                        headers=headers
                     )
             
             response_json = response.json()
@@ -559,15 +512,13 @@ def send_external_request(n_clicks, connection, method, path, headers, body, aut
 @callback(
     Output("mcp-output", "children", allow_duplicate=True),
     [Input("retry-mcp-btn", "n_clicks")],
-    [State("connection-select", "value"),
-     State("method-select", "value"),
-     State("path-input", "value"),
-     State("headers-input", "value"),
-     State("body-input", "value"),
-     State("auth-type-select", "value")],
+    [State("connection-mcp-select", "value"),
+     State("method-mcp-select", "value"),
+     State("body-mcp-input", "value"),
+     State("auth-type-mcp-select", "value")],
     prevent_initial_call=True
 )
-def retry_mcp_request(n_clicks, connection, method, path, headers, body, auth_type):
+def retry_mcp_request(n_clicks, connection, method, body, auth_type):
     """Retry MCP request after user has logged in"""
     if not n_clicks:
         return no_update
@@ -577,4 +528,4 @@ def retry_mcp_request(n_clicks, connection, method, path, headers, body, auth_ty
     mcp_session_id = None
     
     # Call the main request function
-    return send_external_request(n_clicks, connection, method, path, headers, body, auth_type) 
+    return send_external_request(n_clicks, connection, method, body, auth_type) 

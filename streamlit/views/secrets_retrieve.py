@@ -17,7 +17,7 @@ def get_secret(scope, key):
         )
 
 
-st.header("Secrets", divider=True)
+st.header("External services", divider=True)
 st.subheader("Retrieve a secret")
 st.write(
     "This recipe retrieves a [Databricks secret](https://docs.databricks.com/en/security/secrets/index.html). Use secrets to securely connect to external services and APIs."

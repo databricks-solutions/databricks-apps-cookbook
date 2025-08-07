@@ -18,8 +18,8 @@ def get_client_obo() -> WorkspaceClient:
         )
 
 
-st.header(body="External connections", divider=True)
-st.subheader("Securely call external API services")
+st.header(body="External services", divider=True)
+st.subheader("External connections")
 st.write(
     "This recipe demonstrates how to use Unity Catalog-managed external HTTP connections for secure and governed access to non-MCP servers, for example, to GitHub, or Jira, and Slack."
 )

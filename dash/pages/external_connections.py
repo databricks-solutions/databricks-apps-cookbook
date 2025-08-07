@@ -309,7 +309,6 @@ def reset_workspace_client_on_auth_change(auth_type):
     Output("response-output", "children", allow_duplicate=True),
     [Input("send-request-btn", "n_clicks")],
     [State("connection-select", "value"),
-     State("request-type-select", "value"),
      State("method-select", "value"),
      State("path-input", "value"),
      State("headers-input", "value"),

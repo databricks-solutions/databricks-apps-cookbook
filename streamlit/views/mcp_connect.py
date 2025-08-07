@@ -69,8 +69,8 @@ def is_connection_login_error(error: str):
     return "Credential for user identity" in error and "Please login first to the connection" in error
 
 
-st.header(body="Connect an MCP server", divider=True)
-st.subheader("Connect to Model Context Protocol (MCP) servers")
+st.header(body="AI / ML", divider=True)
+st.subheader("Connect an MCP server")
 st.write(
     "This recipe connects to an [MCP](https://modelcontextprotocol.io/overview) server for AI applications using GitHub as an example and the Unity Catalog HTTP connection for secure and governed access."
 )
@@ -86,17 +86,17 @@ with tab_app:
     connection_name = st.text_input("Unity Catalog Connection name:", placeholder="github_mcp_oauth", help="See [this guide](https://docs.databricks.com/aws/en/query-federation/http)")
     auth_mode = st.radio(
         "Authentication mode:",
-        ["Bearer token", "OAuth User to Machine Per User (On-behalf-of-user)", "OAuth Machine to Machine"],
+        ["OAuth User to Machine Per User (On-behalf-of-user)", "Bearer token", "OAuth Machine to Machine"],
     )
     http_method = st.selectbox("HTTP method:", options=["POST", "GET", "PUT", "DELETE", "PATCH"], )
-    request_data = st.text_area("Request data:", placeholder='{"key": "value"}')
+    request_data = st.text_area("Request data:", value='{"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}')
 
     all_fields_filled = connection_name != ""
     if not all_fields_filled:
         st.info("Please fill in all required fields to run a query.")
 
 
-    if st.button("Run"):
+    if st.button("Send request"):
         if auth_mode == "Bearer token":
             w = WorkspaceClient()
         elif auth_mode == "OAuth User to Machine Per User (On-behalf-of-user)":
@@ -187,7 +187,7 @@ with tab_code:
             headers = {"Content-Type": "application/json"}
             payload = {"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}
 
-            if st.button("Run"):
+            if st.button("Send request"):
                 session_id = init_mcp_session(w, connection_name)
                 headers["Mcp-Session-Id"] = session_id
 
