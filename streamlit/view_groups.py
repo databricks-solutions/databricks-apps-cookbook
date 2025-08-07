@@ -65,6 +65,12 @@ groups = [
                 "icon": ":material/search:",
             },
             {
+                "label": "Connect an MCP server",
+                "help": "Connect to a Model Context Protocol server.",
+                "page": "views/mcp_connect.py",
+                "icon": ":material/modeling:",
+            },
+            {
                 "label": "Invoke multi-modal LLM",
                 "help": "Send text and images for visual-language LLM tasks.",
                 "page": "views/ml_serving_invoke_mllm.py",
