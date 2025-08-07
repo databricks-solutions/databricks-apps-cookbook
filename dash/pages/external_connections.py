@@ -12,9 +12,9 @@ import re
 dash.register_page(
     __name__,
     path='/external/connections',
-    title='External Connections',
-    name='External Connections',
-    category='External Services',
+    title='External connections',
+    name='External connections',
+    category='External services',
     icon='material-symbols:link'
 )
 
@@ -22,6 +22,7 @@ dash.register_page(
 w = None
 # Global variable to store MCP session ID
 mcp_session_id = None
+
 
 def get_workspace_client(auth_type):
     """Get or create WorkspaceClient with proper token handling based on auth type"""
@@ -48,6 +49,7 @@ def get_workspace_client(auth_type):
         except Exception:
             w = None
     return w
+
 
 def init_github_mcp(w):
     """Initialize GitHub MCP and get session ID"""
@@ -79,6 +81,7 @@ def init_github_mcp(w):
     except Exception as e:
         return None, f"Error initializing MCP: {str(e)}"
 
+
 def extract_login_url_from_error(error_message):
     """Extract login URL from error message"""
     # Look for URL pattern in the error message
@@ -88,9 +91,11 @@ def extract_login_url_from_error(error_message):
         return match.group(0)
     return None
 
+
 def is_connection_login_error(error_message):
     """Check if error is a connection login error"""
     return "Credential for user identity" in error_message and "Please login first to the connection" in error_message
+
 
 # Example HTTP methods
 HTTP_METHODS = [

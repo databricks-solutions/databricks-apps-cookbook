@@ -8,7 +8,6 @@ dash.register_page(__name__, path="/", title="Introduction", name="Introduction"
 
 
 def create_group_cards():
-    # Define category metadata with consistent order and grouping
     category_metadata = {
         "Tables": {
             "icon": "material-symbols:table",
@@ -33,16 +32,15 @@ def create_group_cards():
         "Compute": {"icon": "material-symbols:computer", "views": ["Connect"]},
         "Authentication": {
             "icon": "material-symbols:lock",
-            "views": ["Get current user", "Retrieve a secret"],
+            "views": ["Get current user"],
         },
-        "External Services": {
+        "External services": {
             "icon": "material-symbols:link",
-            "views": ["External Connections"],
+            "views": ["External connections", "Retrieve a secret"],
         },
     }
 
     cards = []
-    # Create cards in specified order
     for category, metadata in category_metadata.items():
         category_pages = [
             page

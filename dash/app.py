@@ -29,8 +29,8 @@ def create_sidebar():
     # Define category and page order
     sidebar_structure = {
         'Tables': [
-            'Read a table',
-            'Edit a table'
+            'Read a Delta table',
+            'Edit a Delta table'
         ],
         'Volumes': [
             'Upload a file',
@@ -53,18 +53,18 @@ def create_sidebar():
             'Connect'
         ],
         'Authentication': [
-            'Get current user',
-            'Retrieve a secret'
+            'Get current user'
         ],
-        'External Services': [
-            'External Connections'
+        'External services': [
+            'External connections',
+            'Retrieve a secret'
         ]
     }
     
     # Define page-specific icons
     page_icons = {
-        'Read a table': 'material-symbols:table-view',
-        'Edit a table': 'material-symbols:edit-document',
+        'Read a Delta table': 'material-symbols:table-view',
+        'Edit a Delta table': 'material-symbols:edit-document',
         'Upload a file': 'material-symbols:upload',
         'Download a file': 'material-symbols:download',
         'Invoke a model': 'material-symbols:model-training',
@@ -77,7 +77,7 @@ def create_sidebar():
         'Connect': 'material-symbols:link',
         'Get current user': 'material-symbols:fingerprint',
         'Retrieve a secret': 'material-symbols:key',
-        'External Connections': 'material-symbols:link'
+        'External connections': 'material-symbols:link'
     }
     
     # Group pages by category
