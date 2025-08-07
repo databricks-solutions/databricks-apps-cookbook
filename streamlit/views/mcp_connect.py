@@ -105,7 +105,7 @@ with tab_app:
             # TODO: Add OAuth Machine-to-Machine logic
             w = WorkspaceClient()
 
-        request_headers = {}
+        request_headers = {"Content-Type": "application/json"}
         
         if request_data and request_data.strip():
             try:
@@ -134,8 +134,6 @@ with tab_app:
             st.session_state.mcp_session_id = session_id
         
         request_headers["Mcp-Session-Id"] = st.session_state.mcp_session_id
-
-        request_data = request_data if request_data else None
 
         response = w.serving_endpoints.http_request(
             conn=connection_name, 

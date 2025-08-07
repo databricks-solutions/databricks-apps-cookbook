@@ -352,13 +352,13 @@ def send_external_request(n_clicks, connection, method, body, auth_type):
         return html.Div([html.P("Please fill in all required fields: Connection and Method", className="text-danger")])
     
     try:
-        headers = {}
+        request_headers = {"Content-Type": "application/json"}
         
         # Parse body JSON
-        body_data = None
+        request_data = None
         if body and body.strip():
             try:
-                body_data = json.loads(body)
+                request_data = json.loads(body)
             except json.JSONDecodeError:
                 return html.Div([html.P("❌ Invalid JSON in body", className="text-danger")])
         w = get_workspace_client(auth_type)
@@ -399,18 +399,19 @@ def send_external_request(n_clicks, connection, method, body, auth_type):
                             return html.Div([html.P(f"❌ MCP Initialization Error: {error}", className="text-danger")])
                     else:
                         return html.Div([html.P(f"❌ MCP Initialization Error: {error}", className="text-danger")])
+                
                 mcp_session_id = session_id
                 
                 # Add MCP session ID to headers
-                headers["Mcp-Session-Id"] = mcp_session_id
+                request_headers["Mcp-Session-Id"] = mcp_session_id
                 
                 # Use json parameter for MCP requests
                 response = w.serving_endpoints.http_request(
                     conn=connection, 
                     method=method_enum, 
                     path=request_path, 
-                    headers=headers, 
-                    json=body_data
+                    headers=request_headers if request_headers else None, 
+                    json=request_data if request_data else {},
                 )
             else:
                 # Regular requests
@@ -419,15 +420,16 @@ def send_external_request(n_clicks, connection, method, body, auth_type):
                         conn=connection, 
                         method=method_enum, 
                         path=request_path, 
-                        headers=headers, 
-                        json=body_data
+                        headers=request_headers if request_headers else None, 
+                        json=request_data if request_data else {},
                     )
                 else:
                     response = w.serving_endpoints.http_request(
                         conn=connection, 
                         method=method_enum, 
                         path=request_path, 
-                        headers=headers
+                        headers=request_headers if request_headers else None, 
+                        json=request_data if request_data else {},
                     )
             
             response_json = response.json()

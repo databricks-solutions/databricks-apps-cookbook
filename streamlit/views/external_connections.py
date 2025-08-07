@@ -70,8 +70,6 @@ with tab_app:
 
         http_method = getattr(ExternalFunctionRequestHttpMethod, http_method)
 
-        request_data = request_data if request_data else None
-
         response = w.serving_endpoints.http_request(
             conn=connection_name, 
             method=http_method, 
