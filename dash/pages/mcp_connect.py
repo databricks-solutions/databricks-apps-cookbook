@@ -312,7 +312,7 @@ print(response.json())
     Output("mcp-output", "children", allow_duplicate=True),
     [Input("connection-mcp-select", "value"),
      Input("method-mcp-select", "value"),
-     Input("auth-type-select", "value")],
+     Input("auth-type-mcp-select", "value")],
     prevent_initial_call=True
 )
 def initialize_client(connection, method, path, auth_type):
@@ -328,7 +328,7 @@ def initialize_client(connection, method, path, auth_type):
 
 @callback(
     Output("mcp-output", "children", allow_duplicate=True),
-    [Input("auth-type-select", "value")],
+    [Input("auth-type-mcp-select", "value")],
     prevent_initial_call=True
 )
 def reset_workspace_client_on_auth_change(auth_type):
