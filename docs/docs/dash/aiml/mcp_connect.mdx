@@ -11,13 +11,12 @@ This recipe connects to an [MCP](https://modelcontextprotocol.io/overview) serve
 ### OAuth User to Machine Per User (On-behalf-of-user)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
 import json
+from flask import request
 
-
-token = st.context.headers.get("x-forwarded-access-token")
+token = request.headers.get("x-forwarded-access-token")
 w = WorkspaceClient(token=token, auth_type="pat")
 
 
@@ -43,24 +42,22 @@ path = "/"
 headers = {"Content-Type": "application/json"}
 payload = {"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}
 
-if st.button("Run"):
-    session_id = init_mcp_session(w, connection_name)
-    headers["Mcp-Session-Id"] = session_id
+session_id = init_mcp_session(w, connection_name)
+headers["Mcp-Session-Id"] = session_id
 
-    response = w.serving_endpoints.http_request(
-        conn=connection_name,
-        method=http_method,
-        path=path,
-        headers=headers,
-        json=payload,
-    )
-    st.json(response.json())
+response = w.serving_endpoints.http_request(
+    conn=connection_name,
+    method=http_method,
+    path=path,
+    headers=headers,
+    json=payload,
+)
+print(response.json())
 ```
 
 ### Bearer token
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
 
@@ -80,7 +77,7 @@ response = w.serving_endpoints.http_request(
     },
 )
 
-st.json(response.json())
+print(response.json())
 ```
 
 ## Resources
@@ -98,11 +95,13 @@ When using OAuth User to Machine Per User (On-behalf-of-user), you need to confi
 ## Dependencies
 
 - [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Dash](https://pypi.org/project/dash/) - `dash`
+- [Uvicorn](https://pypi.org/project/uvicorn/) - `uvicorn`
 - [MCP CLI](https://pypi.org/project/mcp/) - `mcp[cli]`
 
 ```python title="requirements.txt"
 databricks-sdk
-streamlit
+dash
+uvicorn
 mcp[cli]
 ```

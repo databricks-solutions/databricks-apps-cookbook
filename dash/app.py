@@ -39,6 +39,7 @@ def create_sidebar():
         'AI / ML': [
             'Invoke a model',
             'Run vector search',
+            'Connect an MCP server',
             'Invoke a multi-modal LLM'
         ],
         'Business Intelligence': [
@@ -68,6 +69,7 @@ def create_sidebar():
         'Upload a file': 'material-symbols:upload',
         'Download a file': 'material-symbols:download',
         'Invoke a model': 'material-symbols:model-training',
+        'Connect an MCP server': 'material-symbols:modeling',
         'Invoke a multi-modal LLM': 'material-symbols:sensors',
         'Run vector search': 'material-symbols:search',
         'AI/BI Dashboard': 'material-symbols:dashboard',

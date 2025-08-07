@@ -254,5 +254,5 @@ with tab_config:
                     **Dependencies**
                     * [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
                     * [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
-                    * [MCP](https://pypi.org/project/mcp/) - `mcp[cli]`
+                    * [MCP CLI](https://pypi.org/project/mcp/) - `mcp[cli]`
                     """)

@@ -10,7 +10,7 @@ import dash
 # Register this as a page if using multi-page Dash app structure
 dash.register_page(
     __name__,
-    path="/ai-ml/multimodal",
+    path="/ml/multimodal",
     title="Invoke a multi-modal LLM",
     name="Invoke a multi-modal LLM",
     category="AI / ML",

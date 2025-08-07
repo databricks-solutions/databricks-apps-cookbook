@@ -19,7 +19,7 @@ def create_group_cards():
         },
         "AI / ML": {
             "icon": "material-symbols:science",
-            "views": ["Invoke a model", "Run vector search", "Invoke a multi-modal LLM"],
+            "views": ["Invoke a model", "Run vector search", "Connect an MCP server", "Invoke a multi-modal LLM"],
         },
         "Business Intelligence": {
             "icon": "material-symbols:analytics",
@@ -116,7 +116,7 @@ def layout():
             dbc.Col([
                 html.H1("📖 Databricks Apps Cookbook 🍳", className="mb-3"),
                 html.P([
-                    "**Welcome to the Databricks Apps Cookbook!**",
+                    "Welcome to the Databricks Apps Cookbook!",
                     html.Br(),
                     html.Br(),
                         "Are you ready to serve some tasty apps to your users? You're in the right place!",
