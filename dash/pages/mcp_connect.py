@@ -315,7 +315,7 @@ print(response.json())
      Input("auth-type-mcp-select", "value")],
     prevent_initial_call=True
 )
-def initialize_client(connection, method, path, auth_type):
+def initialize_client(connection, method, auth_type):
     """Initialize WorkspaceClient when user first interacts with form fields"""
     try:
         w = get_workspace_client(auth_type)
