@@ -64,19 +64,6 @@ def is_connection_login_error(error_message):
     return "Credential for user identity" in error_message and "Please login first to the connection" in error_message
 
 
-# Example HTTP methods
-HTTP_METHODS = [
-    {"label": "GET", "value": "GET"},
-    {"label": "POST", "value": "POST"}
-]
-
-# Authentication type options
-AUTH_TYPES = [
-    {"label": "Bearer token", "value": "bearer_token"},
-    {"label": "OAuth User to Machine Per User", "value": "oauth_user_machine_per_user"},
-    {"label": "OAuth Machine to Machine", "value": "oauth_machine_machine"}
-]
-
 def layout():
     return dbc.Container([
         # Header
@@ -112,7 +99,7 @@ def layout():
                                         {"label": "OAuth User to Machine Per User", "value": "oauth_user_machine_per_user"},
                                         {"label": "OAuth Machine to Machine", "value": "oauth_machine_machine"}
                                     ],
-                                    value="bearer_token",
+                                    value="oauth_user_machine_per_user",
                                     className="mb-2"
                                 )
                             ], md=6),

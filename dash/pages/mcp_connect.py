@@ -96,19 +96,6 @@ def is_connection_login_error(error_message):
     return "Credential for user identity" in error_message and "Please login first to the connection" in error_message
 
 
-# Example HTTP methods
-HTTP_METHODS = [
-    {"label": "GET", "value": "GET"},
-    {"label": "POST", "value": "POST"}
-]
-
-# Authentication type options
-AUTH_TYPES = [
-    {"label": "Bearer token", "value": "bearer_token"},
-    {"label": "OAuth User to Machine Per User", "value": "oauth_user_machine_per_user"},
-    {"label": "OAuth Machine to Machine", "value": "oauth_machine_machine"}
-]
-
 def layout():
     return dbc.Container([
         # Header
@@ -151,12 +138,12 @@ def layout():
                             dbc.Col([
                                 dbc.Label("HTTP Method", className="form-label"),
                                 dcc.Dropdown(
-                                    id="method-select",
+                                    id="method-mcp-select",
                                     options=[
                                         {"label": "GET", "value": "GET"},
                                         {"label": "POST", "value": "POST"}
                                     ],
-                                    value="GET",
+                                    value="POST",
                                     className="mb-2"
                                 )
                             ], md=6),
@@ -355,7 +342,7 @@ def reset_workspace_client_on_auth_change(auth_type):
     Output("mcp-output", "children", allow_duplicate=True),
     [Input("send-request-btn", "n_clicks")],
     [State("connection-mcp-select", "value"),
-     State("method-select", "value"),
+     State("method-mcp-select", "value"),
      State("body-mcp-input", "value"),
      State("auth-type-mcp-select", "value")],
     prevent_initial_call=True
