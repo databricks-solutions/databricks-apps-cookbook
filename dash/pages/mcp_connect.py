@@ -125,7 +125,7 @@ def layout():
                             dbc.Col([
                                 dbc.Label("Auth Type", className="form-label"),
                                 dcc.Dropdown(
-                                    id="auth-type-select",
+                                    id="auth-type-mcp-select",
                                     options=[
                                         {"label": "Bearer token", "value": "bearer_token"},
                                         {"label": "OAuth User to Machine Per User", "value": "oauth_user_machine_per_user"},
