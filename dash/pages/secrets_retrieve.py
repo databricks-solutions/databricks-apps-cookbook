@@ -10,7 +10,7 @@ dash.register_page(
     path="/secrets/retrieve",
     title="Secrets Retrieve",
     name="Retrieve a secret",
-    category="Authentication",
+    category="External services",
     icon="material-symbols:key",
 )
 

@@ -1,0 +1,180 @@
+---
+sidebar_position: 3
+---
+
+# Connect an MCP server
+
+This recipe connects to an [MCP](https://modelcontextprotocol.io/overview) server for AI applications using GitHub as an example and the Unity Catalog [HTTP connection](https://docs.databricks.com/aws/en/query-federation/http) for secure and governed access.
+
+## Code snippets
+
+### OAuth User to Machine Per User (On-behalf-of-user)
+
+```python
+import contextvars
+import os
+import uuid
+from pathlib import Path
+from mcp.server.fastmcp import FastMCP
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
+from typing import Dict, Any
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+
+
+STATIC_DIR = Path(__file__).parent / "static"
+
+# Create an MCP server
+mcp = FastMCP("Custom MCP Server on Databricks Apps")
+
+# Context variable for headers
+header_store = contextvars.ContextVar("header_store")
+
+def init_github_tools() -> Dict[str, Any]:
+    headers = header_store.get({})
+    token=headers["x-forwarded-access-token"]
+
+    json = {
+        "jsonrpc": "2.0",
+        "id": "init-1",
+        "method": "initialize",
+        "params": {}
+    }
+
+    try:
+        response =  WorkspaceClient(token=token, auth_type="pat").serving_endpoints.http_request(
+            conn="github_u2m_connection",
+            method=ExternalFunctionRequestHttpMethod.POST,
+            path="/",
+            json=json,
+        )
+    except Exception as e:
+        print(f"Error making the init request: {e}")
+        return {"error": str(e)}
+
+    # Extract the Mcp-Session-Id from response headers
+    print("MCP_HEADERS", response.headers)
+    session_id = response.headers.get("mcp-session-id")
+    if not session_id:
+        print("No session ID returned by server.")
+
+    print(f"✅ Got MCP Session ID: {session_id}")
+    return session_id
+
+# Tool using header_store
+def list_github_tools() -> Dict[str, Any]:
+    session_id = init_github_tools()
+    headers = header_store.get({})
+    token=headers["x-forwarded-access-token"]
+
+    json = {
+        "jsonrpc": "2.0",
+        "id": "list-1",
+        "method": "tools/list",
+    }
+
+    try:
+        response =  WorkspaceClient(token=token, auth_type="pat").serving_endpoints.http_request(
+            conn="github_u2m_connection",
+            method=ExternalFunctionRequestHttpMethod.POST,
+            path="/",
+            json=json,
+            headers={
+                "Mcp-Session-Id": session_id
+            }
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"error": str(e)}
+
+    print(f"Response list tools: {response.json()}")
+
+    return response.json()
+
+
+def call_github_tool(name: str, arguments: dict) -> Dict[str, Any]:
+    session_id = init_github_tools()
+    headers = header_store.get({})
+    token=headers["x-forwarded-access-token"]
+    json = {
+        "jsonrpc": "2.0",
+        "id": "call-1",
+        "method": "tools/call",
+        "params": {
+            "name": name,
+            "arguments": arguments
+        }
+    }
+    try:
+        response =  WorkspaceClient(token=token, auth_type="pat").serving_endpoints.http_request(
+            conn="github_u2m_connection",
+            method=ExternalFunctionRequestHttpMethod.POST,
+            path="/",
+            json=json,
+            headers={
+                "Mcp-Session-Id": session_id
+            }
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"error": str(e)}
+    
+    print(f"Response call tools: {response.json()}")
+    return response.json()
+
+@mcp._mcp_server.list_tools()
+async def list_tools():
+    tools_dict = list_github_tools()
+    return tools_dict.get("result", {}).get("tools", [])
+
+@mcp._mcp_server.call_tool()
+async def call_tool(name: str, arguments: dict):
+    response = call_github_tool(name, arguments)
+    return response.get("result", {}).get("content", [])
+
+mcp_app = mcp.streamable_http_app()
+
+
+app = FastAPI(
+    lifespan=lambda _: mcp.session_manager.run(),
+)
+
+@app.middleware("http")
+async def capture_headers(request: Request, call_next):
+    header_store.set(dict(request.headers))
+    return await call_next(request)
+
+@app.get("/", include_in_schema=False)
+async def serve_index():
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+app.mount("/", mcp_app)
+```
+
+## Resources
+
+- [Unity Catalog HTTP Connection](https://docs.databricks.com/aws/en/query-federation/http) with the MCP (/mcp) base path
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `USE CONNECTION` permission on the HTTP Connection
+
+When using OAuth User to Machine Per User (On-behalf-of-user), you need to configure [User authorization](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth#user-authorization) by adding the Unity Catalog connection or other scopes.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [FastAPI](https://pypi.org/project/fastapi/) - `fastapi`
+- [uvicorn](https://pypi.org/project/uvicorn/) - `uvicorn`
+- [MCP CLI](https://pypi.org/project/mcp/) - `mcp[cli]`
+
+```python title="requirements.txt"
+databricks-sdk
+fastapi
+uvicorn
+mcp[cli]
+```

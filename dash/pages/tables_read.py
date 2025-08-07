@@ -12,7 +12,7 @@ dash.register_page(
     __name__,
     path='/tables/read',
     title='Read Table',
-    name='Read a table',
+    name='Read a Delta table',
     category='Tables',
     icon='table'
 )

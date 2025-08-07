@@ -8,7 +8,6 @@ dash.register_page(__name__, path="/", title="Introduction", name="Introduction"
 
 
 def create_group_cards():
-    # Define category metadata with consistent order and grouping
     category_metadata = {
         "Tables": {
             "icon": "material-symbols:table",
@@ -20,7 +19,7 @@ def create_group_cards():
         },
         "AI / ML": {
             "icon": "material-symbols:science",
-            "views": ["Invoke a model", "Run vector search", "Invoke a multi-modal LLM"],
+            "views": ["Invoke a model", "Run vector search", "Connect an MCP server", "Invoke a multi-modal LLM"],
         },
         "Business Intelligence": {
             "icon": "material-symbols:analytics",
@@ -33,16 +32,15 @@ def create_group_cards():
         "Compute": {"icon": "material-symbols:computer", "views": ["Connect"]},
         "Authentication": {
             "icon": "material-symbols:lock",
-            "views": ["Get current user", "Retrieve a secret"],
+            "views": ["Get current user"],
         },
-        "External Services": {
+        "External services": {
             "icon": "material-symbols:link",
-            "views": ["External Connections"],
+            "views": ["External connections", "Retrieve a secret"],
         },
     }
 
     cards = []
-    # Create cards in specified order
     for category, metadata in category_metadata.items():
         category_pages = [
             page
@@ -118,7 +116,7 @@ def layout():
             dbc.Col([
                 html.H1("📖 Databricks Apps Cookbook 🍳", className="mb-3"),
                 html.P([
-                    "**Welcome to the Databricks Apps Cookbook!**",
+                    "Welcome to the Databricks Apps Cookbook!",
                     html.Br(),
                     html.Br(),
                         "Are you ready to serve some tasty apps to your users? You're in the right place!",

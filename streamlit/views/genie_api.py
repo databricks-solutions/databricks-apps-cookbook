@@ -8,8 +8,8 @@ from typing import Dict
 
 w = WorkspaceClient()
 
-st.header("Genie", divider=True)
-st.subheader("Converse with your data")
+st.header("Business Intelligence", divider=True)
+st.subheader("Genie - Converse with your data")
 st.write(
     """
     This app uses [Genie](https://www.databricks.com/product/ai-bi) [API](https://docs.databricks.com/api/workspace/genie) 
