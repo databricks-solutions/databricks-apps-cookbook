@@ -115,7 +115,7 @@ def layout():
         html.Div([
             html.H1("AI/ML", className="mb-1"),
             html.P("Connect to remote MCP servers using Databricks Unity Catalog (UC) connections. This feature allows you to connect remote MCP servers like Slack, Jira, Gmail, Github or any service with an API using HTTP requests. ", className="text-muted mb-4"),
-            html.P("The 'Try it' example below is designed for GitHub regular connections and MCP servers. You should set up your UC external connections in Databricks Unity Catalog first before testing them here.", className="text-muted mb-4"),
+            html.P("You should set up your UC external connections in Databricks Unity Catalog first before testing them here.", className="text-muted mb-4"),
         ], className="mb-4"),
         
         # Tabbed layout
@@ -206,36 +206,74 @@ def layout():
             
             # Code snippet tab
             dbc.Tab([
-                html.H4("Bearer Token Method", className="mb-1", style={"margin-top": "0", "padding-top": "0"}),
+                html.H4("OAuth User to Machine Per User (On-behalf-of-user)", className="mb-1", style={"margin-top": "0", "padding-top": "0"}),
                 dcc.Markdown(
                     """```python
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
-w = WorkspaceClient()
+import json
+from flask import request
+
+token = request.headers.get("x-forwarded-access-token")
+w = WorkspaceClient(token=token, auth_type="pat")
+
+
+def init_mcp_session(w: WorkspaceClient, connection_name: str):
+    init_payload = {
+        "jsonrpc": "2.0",
+        "id": "init-1",
+        "method": "initialize",
+        "params": {}
+    }
+    response = w.serving_endpoints.http_request(
+        conn=connection_name,
+        method=ExternalFunctionRequestHttpMethod.POST,
+        path="/",
+        json=init_payload,
+    )
+    return response.headers.get("mcp-session-id")
+
+
+connection_name = "github_u2m_connection"
+http_method = ExternalFunctionRequestHttpMethod.POST
+path = "/"
+headers = {"Content-Type": "application/json"}
+payload = {"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}
+
+session_id = init_mcp_session(w, connection_name)
+headers["Mcp-Session-Id"] = session_id
 
 response = w.serving_endpoints.http_request(
-    conn="github_connection",
-    method=ExternalFunctionRequestHttpMethod.GET,
-    path="/traffic/views",
-    headers={"Accept": "application/vnd.github+json"},
+    conn=connection_name,
+    method=http_method,
+    path=path,
+    headers=headers,
+    json=payload,
 )
-
 print(response.json())
 ```""",
                     className="mb-3"
                 ),
-                html.H4("Bearer Token Method", className="mb-1", style={"margin-top": "0", "padding-top": "0"}),
+                html.H4("Bearer token", className="mb-1", style={"margin-top": "0", "padding-top": "0"}),
                 dcc.Markdown(
                     """```python
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+
+
 w = WorkspaceClient()
 
 response = w.serving_endpoints.http_request(
-    conn="github_connection",
+    conn="github_u2m_connection",
     method=ExternalFunctionRequestHttpMethod.GET,
     path="/traffic/views",
     headers={"Accept": "application/vnd.github+json"},
+    json={
+        "jsonrpc": "2.0",
+        "id": "init-1",
+        "method": "initialize",
+        "params": {}
+    },
 )
 
 print(response.json())
@@ -244,148 +282,7 @@ print(response.json())
                 ),
                 html.H4("OAuth On-Behalf-Of User", className="mb-1"),
                 dcc.Markdown(
-                    """```python
-import contextvars
-import os
-import uuid
-from pathlib import Path
-from mcp.server.fastmcp import FastMCP
-from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse
-from typing import Dict, Any
-from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
-
-
-STATIC_DIR = Path(__file__).parent / "static"
-
-# Create an MCP server
-mcp = FastMCP("Custom MCP Server on Databricks Apps")
-
-# Context variable for headers
-header_store = contextvars.ContextVar("header_store")
-
-def init_github_tools() -> Dict[str, Any]:
-    headers = header_store.get({})
-    token=headers["x-forwarded-access-token"]
-
-    json = {
-        "jsonrpc": "2.0",
-        "id": "init-1",
-        "method": "initialize",
-        "params": {}
-    }
-
-    try:
-        response =  WorkspaceClient(token=token, auth_type="pat").serving_endpoints.http_request(
-            conn="github_u2m_connection",
-            method=ExternalFunctionRequestHttpMethod.POST,
-            path="/",
-            json=json,
-        )
-    except Exception as e:
-        print(f"Error making the init request: {e}")
-        return {"error": str(e)}
-
-    # Extract the Mcp-Session-Id from response headers
-    print("MCP_HEADERS", response.headers)
-    session_id = response.headers.get("mcp-session-id")
-    if not session_id:
-        print("No session ID returned by server.")
-
-    print(f"✅ Got MCP Session ID: {session_id}")
-    return session_id
-
-# Tool using header_store
-def list_github_tools() -> Dict[str, Any]:
-    session_id = init_github_tools()
-    headers = header_store.get({})
-    token=headers["x-forwarded-access-token"]
-
-    json = {
-        "jsonrpc": "2.0",
-        "id": "list-1",
-        "method": "tools/list",
-    }
-
-    try:
-        response =  WorkspaceClient(token=token, auth_type="pat").serving_endpoints.http_request(
-            conn="github_u2m_connection",
-            method=ExternalFunctionRequestHttpMethod.POST,
-            path="/",
-            json=json,
-            headers={
-                "Mcp-Session-Id": session_id
-            }
-        )
-    except Exception as e:
-        print(f"Error: {e}")
-        return {"error": str(e)}
-
-    print(f"Response list tools: {response.json()}")
-
-    return response.json()
-
-
-def call_github_tool(name: str, arguments: dict) -> Dict[str, Any]:
-    session_id = init_github_tools()
-    headers = header_store.get({})
-    token=headers["x-forwarded-access-token"]
-    json = {
-        "jsonrpc": "2.0",
-        "id": "call-1",
-        "method": "tools/call",
-        "params": {
-            "name": name,
-            "arguments": arguments
-        }
-    }
-    try:
-        response =  WorkspaceClient(token=token, auth_type="pat").serving_endpoints.http_request(
-            conn="github_u2m_connection",
-            method=ExternalFunctionRequestHttpMethod.POST,
-            path="/",
-            json=json,
-            headers={
-                "Mcp-Session-Id": session_id
-            }
-        )
-    except Exception as e:
-        print(f"Error: {e}")
-        return {"error": str(e)}
-    
-    print(f"Response call tools: {response.json()}")
-    return response.json()
-
-@mcp._mcp_server.list_tools()
-async def list_tools():
-    tools_dict = list_github_tools()
-    return tools_dict.get("result", {}).get("tools", [])
-
-@mcp._mcp_server.call_tool()
-async def call_tool(name: str, arguments: dict):
-    response = call_github_tool(name, arguments)
-    return response.get("result", {}).get("content", [])
-
-mcp_app = mcp.streamable_http_app()
-
-
-app = FastAPI(
-    lifespan=lambda _: mcp.session_manager.run(),
-)
-
-@app.middleware("http")
-async def capture_headers(request: Request, call_next):
-    header_store.set(dict(request.headers))
-    return await call_next(request)
-
-@app.get("/", include_in_schema=False)
-async def serve_index():
-    return FileResponse(STATIC_DIR / "index.html")
-
-
-app.mount("/", mcp_app)
-```""",
+                    [],
                     className="mb-3"
                 ),
                 
