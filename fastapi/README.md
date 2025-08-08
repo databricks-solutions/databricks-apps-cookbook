@@ -12,7 +12,7 @@ The sample application provides the following API endpoints:
 #### API v1
 - `/api/v1/healthcheck` - Returns a response to validate the health of the application
 - `/api/v1/table` - Query data from Databricks tables
-- `/api/v1/orders/count` - Get total order count from PostgreSQL database
+- `/api/v1/orders/count` - Get total order count from Lakebase (PostgreSQL) database
 - `/api/v1/orders/sample` - Get sample order keys for testing
 - `/api/v1/orders/pages` - Get orders with traditional page-based pagination
 - `/api/v1/orders/stream` - Get orders with cursor-based pagination (recommended for large datasets)
@@ -54,9 +54,9 @@ pytest tests/v1/test_healthcheck.py
 This application uses a dual database architecture:
 
 - **Databricks SQL Warehouse**: Used for Unity Catalog table queries and analytics workloads via the `/api/v1/table` endpoint
-- **PostgreSQL Database**: Used for transactional operations and orders management via the `/api/v1/orders/*` endpoints
+- **Lakebase PostgreSQL Database**: Used for transactional operations and orders management via the `/api/v1/orders/*` endpoints
 
-The PostgreSQL database uses automatic token refresh for Databricks database instances with OAuth authentication.
+The Lakebase PostgreSQL database uses automatic token refresh for Databricks database instances with OAuth authentication.
 
 ## Configuration
 
@@ -67,9 +67,9 @@ The application uses environment variables for configuration:
 - `DATABRICKS_HOST` - (Optional) The Databricks workspace host
 - `DATABRICKS_TOKEN` - (Optional) The Databricks access token
 
-### PostgreSQL Database (for orders management)
+### Lakebase PostgreSQL Database (for orders management)
 - `DATABRICKS_DATABASE_INSTANCE` - The name of the Databricks database instance
-- `DATABRICKS_DATABASE_NAME` - The PostgreSQL database name
+- `DATABRICKS_DATABASE_NAME` - The Lakebase PostgreSQL database name
 - `DATABRICKS_DATABASE_PORT` - (Optional) Database port (default: 5432)
 - `DEFAULT_POSTGRES_SCHEMA` - (Optional) Database schema (default: public)
 - `DEFAULT_POSTGRES_TABLE` - (Optional) Orders table name (default: orders_synced)
