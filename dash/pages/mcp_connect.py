@@ -248,12 +248,6 @@ print(response.json())
 ```""",
                     className="mb-3"
                 ),
-                html.H4("OAuth On-Behalf-Of User", className="mb-1"),
-                dcc.Markdown(
-                    [],
-                    className="mb-3"
-                ),
-                
             ], label="Code snippet", tab_id="tab-code"),
             
             # Requirements tab

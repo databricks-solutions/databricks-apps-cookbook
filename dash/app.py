@@ -30,7 +30,8 @@ def create_sidebar():
     sidebar_structure = {
         'Tables': [
             'Read a Delta table',
-            'Edit a Delta table'
+            'Edit a Delta table',
+            'OLTP Database'
         ],
         'Volumes': [
             'Upload a file',
@@ -66,6 +67,7 @@ def create_sidebar():
     page_icons = {
         'Read a Delta table': 'material-symbols:table-view',
         'Edit a Delta table': 'material-symbols:edit-document',
+        'OLTP Database': 'material-symbols:database',
         'Upload a file': 'material-symbols:upload',
         'Download a file': 'material-symbols:download',
         'Invoke a model': 'material-symbols:model-training',
