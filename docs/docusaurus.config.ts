@@ -11,7 +11,7 @@ const config: Config = {
   url: "https://apps-cookbook.dev",
   baseUrl: "/",
 
-  organizationName: "pbv0",
+  organizationName: "databricks-solutions",
   projectName: "databricks-apps-cookbook",
 
   onBrokenLinks: "throw",
@@ -24,10 +24,10 @@ const config: Config = {
 
   scripts: [
     {
-      src: 'https://plausible.io/js/script.outbound-links.js',
+      src: "https://plausible.io/js/script.outbound-links.js",
       defer: true,
-      'apps-cookbook.dev': 'yourdomain.com'
-    }
+      "data-domain": "apps-cookbook.dev",
+    },
   ],
 
   presets: [

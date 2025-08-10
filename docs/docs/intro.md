@@ -16,22 +16,54 @@ For each snippet, you will find the **source code**, required **permissions**, l
 
 Currently, we offer snippets for [Streamlit](/docs/category/streamlit), [Dash](/docs/category/dash), and [FastAPI](/docs/category/fastapi) and they can be easily adapted to other Python frameworks.
 
-<div className="mt-4 flex flex-wrap space-x-8 align-middle text-center">
-    <Link to="/docs/category/streamlit">
-        <button className="inline-flex items-center border-2 border-lava-600 px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline bg-transparent hover:cursor-pointer">
-            <img src="/img/logo_streamlit.svg" className="mr-4 h-8" />
-            <span clasName="m-0 p-0">Build with Streamlit</span>
+<div className="mt-4 flex w-full flex-row items-center justify-center space-x-4 sm:w-auto">
+    <Link to="/docs/category/streamlit" className="landing-button-horizontal">
+        <button className="inline-flex w-full items-center justify-center border-2 border-lava-600 bg-transparent px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline">
+            <div className="flex h-8 items-center">
+                <img src="/img/logo_streamlit.svg" className="mr-4 h-6" />
+            </div>
+            <span className="m-0 p-0">Build with Streamlit</span>
         </button>
     </Link>
-    <Link to="/docs/category/dash">
-        <button className="inline-flex items-center border-2 border-lava-600 px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline bg-transparent hover:cursor-pointer">
-            <img src="/img/logo_dash.png" className="mr-4 h-8" />
+    <Link to="/docs/category/dash" className="landing-button-horizontal">
+        <button className="inline-flex w-full items-center justify-center border-2 border-lava-600 bg-transparent px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline">
+            <div className="flex h-8 items-center">
+                <img src="/img/logo_dash.png" className="mr-4 h-6" />
+            </div>
             <span>Build with Dash</span>
         </button>
     </Link>
-    <Link to="/docs/category/fastapi">
-        <button className="inline-flex items-center border-2 border-lava-600 px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline bg-transparent hover:cursor-pointer">
-            <img src="/img/logo_fastapi.svg" className="mr-4 h-8" />
+    <Link to="/docs/category/fastapi" className="landing-button-horizontal">
+        <button className="inline-flex w-full items-center justify-center border-2 border-lava-600 bg-transparent px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline">
+            <div className="flex h-8 items-center">
+                <img src="/img/logo_fastapi.svg" className="mr-4 h-6" />
+            </div>
+            <span>Build with FastAPI</span>
+        </button>
+    </Link>
+</div>
+<div className="mt-4 flex w-full flex-col items-center justify-center space-y-4 sm:w-auto">
+    <Link to="/docs/category/streamlit" className="landing-button-vertical w-full">
+        <button className="inline-flex w-full items-center justify-center border-2 border-lava-600 bg-transparent px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline">
+            <div className="flex h-8 items-center">
+                <img src="/img/logo_streamlit.svg" className="mr-4 h-6" />
+            </div>
+            <span className="m-0 p-0">Build with Streamlit</span>
+        </button>
+    </Link>
+    <Link to="/docs/category/dash" className="landing-button-vertical w-full">
+        <button className="inline-flex w-full items-center justify-center border-2 border-lava-600 bg-transparent px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline">
+            <div className="flex h-8 items-center">
+                <img src="/img/logo_dash.png" className="mr-4 h-6" />
+            </div>
+            <span>Build with Dash</span>
+        </button>
+    </Link>
+    <Link to="/docs/category/fastapi" className="landing-button-vertical w-full">
+        <button className="inline-flex w-full items-center justify-center border-2 border-lava-600 bg-transparent px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline">
+            <div className="flex h-8 items-center">
+                <img src="/img/logo_fastapi.svg" className="mr-4 h-6" />
+            </div>
             <span>Build with FastAPI</span>
         </button>
     </Link>
