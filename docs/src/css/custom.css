@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 
 @layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme) important;
-@import "tailwindcss/utilities.css" layer(utilities) important;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 @custom-variant dark (&:is([data-theme="dark"] *));
 
@@ -17,6 +17,8 @@
   --ifm-font-family-base: "DM Sans";
   --ifm-heading-font-family: "DM Sans";
   --ifm-font-family-monospace: "DM Mono", monospace;
+
+  --ifm-heading-color: #1e2938;
 
   --ifm-color-primary: #ff3621;
   --ifm-color-primary-dark: #ff1c04;
@@ -44,6 +46,8 @@
 }
 
 [data-theme="dark"] {
+  --ifm-heading-color: #ffffff;
+
   --ifm-color-primary: #ff3621;
   --ifm-color-primary-dark: #ff1c04;
   --ifm-color-primary-darker: #f51700;

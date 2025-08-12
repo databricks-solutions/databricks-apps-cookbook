@@ -37,7 +37,7 @@ const config: Config = {
         docs: {
           sidebarPath: "./sidebars.ts",
           editUrl:
-            "https://github.com/pbv0/databricks-apps-cookbook/edit/main/docs/",
+            "https://github.com/databricks-solutions/databricks-apps-cookbook/edit/main/docs/",
         },
         blog: {
           showReadingTime: true,
@@ -45,11 +45,6 @@ const config: Config = {
             type: ["rss", "atom"],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
-          // Useful options to enforce blogging best practices
           onInlineTags: "warn",
           onInlineAuthors: "warn",
           onUntruncatedBlogPosts: "warn",
@@ -62,16 +57,8 @@ const config: Config = {
   ],
 
   plugins: [
+    "./src/plugins/tailwind-config.js",
     require.resolve("docusaurus-lunr-search"),
-    function tailwindPlugin(context, options) {
-      return {
-        name: "tailwind-plugin",
-        configurePostCss(postcssOptions) {
-          postcssOptions.plugins = [require("@tailwindcss/postcss")];
-          return postcssOptions;
-        },
-      };
-    },
   ],
 
   themeConfig: {
@@ -109,7 +96,7 @@ const config: Config = {
           position: "left",
           activeBasePath: "docs/category/fastapi",
         },
-        { to: "blog", label: "Blog", position: "left" },
+        { to: "resources", label: "Resources", position: "left" },
         {
           href: "https://github.com/pbv0/databricks-apps-cookbook/",
           label: "GitHub",

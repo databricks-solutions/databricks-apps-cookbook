@@ -1,0 +1,247 @@
+[
+  {
+    "title": "Building a Real-Time Table Editor with Databricks Apps and Lakebase",
+    "date": "2025-06-11",
+    "authors": [
+      {
+        "name": "Ivan Trusov",
+        "url": "https://www.linkedin.com/in/ivan-trusov"
+      }
+    ],
+    "type": "Blog Post",
+    "category": "Getting Started",
+    "url": "https://www.linkedin.com/pulse/building-real-time-table-editor-databricks-apps-lakebase-ivan-trusov-pfq8f/",
+    "summary": "Learn how to build a real-time table editor using Databricks Apps and Lakebase, the new fully-managed Postgres OLTP database integrated with the Databricks platform."
+  },
+  {
+    "title": "End-to-End RAG Application with Source Retrieval Platform",
+    "date": "2025-01-15",
+    "authors": [
+      {
+        "name": "Ivan Trusov",
+        "url": "https://www.linkedin.com/in/ivan-trusov"
+      }
+    ],
+    "type": "Blog Post",
+    "category": "GenAI",
+    "url": "https://www.linkedin.com/pulse/end-to-end-rag-application-source-retriveal-platform-ivan-trusov-znvqf/",
+    "summary": "Comprehensive guide on building retrieval-augmented generation applications with Databricks Apps, covering architecture patterns and implementation strategies."
+  },
+  {
+    "title": "Building Data Applications with Databricks Apps",
+    "date": "2023-09-20",
+    "authors": [
+      {
+        "name": "Ivan Trusov",
+        "url": "https://www.linkedin.com/in/ivan-trusov"
+      }
+    ],
+    "type": "Blog Post",
+    "category": "Getting Started",
+    "url": "https://www.linkedin.com/pulse/building-data-applications-databricks-apps-ivan-trusov-6pjwf/",
+    "summary": "An introduction to building data applications using Databricks Apps, exploring frameworks, development patterns, and best practices."
+  },
+  {
+    "title": "Setting up your development environment for Databricks Apps",
+    "date": "2025-01-08",
+    "authors": [
+      {
+        "name": "Pascal Vogel",
+        "url": "https://www.linkedin.com/in/pascal-vogel/"
+      },
+      {
+        "name": "Anton Vlasov",
+        "url": "https://www.linkedin.com/in/asvlasov/"
+      }
+    ],
+    "type": "Tutorial",
+    "category": "DevOps",
+    "url": "https://community.databricks.com/t5/technical-blog/setting-up-your-development-environment-for-databricks-apps/ba-p/122111",
+    "summary": "Opinionated guide to setting up a great developer experience for Databricks Apps with local IDE development, OAuth authentication, and efficient deployment workflows."
+  },
+  {
+    "title": "Building Interactive Web Applications with Databricks Connect",
+    "date": "2025-04-15",
+    "authors": [
+      {
+        "name": "Databricks Community"
+      }
+    ],
+    "type": "Tutorial",
+    "category": "Getting Started",
+    "url": "https://community.databricks.com/t5/technical-blog/building-interactive-web-applications-with-databricks-connect/ba-p/120724",
+    "summary": "Walk through a modern 3-tier architecture built with React frontend, FastAPI backend, and Databricks Serverless Compute via Databricks Connect."
+  },
+  {
+    "title": "Build Databricks Apps in 5 Minutes!",
+    "date": "2024-06-15",
+    "authors": [
+      {
+        "name": "Databricks"
+      }
+    ],
+    "type": "Video",
+    "category": "Getting Started",
+    "url": "https://www.youtube.com/watch?v=Peh3roKGvJQ",
+    "summary": "Quick video tutorial teaching how to build your first Databricks App in less than 5 minutes using popular frameworks and serverless deployment."
+  },
+  {
+    "title": "Databricks Apps Deep Dive Tutorial",
+    "date": "2024-07-20",
+    "authors": [
+      {
+        "name": "Databricks"
+      }
+    ],
+    "type": "Video",
+    "category": "Getting Started",
+    "url": "https://www.youtube.com/watch?v=D-0AIBhpQh4",
+    "summary": "Comprehensive video guide covering Databricks Apps architecture, deployment patterns, and advanced features."
+  },
+  {
+    "title": "Exploring Code With Databricks Apps",
+    "date": "2024-11-15",
+    "authors": [
+      {
+        "name": "Databricks Community"
+      }
+    ],
+    "type": "Code sample",
+    "category": "GenAI",
+    "url": "https://community.databricks.com/t5/technical-blog/exploring-code-with-databricks-apps/ba-p/117634",
+    "summary": "Build a Databricks App for understanding complex code bases using LLMs, vector databases, and code analysis tools to explore C code like SQLite."
+  },
+  {
+    "title": "Implement fine-grained permissions for Databricks Apps with on-behalf-of-user authorization",
+    "date": "2024-10-22",
+    "authors": [
+      {
+        "name": "Databricks Community"
+      }
+    ],
+    "type": "Tutorial",
+    "category": "DevOps",
+    "url": "https://community.databricks.com/t5/technical-blog/implement-fine-grained-permissions-for-databricks-apps-with-on/ba-p/116884",
+    "summary": "Learn how to leverage on-behalf-of-user (OBO) authorization to implement fine-grained permissions in Databricks Apps using Unity Catalog."
+  },
+  {
+    "title": "Building an Inpainting App Using Hugging Face, Databricks Model Serving, and Databricks Apps",
+    "date": "2024-08-10",
+    "authors": [
+      {
+        "name": "Databricks Community"
+      }
+    ],
+    "type": "Tutorial",
+    "category": "GenAI",
+    "url": "https://community.databricks.com/t5/technical-blog/building-an-inpainting-app-using-hugging-face-databricks-model/ba-p/99137",
+    "summary": "Comprehensive guide to building an image inpainting application using Hugging Face Diffusers, MLflow, Databricks Model Serving, and Databricks Apps."
+  },
+  {
+    "title": "Building Databricks Apps with React and Mosaic AI Agents for Enterprise Chat Solutions",
+    "date": "2025-03-21",
+    "authors": [
+      {
+        "name": "Wenwen Xie",
+        "url": "https://www.databricks.com/blog/author/wenwen-xie"
+      },
+      {
+        "name": "Ivan Trusov",
+        "url": "https://www.databricks.com/blog/author/ivan-trusov"
+      },
+      {
+        "name": "Andre Furlan Bueno",
+        "url": "https://www.databricks.com/blog/author/andre-furlan-bueno"
+      }
+    ],
+    "type": "Blog Post",
+    "category": "GenAI",
+    "url": "https://www.databricks.com/blog/building-databricks-apps-react-and-mosaic-ai-agents-enterprise-chat-solutions",
+    "summary": "Technical implementation of a Databricks-hosted chatbot combining React frontend with Mosaic AI Agent Framework for manufacturing operations management."
+  },
+  {
+    "title": "Official Databricks Apps Documentation",
+    "date": "2025-01-01",
+    "authors": [
+      {
+        "name": "Databricks"
+      }
+    ],
+    "type": "Documentation",
+    "category": "Getting Started",
+    "url": "https://docs.databricks.com/en/dev-tools/databricks-apps/",
+    "summary": "Official documentation for Databricks Apps covering setup, development, deployment, and best practices for building secure data and AI applications."
+  },
+  {
+    "title": "Databricks Apps GitHub Examples Repository",
+    "date": "2024-12-01",
+    "authors": [
+      {
+        "name": "Databricks Solutions"
+      }
+    ],
+    "type": "Code sample",
+    "category": "Getting Started",
+    "url": "https://github.com/databricks-solutions/databricks-apps-examples",
+    "summary": "Collection of example applications demonstrating various use cases and patterns for Databricks Apps including authentication, data visualization, and AI integration."
+  },
+  {
+    "title": "The Full Stack of Innovation: Building Data and AI Products With Databricks Apps",
+    "date": "2025-06-10",
+    "authors": [
+      {
+        "name": "Ivan Trusov",
+        "url": "https://www.linkedin.com/in/ivan-trusov"
+      },
+      {
+        "name": "Giran Moodley"
+      }
+    ],
+    "type": "Video",
+    "category": "DevOps",
+    "url": "https://www.databricks.com/dataaisummit/session/full-stack-innovation-building-data-and-ai-products-databricks-apps",
+    "summary": "Deep-dive technical session from Data + AI Summit covering full-stack development of Databricks Apps including frameworks, testing, CI/CD, and monitoring."
+  },
+  {
+    "title": "Building Data Visualization Apps with Streamlit and Databricks SQL",
+    "date": "2021-07-04",
+    "authors": [
+      {
+        "name": "Ivan Trusov",
+        "url": "https://polarpersonal.medium.com"
+      }
+    ],
+    "type": "Tutorial",
+    "category": "Getting Started",
+    "url": "https://polarpersonal.medium.com/building-data-visualization-apps-with-streamlit-and-databricks-sql-54e51bb6b0a8",
+    "summary": "Quick example of building a data visualization app in almost pure Python using Streamlit and Databricks SQL endpoints."
+  },
+  {
+    "title": "Building a Data Labeling App with Python, Dash, and Databricks Lakehouse",
+    "date": "2023-03-13",
+    "authors": [
+      {
+        "name": "Ivan Trusov",
+        "url": "https://polarpersonal.medium.com"
+      }
+    ],
+    "type": "Tutorial",
+    "category": "Getting Started",
+    "url": "https://polarpersonal.medium.com/building-a-data-labeling-app-with-python-dash-and-databricks-lakehouse-48341f618b8f",
+    "summary": "Writing a data labeling application on top of the Databricks Lakehouse platform with Python and Dash for machine learning workflows."
+  },
+  {
+    "title": "Building an Image Classification App with Databricks Connect V2 and Dash",
+    "date": "2023-05-18",
+    "authors": [
+      {
+        "name": "Ivan Trusov",
+        "url": "https://polarpersonal.medium.com"
+      }
+    ],
+    "type": "Tutorial",
+    "category": "Getting Started",
+    "url": "https://polarpersonal.medium.com/building-an-image-classification-app-with-databricks-connect-v2-and-dash-3c7f855f6e6",
+    "summary": "Detailed guide on setting up and building an image classification app with Databricks Connect V2 (based on Spark Connect) and the Dash framework."
+  }
+]
