@@ -12,11 +12,6 @@ env:
   - name: 'DATABRICKS_DATABASE_PORT'
     value: '5432'
 
-  - name: 'DEFAULT_POSTGRES_SCHEMA'
-    value: 'public'
-  - name: 'DEFAULT_POSTGRES_TABLE'
-    value: 'orders_synced'
-
   - name: 'DB_POOL_SIZE'
     value: '5'
   - name: 'DB_MAX_OVERFLOW'

@@ -1,4 +1,3 @@
-import os
 from datetime import date
 from decimal import Decimal
 from typing import Optional
@@ -18,8 +17,8 @@ class OrderBase(SQLModel):
 
 
 class Order(OrderBase, table=True):
-    __tablename__ = os.getenv("DEFAULT_POSTGRES_TABLE", "orders_synced")
-    __table_args__ = {"schema": os.getenv("DEFAULT_POSTGRES_SCHEMA", "public")}
+    __tablename__ = "orders_synced"
+    __table_args__ = "public"
     o_orderkey: Optional[int] = Field(default=None, primary_key=True)
 
 

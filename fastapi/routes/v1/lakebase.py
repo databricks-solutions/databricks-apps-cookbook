@@ -45,8 +45,10 @@ async def create_lakebase_resources(
     ),
 ):
     if create_resources:
-        instance_name = os.getenv("LAKEBASE_INSTANCE_NAME", f"{current_user_id}-lakebase-demo")
-        
+        instance_name = os.getenv(
+            "LAKEBASE_INSTANCE_NAME", f"{current_user_id}-lakebase-demo"
+        )
+
         # Check if instance already exists
         try:
             instance_exists = w.database.get_database_instance(name=instance_name)
@@ -59,12 +61,14 @@ async def create_lakebase_resources(
             )
         except Exception as e:
             if "not found" in str(e).lower() or "resource not found" in str(e).lower():
-                logger.info(f"Instance {instance_name} does not exist. Proceeding with creation.")
+                logger.info(
+                    f"Instance {instance_name} does not exist. Proceeding with creation."
+                )
             else:
                 logger.error(f"Error checking instance existence: {e}")
                 raise HTTPException(
-                    status_code=500, 
-                    detail=f"Error checking instance existence: {str(e)}"
+                    status_code=500,
+                    detail=f"Error checking instance existence: {str(e)}",
                 )
 
         lakebase_database_name = os.getenv("LAKEBASE_DATABASE_NAME", "demo_database")
@@ -101,12 +105,15 @@ async def create_lakebase_resources(
         logger.info(f"Creating superuser role for: {superuser_role.name}")
         try:
             created_role = w.database.create_database_instance_role(
-                instance_name=instance_create.name, database_instance_role=superuser_role
+                instance_name=instance_create.name,
+                database_instance_role=superuser_role,
             )
             logger.info(f"Successfully created superuser role: {created_role.name}")
         except Exception as e:
             logger.error(f"Failed to create superuser role (continuing anyway): {e}")
-            logger.info("Database instance is still functional - role can be created manually if needed")
+            logger.info(
+                "Database instance is still functional - role can be created manually if needed"
+            )
 
         catalog = DatabaseCatalog(
             name=catalog_name,
@@ -145,17 +152,18 @@ async def create_lakebase_resources(
             logger.info(f"Initiated sync pipeline creation: {synced_table_create.id}")
             pipeline_id = synced_table_create.id
         except Exception as e:
-            logger.error(f"API error during synced table creation (pipeline likely created anyway): {e}")
+            logger.error(
+                f"API error during synced table creation (pipeline likely created anyway): {e}"
+            )
             pipeline_id = "check-workspace-ui"
-        
-        # Get workspace URL from current workspace client
+
         workspace_url = w.config.host
         if pipeline_id != "check-workspace-ui":
             pipeline_url = f"{workspace_url}/pipelines/{pipeline_id}"
             message = f"Resources created successfully. Synced table pipeline {pipeline_id} is provisioning asynchronously. Monitor progress at: {pipeline_url}"
         else:
             message = f"Resources created successfully. Synced table pipeline initiated (API response error). Check pipelines in workspace: {workspace_url}/pipelines"
-        
+
         return LakebaseResourcesResponse(
             instance=instance_create.name,
             catalog=database_create.name,
@@ -192,7 +200,9 @@ async def delete_lakebase_resources(
             message="No resources were deleted (confirm_deletion=False)",
         )
 
-    instance_name = os.getenv("LAKEBASE_INSTANCE_NAME", f"{current_user_id}-lakebase-demo")
+    instance_name = os.getenv(
+        "LAKEBASE_INSTANCE_NAME", f"{current_user_id}-lakebase-demo"
+    )
     catalog_name = os.getenv("LAKEBASE_CATALOG_NAME", f"{current_user_id}-pg-catalog")
     synced_table_name = f"{catalog_name}.public.orders_synced"
 
