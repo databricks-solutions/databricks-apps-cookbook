@@ -5,9 +5,9 @@ env:
     valueFrom: 'sql_warehouse'
   
   # Lakebase connection settings
-  - name: 'DATABRICKS_DATABASE_INSTANCE'
+  - name: 'LAKEBASE_INSTANCE_NAME'
     value: 'your_db_instance_name'
-  - name: 'DATABRICKS_DATABASE_NAME'
+  - name: 'LAKEBASE_DATABASE_NAME'
     value: 'your_database_name'
   - name: 'DATABRICKS_DATABASE_PORT'
     value: '5432'

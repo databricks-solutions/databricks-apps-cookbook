@@ -62,7 +62,10 @@ def init_engine():
     try:
         workspace_client = WorkspaceClient()
 
-        instance_name = os.getenv("DATABRICKS_DATABASE_INSTANCE")
+        instance_name = os.getenv("LAKEBASE_INSTANCE_NAME")
+        if not instance_name:
+            raise RuntimeError("LAKEBASE_INSTANCE_NAME environment variable is required")
+            
         database_instance = workspace_client.database.get_database_instance(
             name=instance_name
         )
@@ -76,7 +79,7 @@ def init_engine():
         logger.info("Database: Initial credentials generated")
 
         # Create Engine
-        database_name = os.getenv("DATABRICKS_DATABASE_NAME", database_instance.name)
+        database_name = os.getenv("LAKEBASE_DATABASE_NAME", database_instance.name)
         username = (
             os.getenv("DATABRICKS_CLIENT_ID")
             or workspace_client.current_user.me().user_name
@@ -155,6 +158,27 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
         raise RuntimeError("Engine not initialized; call init_engine() first")
     async with AsyncSessionLocal() as session:
         yield session
+
+
+def check_database_exists() -> bool:
+    """Check if the Lakebase database instance exists"""
+    try:
+        workspace_client = WorkspaceClient()
+        instance_name = os.getenv("LAKEBASE_INSTANCE_NAME")
+        
+        if not instance_name:
+            logger.warning("LAKEBASE_INSTANCE_NAME not set - database instance check skipped")
+            return False
+            
+        workspace_client.database.get_database_instance(name=instance_name)
+        logger.info(f"Lakebase database instance '{instance_name}' exists")
+        return True
+    except Exception as e:
+        if "not found" in str(e).lower() or "resource not found" in str(e).lower():
+            logger.info(f"Lakebase database instance '{instance_name}' does not exist")
+        else:
+            logger.error(f"Error checking database instance existence: {e}")
+        return False
 
 
 async def database_health() -> bool:

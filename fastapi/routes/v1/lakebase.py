@@ -99,10 +99,14 @@ async def create_lakebase_resources(
         )
 
         logger.info(f"Creating superuser role for: {superuser_role.name}")
-        created_role = w.database.create_database_instance_role(
-            instance_name=instance_create.name, database_instance_role=superuser_role
-        )
-        logger.info(f"Successfully created superuser role: {created_role.name}")
+        try:
+            created_role = w.database.create_database_instance_role(
+                instance_name=instance_create.name, database_instance_role=superuser_role
+            )
+            logger.info(f"Successfully created superuser role: {created_role.name}")
+        except Exception as e:
+            logger.error(f"Failed to create superuser role (continuing anyway): {e}")
+            logger.info("Database instance is still functional - role can be created manually if needed")
 
         catalog = DatabaseCatalog(
             name=catalog_name,
