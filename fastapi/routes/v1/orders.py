@@ -275,9 +275,7 @@ async def get_orders_by_cursor(
 
 
 @router.get("/{order_key}", response_model=OrderRead, summary="Get an order by its key")
-async def read_order(
-    order_key: int, db: AsyncSession = Depends(get_async_db)
-):
+async def read_order(order_key: int, db: AsyncSession = Depends(get_async_db)):
     """
     Fetch a single order by its key, returning all order fields.
 

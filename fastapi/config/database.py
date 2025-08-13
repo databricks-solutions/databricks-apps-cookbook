@@ -60,12 +60,7 @@ def init_engine():
         last_password_refresh
 
     try:
-        if os.getenv("DATABRICKS_HOST"):
-            workspace_client = WorkspaceClient(
-                host=os.getenv("DATABRICKS_HOST"), token=os.getenv("DATABRICKS_TOKEN")
-            )
-        else:
-            workspace_client = WorkspaceClient()
+        workspace_client = WorkspaceClient()
 
         instance_name = os.getenv("DATABRICKS_DATABASE_INSTANCE")
         database_instance = workspace_client.database.get_database_instance(
@@ -82,8 +77,10 @@ def init_engine():
 
         # Create Engine
         database_name = os.getenv("DATABRICKS_DATABASE_NAME", database_instance.name)
-        username = os.getenv(
-            "DATABRICKS_CLIENT_ID", os.getenv("DATABRICKS_USER_NAME", None)
+        username = (
+            os.getenv("DATABRICKS_CLIENT_ID")
+            or workspace_client.current_user.me().user_name
+            or None
         )
 
         url = URL.create(
