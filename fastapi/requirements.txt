@@ -6,7 +6,7 @@ pytest>=7.4.0
 pytest-mock>=3.10.0
 pytest-asyncio>=0.21.0
 httpx>=0.24.1
-databricks-sdk>=0.8.0
+databricks-sdk>=0.61.0
 databricks-sql-connector==4.0.2
 pandas>=2.0.0
 annotated-types==0.7.0
