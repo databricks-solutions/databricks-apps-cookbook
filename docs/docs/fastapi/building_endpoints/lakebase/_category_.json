@@ -1,0 +1,8 @@
+{
+  "label": "Lakebase",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn how to build FastAPI applications with Lakebase PostgreSQL databases, including resource management and data operations."
+  }
+}

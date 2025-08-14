@@ -3,3 +3,22 @@ command: ["uvicorn", "app:app"]
 env:
   - name: 'DATABRICKS_WAREHOUSE_ID'
     valueFrom: 'sql_warehouse'
+  
+  # Lakebase connection settings
+  - name: 'LAKEBASE_INSTANCE_NAME'
+    value: 'your_db_instance_name'
+  - name: 'LAKEBASE_DATABASE_NAME'
+    value: 'your_database_name'
+  - name: 'DATABRICKS_DATABASE_PORT'
+    value: '5432'
+
+  - name: 'DB_POOL_SIZE'
+    value: '5'
+  - name: 'DB_MAX_OVERFLOW'
+    value: '10'
+  - name: 'DB_COMMAND_TIMEOUT'
+    value: '30'
+  - name: 'DB_POOL_TIMEOUT'
+    value: '10'
+  - name: 'DB_POOL_RECYCLE_INTERVAL'
+    value: '3600'
