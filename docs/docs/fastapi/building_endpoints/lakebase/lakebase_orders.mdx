@@ -1,8 +1,8 @@
 ---
-sidebar_position: 5
+sidebar_position: 3
 ---
 
-# Lakebase Orders
+# Interact with Lakebase Tables
 
 This recipe demonstrates how to build a complete orders management API using Lakebase PostgreSQL database. These endpoints provide CRUD operations and various query patterns for handling orders data synchronized from Databricks Unity Catalog.
 
@@ -12,20 +12,15 @@ This recipe demonstrates how to build a complete orders management API using Lak
 - Database connection must be configured in your application environment
 :::
 
-## Overview
+:::info
+In this example, we demonstrate multiple HTTP methods (GET, POST) which are the standard choices for data operations in REST APIs as defined in RFC 7231:
+- `GET` requests are idempotent and cacheable, ideal for data retrieval
+- `POST` requests for updates and modifications
 
-The orders API provides six main endpoints for different use cases:
+For detailed specifications, refer to [RFC 7231](https://datatracker.ietf.org/doc/html/rfc7231) which defines HTTP method semantics.
+:::
 
-| Endpoint | Method | Purpose | Best For |
-|----------|--------|---------|----------|
-| `/orders/count` | GET | Get total orders count | Dashboards, monitoring |
-| `/orders/sample` | GET | Get 5 sample order keys | Testing, development |
-| `/orders/pages` | GET | Page-based pagination | Traditional UIs with page numbers |
-| `/orders/stream` | GET | Cursor-based pagination | Large datasets, infinite scroll |
-| `/orders/{order_key}` | GET | Get specific order | Order details, lookups |
-| `/orders/{order_key}/status` | POST | Update order status | Order processing workflows |
-
-## Code Implementation
+## Code snippet
 
 ```python title="routes/v1/orders.py"
 import logging
@@ -219,50 +214,56 @@ async def update_order_status(
         raise HTTPException(status_code=500, detail="Failed to update order status")
 ```
 
-## Endpoint Details
+:::warning
 
-### 1. Get Orders Count (`/orders/count`)
+The above example is shortened for brevity and not suitable for production use.
+You can find a more advanced sample in the databricks-apps-cookbook GitHub repository.
 
-**Purpose**: Get total number of orders in the database
+:::
 
-**Response**:
+## Example Usage
+
+The orders API provides six main endpoints for different use cases:
+
+| Endpoint | Method | Purpose | Best For |
+|----------|--------|---------|----------|
+| `/orders/count` | GET | Get total orders count | Dashboards, monitoring |
+| `/orders/sample` | GET | Get 5 sample order keys | Testing, development |
+| `/orders/pages` | GET | Page-based pagination | Traditional UIs with page numbers |
+| `/orders/stream` | GET | Cursor-based pagination | Large datasets, infinite scroll |
+| `/orders/{order_key}` | GET | Get specific order | Order details, lookups |
+| `/orders/{order_key}/status` | POST | Update order status | Order processing workflows |
+
+### Get Orders Count
+
+```bash
+curl -X GET "http://localhost:8000/api/v1/orders/count"
+```
+
 ```json
 {
   "total_orders": 1500000
 }
 ```
 
-**Usage**:
+### Get Sample Orders
+
 ```bash
-curl -X GET "http://localhost:8000/api/v1/orders/count"
+curl -X GET "http://localhost:8000/api/v1/orders/sample"
 ```
 
-### 2. Get Sample Orders (`/orders/sample`)
-
-**Purpose**: Get 5 sample order keys for testing and development
-
-**Response**:
 ```json
 {
   "sample_order_keys": [1, 32, 33, 34, 35]
 }
 ```
 
-**Usage**:
+### Page-Based Pagination
+
 ```bash
-curl -X GET "http://localhost:8000/api/v1/orders/sample"
+curl -X GET "http://localhost:8000/api/v1/orders/pages?page=1&page_size=2"
 ```
 
-### 3. Page-Based Pagination (`/orders/pages`)
-
-**Purpose**: Traditional pagination with page numbers - ideal for UIs with page controls
-
-**Parameters**:
-- `page` (int): Page number (1-based, default: 1)
-- `page_size` (int): Records per page (1-1000, default: 100)
-- `include_count` (bool): Include total count (default: true)
-
-**Response**:
 ```json
 {
   "orders": [
@@ -276,12 +277,23 @@ curl -X GET "http://localhost:8000/api/v1/orders/sample"
       "o_clerk": "Clerk#000000951",
       "o_shippriority": 0,
       "o_comment": "nstructions sleep furiously among"
+    },
+    {
+      "o_orderkey": 2,
+      "o_custkey": 781,
+      "o_orderstatus": "O",
+      "o_totalprice": 46929.18,
+      "o_orderdate": "1996-12-01",
+      "o_orderpriority": "1-URGENT",
+      "o_clerk": "Clerk#000000880",
+      "o_shippriority": 0,
+      "o_comment": "foxes. pending accounts at the pending"
     }
   ],
   "pagination": {
     "page": 1,
-    "page_size": 100,
-    "total_pages": 15000,
+    "page_size": 2,
+    "total_pages": 750000,
     "total_count": 1500000,
     "has_next": true,
     "has_previous": false
@@ -289,94 +301,14 @@ curl -X GET "http://localhost:8000/api/v1/orders/sample"
 }
 ```
 
-**Usage**:
+### Update Order Status
+
 ```bash
-# First page
-curl -X GET "http://localhost:8000/api/v1/orders/pages?page=1&page_size=50"
-
-# Specific page without count (faster)
-curl -X GET "http://localhost:8000/api/v1/orders/pages?page=10&include_count=false"
+curl -X POST "http://localhost:8000/api/v1/orders/1/status" \
+  -H "Content-Type: application/json" \
+  -d '{"o_orderstatus": "F"}'
 ```
 
-### 4. Cursor-Based Pagination (`/orders/stream`)
-
-**Purpose**: High-performance pagination for large datasets - ideal for infinite scroll or data streaming
-
-**Parameters**:
-- `cursor` (int): Start after this order key (0 for beginning, default: 0)
-- `page_size` (int): Records to fetch (1-1000, default: 100)
-
-**Response**:
-```json
-{
-  "orders": [
-    {
-      "o_orderkey": 101,
-      "o_custkey": 136,
-      "o_orderstatus": "O",
-      "o_totalprice": 46929.18,
-      "o_orderdate": "1996-03-13",
-      "o_orderpriority": "5-LOW",
-      "o_clerk": "Clerk#000000973",
-      "o_shippriority": 0,
-      "o_comment": "foxes after the"
-    }
-  ],
-  "pagination": {
-    "page_size": 100,
-    "has_next": true,
-    "has_previous": true,
-    "next_cursor": 200,
-    "previous_cursor": 0
-  }
-}
-```
-
-**Usage**:
-```bash
-# First batch
-curl -X GET "http://localhost:8000/api/v1/orders/stream?cursor=0&page_size=100"
-
-# Next batch (use next_cursor from previous response)
-curl -X GET "http://localhost:8000/api/v1/orders/stream?cursor=100&page_size=100"
-```
-
-### 5. Get Specific Order (`/orders/{order_key}`)
-
-**Purpose**: Retrieve complete details for a single order
-
-**Response**:
-```json
-{
-  "o_orderkey": 1,
-  "o_custkey": 370,
-  "o_orderstatus": "O",
-  "o_totalprice": 172799.49,
-  "o_orderdate": "1996-01-02",
-  "o_orderpriority": "5-LOW",
-  "o_clerk": "Clerk#000000951",
-  "o_shippriority": 0,
-  "o_comment": "nstructions sleep furiously among"
-}
-```
-
-**Usage**:
-```bash
-curl -X GET "http://localhost:8000/api/v1/orders/1"
-```
-
-### 6. Update Order Status (`/orders/{order_key}/status`)
-
-**Purpose**: Update the status of an existing order
-
-**Request Body**:
-```json
-{
-  "o_orderstatus": "F"
-}
-```
-
-**Response**:
 ```json
 {
   "o_orderkey": 1,
@@ -385,147 +317,22 @@ curl -X GET "http://localhost:8000/api/v1/orders/1"
 }
 ```
 
-**Usage**:
-```bash
-curl -X POST "http://localhost:8000/api/v1/orders/1/status" \
-  -H "Content-Type: application/json" \
-  -d '{"o_orderstatus": "F"}'
-```
+## Resources
 
-## Order Status Values
+- [Lakebase PostgreSQL](https://docs.databricks.com/en/database/index.html)
+- [SQLAlchemy Async](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)
+- [FastAPI Dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/)
 
-The TPC-H orders dataset uses these standard status codes:
-- `O` - Open
-- `F` - Finished  
-- `P` - Partial
+## Permissions
 
-## Pagination Comparison
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
 
-### When to Use Page-Based Pagination
-✅ **Best for**:
-- Small to medium datasets (< 1M records)
-- Traditional UI with page numbers
-- Users need to jump to specific pages
-- Displaying "Page X of Y" information
+- Database instance connection access via OAuth tokens
+- `SELECT` permissions on the `orders_synced` table in your Lakebase database
+- `UPDATE` permissions on the `orders_synced` table for status updates
+- Database user role with appropriate table access
 
-❌ **Avoid for**:
-- Very large datasets (performance degrades)
-- Real-time data feeds
-- Mobile infinite scroll interfaces
-
-### When to Use Cursor-Based Pagination
-✅ **Best for**:
-- Large datasets (1M+ records)
-- High-performance applications
-- Infinite scroll UIs
-- Real-time data streaming
-- APIs with high concurrency
-
-❌ **Avoid for**:
-- UIs requiring page jumps
-- Small datasets where page-based is simpler
-
-## Error Handling
-
-### Common HTTP Status Codes
-
-- `200` - Success
-- `400` - Invalid parameters (negative order_key, invalid page)
-- `404` - Order not found
-- `422` - Validation error (invalid request body)
-- `500` - Database or server error
-
-### Error Response Format
-```json
-{
-  "detail": "Order with key '999999' not found"
-}
-```
-
-## Performance Tips
-
-1. **Use cursor pagination** for large datasets (>100K records)
-2. **Disable count** in page pagination when not needed (`include_count=false`)
-3. **Limit page_size** to reasonable values (100-1000)
-4. **Cache count results** for dashboard displays
-5. **Index order_key** column for optimal performance (already indexed as primary key)
-
-## Complete Usage Example
-
-Here's a Python example showing how to use all endpoints together:
-
-```python
-import requests
-
-class OrdersClient:
-    def __init__(self, base_url):
-        self.base_url = base_url
-    
-    def get_count(self):
-        """Get total orders count"""
-        response = requests.get(f"{self.base_url}/orders/count")
-        return response.json()["total_orders"]
-    
-    def get_samples(self):
-        """Get sample order keys for testing"""
-        response = requests.get(f"{self.base_url}/orders/sample")
-        return response.json()["sample_order_keys"]
-    
-    def get_page(self, page=1, page_size=100, include_count=True):
-        """Get orders using page-based pagination"""
-        params = {"page": page, "page_size": page_size, "include_count": include_count}
-        response = requests.get(f"{self.base_url}/orders/pages", params=params)
-        return response.json()
-    
-    def stream_orders(self, cursor=0, page_size=100):
-        """Get orders using cursor-based pagination"""
-        params = {"cursor": cursor, "page_size": page_size}
-        response = requests.get(f"{self.base_url}/orders/stream", params=params)
-        return response.json()
-    
-    def get_order(self, order_key):
-        """Get specific order by key"""
-        response = requests.get(f"{self.base_url}/orders/{order_key}")
-        if response.status_code == 404:
-            return None
-        return response.json()
-    
-    def update_status(self, order_key, new_status):
-        """Update order status"""
-        data = {"o_orderstatus": new_status}
-        response = requests.post(
-            f"{self.base_url}/orders/{order_key}/status", 
-            json=data
-        )
-        return response.json()
-
-# Usage example
-client = OrdersClient("http://localhost:8000/api/v1")
-
-# Get overview
-total_orders = client.get_count()
-print(f"Total orders: {total_orders:,}")
-
-# Test with samples
-sample_keys = client.get_samples()
-for key in sample_keys:
-    order = client.get_order(key)
-    print(f"Order {key}: {order['o_orderstatus']} - ${order['o_totalprice']}")
-
-# Browse orders with pagination
-page_result = client.get_page(page=1, page_size=10)
-print(f"Page 1 has {len(page_result['orders'])} orders")
-
-# Stream orders efficiently
-stream_result = client.stream_orders(cursor=0, page_size=100)
-print(f"Streamed {len(stream_result['orders'])} orders")
-next_cursor = stream_result['pagination']['next_cursor']
-
-# Update an order status
-if sample_keys:
-    update_result = client.update_status(sample_keys[0], "F")
-    print(f"Updated order {sample_keys[0]} status to: {update_result['o_orderstatus']}")
-```
+See [Lakebase permissions](https://docs.databricks.com/en/database/permissions.html) for more information.
 
 ## Dependencies
 
@@ -544,9 +351,3 @@ sqlmodel
 asyncpg
 uvicorn
 ```
-
-## Related Documentation
-
-- [Create Lakebase Resources](./lakebase_resources_create.mdx) - Set up the PostgreSQL database
-- [Delete Lakebase Resources](./lakebase_resources_delete.mdx) - Clean up resources
-- [Read Unity Catalog Tables](./tables_read.mdx) - Query Databricks tables directly
