@@ -1,0 +1,284 @@
+---
+sidebar_position: 4
+---
+
+# Delete Lakebase Resources
+
+This recipe demonstrates how to programmatically delete Lakebase PostgreSQL resources from your Databricks workspace using FastAPI. This endpoint safely removes all created Lakebase resources to avoid ongoing costs.
+
+:::warning Destructive Operation
+This endpoint permanently deletes:
+- Database catalog and all its data
+- PostgreSQL database instance and all stored data
+
+**This action cannot be undone.** Ensure you have backed up any important data before deletion.
+
+The pipeline created to sync orders to our postgres instance will need to be **deleted manually.**
+:::
+
+:::info Deletion Order
+Resources are deleted in the correct dependency order:
+1. **Synced Table**: Removes the data synchronization pipeline
+2. **Database Catalog**: Removes the Unity Catalog connection
+3. **Database Instance**: Removes the PostgreSQL instance and all data
+:::
+
+## Prerequisites
+
+Before using this endpoint, ensure you have:
+- Previously created Lakebase resources using the create endpoint
+- Confirmed you no longer need the data and resources
+- Appropriate permissions to delete database instances in your workspace
+
+## Environment Variables
+
+The endpoint uses the same environment variables as the create endpoint to identify resources:
+
+```bash title=".env"
+LAKEBASE_INSTANCE_NAME=my-lakebase-instance
+LAKEBASE_CATALOG_NAME=my-pg-catalog
+```
+
+## Code Snippet
+
+```python title="routes/v1/lakebase.py"
+import logging
+import os
+
+from databricks.sdk import WorkspaceClient
+from fastapi import APIRouter, Query
+
+from models.lakebase import LakebaseResourcesDeleteResponse
+
+router = APIRouter(tags=["lakebase"])
+w = WorkspaceClient()
+
+@router.delete(
+    "/resources/delete-lakebase-resources",
+    response_model=LakebaseResourcesDeleteResponse,
+    summary="Delete Lakebase Resources",
+)
+async def delete_lakebase_resources(
+    confirm_deletion: bool = Query(
+        description="""🚨 This endpoint will permanently delete Lakebase resources. 
+        Set to true to confirm you want to delete these resources. 🚨
+        ⌛️ This endpoint may take a few minutes to complete.⌛️""",
+    ),
+):
+    if not confirm_deletion:
+        return LakebaseResourcesDeleteResponse(
+            deleted_resources=[],
+            failed_deletions=[],
+            message="No resources were deleted (confirm_deletion=False)",
+        )
+
+    instance_name = os.getenv("LAKEBASE_INSTANCE_NAME", f"{current_user_id}-lakebase-demo")
+    catalog_name = os.getenv("LAKEBASE_CATALOG_NAME", f"{current_user_id}-pg-catalog")
+    synced_table_name = f"{catalog_name}.public.orders_synced"
+
+    deleted_resources = []
+    failed_deletions = []
+
+    # Delete synced table
+    try:
+        w.database.delete_synced_database_table(name=synced_table_name)
+        deleted_resources.append(f"Synced table: {synced_table_name}")
+    except Exception as e:
+        failed_deletions.append(f"Synced table: {synced_table_name} - {str(e)}")
+
+    # Delete catalog
+    try:
+        w.database.delete_database_catalog(name=catalog_name)
+        deleted_resources.append(f"Catalog: {catalog_name}")
+    except Exception as e:
+        failed_deletions.append(f"Catalog: {catalog_name} - {str(e)}")
+
+    # Delete database instance
+    try:
+        w.database.delete_database_instance(name=instance_name, purge=True)
+        deleted_resources.append(f"Database instance: {instance_name}")
+    except Exception as e:
+        failed_deletions.append(f"Database instance: {instance_name} - {str(e)}")
+
+    if failed_deletions:
+        message = f"Deletion completed with errors. {len(deleted_resources)} resources deleted, {len(failed_deletions)} failed."
+    else:
+        message = f"All {len(deleted_resources)} resources deleted successfully."
+
+    return LakebaseResourcesDeleteResponse(
+        deleted_resources=deleted_resources,
+        failed_deletions=failed_deletions,
+        message=message,
+    )
+```
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `confirm_deletion` | boolean | **Yes** | **Must be `true` to delete resources.** Safety confirmation for destructive operation |
+
+## Response Format
+
+### Successful Deletion
+```json
+{
+  "deleted_resources": [
+    "Synced table: my-pg-catalog.public.orders_synced",
+    "Catalog: my-pg-catalog",
+    "Database instance: my-lakebase-instance"
+  ],
+  "failed_deletions": [],
+  "message": "All 3 resources deleted successfully."
+}
+```
+
+### Partial Success with Errors
+```json
+{
+  "deleted_resources": [
+    "Synced table: my-pg-catalog.public.orders_synced",
+    "Catalog: my-pg-catalog"
+  ],
+  "failed_deletions": [
+    "Database instance: my-lakebase-instance - Instance not found or already deleted"
+  ],
+  "message": "Deletion completed with errors. 2 resources deleted, 1 failed."
+}
+```
+
+### No Confirmation
+```json
+{
+  "deleted_resources": [],
+  "failed_deletions": [],
+  "message": "No resources were deleted (confirm_deletion=False)"
+}
+```
+
+## Usage Examples
+
+:::info 
+For simplicity, run the fastapi locally and use the swagger ui to delete resources.
+:::
+
+### Using curl
+
+```bash
+# Delete all Lakebase resources
+curl -X DELETE "http://localhost:8000/api/v1/resources/delete-lakebase-resources?confirm_deletion=true"
+
+# Safe call without deletion (for testing)
+curl -X DELETE "http://localhost:8000/api/v1/resources/delete-lakebase-resources?confirm_deletion=false"
+```
+
+### Using Python requests
+
+```python
+import requests
+
+# Delete resources with confirmation
+response = requests.delete(
+    "http://localhost:8000/api/v1/resources/delete-lakebase-resources",
+    params={"confirm_deletion": True}
+)
+
+result = response.json()
+print(f"Deleted: {len(result['deleted_resources'])} resources")
+print(f"Failed: {len(result['failed_deletions'])} deletions")
+
+if result['failed_deletions']:
+    print("Failed deletions:")
+    for failure in result['failed_deletions']:
+        print(f"  - {failure}")
+```
+
+### Using JavaScript/fetch
+
+```javascript
+const deleteResources = async () => {
+  const response = await fetch(
+    '/api/v1/resources/delete-lakebase-resources?confirm_deletion=true',
+    {
+      method: 'DELETE'
+    }
+  );
+  
+  const result = await response.json();
+  console.log(`Deletion complete: ${result.message}`);
+  return result;
+};
+```
+
+## Error Handling
+
+### Common Error Scenarios
+
+#### Resource Not Found
+If resources were already deleted or never existed:
+```json
+{
+  "failed_deletions": [
+    "Database instance: my-instance - Resource not found"
+  ]
+}
+```
+
+#### Insufficient Permissions
+```json
+{
+  "detail": "User does not have permission to delete database instances"
+}
+```
+
+#### Dependencies Still Exist
+If deletion order fails due to dependencies:
+```json
+{
+  "failed_deletions": [
+    "Database instance: my-instance - Cannot delete instance with active catalogs"
+  ]
+}
+```
+
+## Best Practices
+
+1. **Backup Data**: Export important data before deletion
+2. **Confirm Resources**: Verify resource names in your environment variables
+3. **Check Dependencies**: Ensure no other applications are using the resources
+4. **Monitor Deletion**: Check the response for any failed deletions
+5. **Cost Verification**: Confirm billing stops after successful deletion
+
+## Troubleshooting
+
+### Partial Deletion Failures
+If some resources fail to delete:
+1. Check the `failed_deletions` array for specific error messages
+2. Manually delete remaining resources via Databricks UI if needed
+3. Verify environment variable values match actual resource names
+
+### Timeout Issues
+For large instances, deletion may take several minutes:
+- The endpoint waits for completion automatically
+- Monitor Databricks UI for deletion progress
+- Re-run the endpoint if it times out (it's safe to retry)
+
+### Permission Errors
+Ensure your user/service principal has:
+- `CAN_MANAGE` permissions on the Databricks workspace
+- Database admin privileges for the instance
+- Access to delete Unity Catalog objects
+
+## Related Endpoints
+
+- [Create Lakebase Resources](./lakebase_resources_create.mdx) - Create new Lakebase environment
+- [Lakebase Orders](./lakebase_orders.mdx) - Query and export orders data before deletion
+
+## Cost Impact
+
+After successful deletion:
+- **Immediate**: No new compute charges for the database instance
+- **Storage**: Any remaining log/backup data may incur minimal storage costs
+- **Pipelines**: Synced table pipelines stop incurring costs immediately
+
+Verify cost reduction in your Databricks billing dashboard within 24 hours.
