@@ -298,7 +298,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE app_state TO "099f0306-9e29-4a87-8
                                        href="https://pypi.org/project/databricks-sdk/", 
                                        target="_blank",
                                        style={"color": "#2563eb"}),
-                                " - databricks-sdk"
+                                " - databricks-sdk>=0.60.0"
                             ], className="mb-2"),
                             html.Li([
                                 html.A("psycopg[binary]", 
