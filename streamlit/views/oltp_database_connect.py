@@ -249,7 +249,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE app_state TO "099f0306-9e29-4a87-8
         st.markdown(
             """
             **Dependencies**
-            * [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+            * [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk>=0.60.0`
             * [`psycopg[binary]`](https://pypi.org/project/psycopg/), [`psycopg-pool`](https://pypi.org/project/psycopg-pool/)
             * [Pandas](https://pypi.org/project/pandas/) - `pandas`
             * [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
