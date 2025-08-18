@@ -8,8 +8,8 @@
         "url": "https://www.linkedin.com/in/ivan-trusov"
       }
     ],
-    "type": "Blog Post",
-    "category": "Lakebase / OLTP",
+    "type": "Blog post",
+    "category": "Database applications",
     "url": "https://www.linkedin.com/pulse/building-real-time-table-editor-databricks-apps-lakebase-ivan-trusov-pfq8f/",
     "summary": "Learn how to build a real-time table editor using Databricks Apps and Lakebase, the new fully-managed Postgres OLTP database integrated with the Databricks platform."
   },
@@ -22,22 +22,22 @@
         "url": "https://www.linkedin.com/in/ivan-trusov"
       }
     ],
-    "type": "Blog Post",
-    "category": "GenAI",
+    "type": "Blog post",
+    "category": "AI/ML",
     "url": "https://www.linkedin.com/pulse/end-to-end-rag-application-source-retriveal-platform-ivan-trusov-znvqf/",
     "summary": "Comprehensive guide on building retrieval-augmented generation applications with Databricks Apps, covering architecture patterns and implementation strategies."
   },
   {
     "title": "Building Data Applications with Databricks Apps",
-    "date": "2023-09-20",
+    "date": "2024-11-06",
     "authors": [
       {
         "name": "Ivan Trusov",
         "url": "https://www.linkedin.com/in/ivan-trusov"
       }
     ],
-    "type": "Blog Post",
-    "category": "Getting Started",
+    "type": "Blog post",
+    "category": "Getting started",
     "url": "https://www.linkedin.com/pulse/building-data-applications-databricks-apps-ivan-trusov-6pjwf/",
     "summary": "An introduction to building data applications using Databricks Apps, exploring frameworks, development patterns, and best practices."
   },
@@ -73,73 +73,86 @@
       }
     ],
     "type": "Tutorial",
-    "category": "Architecture",
+    "category": "Advanced examples",
     "url": "https://community.databricks.com/t5/technical-blog/building-interactive-web-applications-with-databricks-connect/ba-p/120724",
     "summary": "Walk through a modern 3-tier architecture built with React frontend, FastAPI backend, and Databricks Serverless Compute via Databricks Connect."
   },
   {
     "title": "Build Databricks Apps in 5 Minutes!",
-    "date": "2024-06-15",
+    "date": "2025-06-30",
     "authors": [
       {
-        "name": "Databricks"
+        "name": "Stephanie Alba",
+        "url": "https://www.linkedin.com/in/stephanieamalba/"
+      },
+      {
+        "name": "Will Middlebrook",
+        "url": "https://www.linkedin.com/in/will-middlebrook/"
       }
     ],
     "type": "Video",
-    "category": "Getting Started",
+    "category": "Getting started",
     "url": "https://www.youtube.com/watch?v=Peh3roKGvJQ",
     "summary": "Quick video tutorial teaching how to build your first Databricks App in less than 5 minutes using popular frameworks and serverless deployment."
   },
   {
     "title": "Databricks Apps Deep Dive Tutorial",
-    "date": "2024-07-20",
+    "date": "2024-11-16",
     "authors": [
       {
-        "name": "Databricks"
+        "name": "Stephanie Alba",
+        "url": "https://www.linkedin.com/in/stephanieamalba/"
+      },
+      {
+        "name": "Zach Jacobson",
+        "url": "https://www.linkedin.com/in/zach-jacobson-4b6903100/"
       }
     ],
     "type": "Video",
-    "category": "Getting Started",
+    "category": "Getting started",
     "url": "https://www.youtube.com/watch?v=D-0AIBhpQh4",
-    "summary": "Comprehensive video guide covering Databricks Apps architecture, deployment patterns, and advanced features."
+    "summary": "Introductory video and demo on Databricks Apps."
   },
   {
     "title": "Exploring Code With Databricks Apps",
-    "date": "2024-11-15",
+    "date": "2025-05-06",
     "authors": [
       {
-        "name": "Databricks Community"
+        "name": "Josh Melton",
+        "url": "https://www.linkedin.com/in/josh-melton-2b5a9b115/"
       }
     ],
-    "type": "Code sample",
-    "category": "GenAI",
+    "type": "Blog post",
+    "category": "AI/ML",
     "url": "https://community.databricks.com/t5/technical-blog/exploring-code-with-databricks-apps/ba-p/117634",
-    "summary": "Build a Databricks App for understanding complex code bases using LLMs, vector databases, and code analysis tools to explore C code like SQLite."
+    "summary": "Build a Databricks App for understanding complex C codebases like SQLite using LLMs, vector databases, dependency graph analysis, and the Databricks SDK for semantic code exploration."
   },
   {
     "title": "Implement fine-grained permissions for Databricks Apps with on-behalf-of-user authorization",
-    "date": "2024-10-22",
+    "date": "2025-04-29",
     "authors": [
       {
-        "name": "Databricks Community"
+        "name": "Pascal Vogel",
+        "url": "https://www.linkedin.com/in/pascal-vogel/"
       }
     ],
     "type": "Tutorial",
-    "category": "DevOps",
+    "category": "Security & governance",
     "url": "https://community.databricks.com/t5/technical-blog/implement-fine-grained-permissions-for-databricks-apps-with-on/ba-p/116884",
     "summary": "Learn how to leverage on-behalf-of-user (OBO) authorization to implement fine-grained permissions in Databricks Apps using Unity Catalog."
   },
   {
     "title": "Building an Inpainting App Using Hugging Face, Databricks Model Serving, and Databricks Apps",
-    "date": "2024-08-10",
+    "date": "2024-11-15",
     "authors": [
       {
-        "name": "Databricks Community"
+        "name": "Ehsan Olfat",
+        "url": "https://www.linkedin.com/in/ehsanolfat/"
       }
     ],
     "type": "Tutorial",
-    "category": "GenAI",
-    "url": "https://community.databricks.com/t5/technical-blog/building-an-inpainting-app-using-hugging-face-databricks-model/ba-p/99137",
+    "category": "AI/ML",
+    "url": "https://medium.com/@ehsan.olfat/building-an-inpainting-app-using-hugging-face-databricks-model-serving-and-databricks-apps-a0437c2fb62a",
     "summary": "Comprehensive guide to building an image inpainting application using Hugging Face Diffusers, MLflow, Databricks Model Serving, and Databricks Apps."
   },
   {
@@ -159,36 +172,20 @@
         "url": "https://www.linkedin.com/in/andrefurlanbueno/"
       }
     ],
-    "type": "Blog Post",
-    "category": "GenAI",
+    "type": "Blog post",
+    "category": "AI/ML",
     "url": "https://www.databricks.com/blog/building-databricks-apps-react-and-mosaic-ai-agents-enterprise-chat-solutions",
     "summary": "Technical implementation of a Databricks-hosted chatbot combining React frontend with Mosaic AI Agent Framework for manufacturing operations management."
   },
   {
-    "title": "Official Databricks Apps Documentation",
-    "date": "2025-01-01",
-    "authors": [
-      {
-        "name": "Databricks"
-      }
-    ],
-    "type": "Documentation",
-    "category": "Getting Started",
-    "url": "https://docs.databricks.com/en/dev-tools/databricks-apps/",
-    "summary": "Official documentation for Databricks Apps covering setup, development, deployment, and best practices for building secure data and AI applications."
-  },
-  {
-    "title": "Databricks Apps GitHub Examples Repository",
-    "date": "2024-12-01",
-    "authors": [
-      {
-        "name": "Databricks Solutions"
-      }
-    ],
+    "title": "Databricks Apps Examples",
+    "date": "2024-10-17",
     "type": "Code sample",
-    "category": "Getting Started",
+    "category": "Getting started",
     "url": "https://github.com/databricks-solutions/databricks-apps-examples",
-    "summary": "Collection of example applications demonstrating various use cases and patterns for Databricks Apps including authentication, data visualization, and AI integration."
+    "summary": "Collection of example applications demonstrating various use cases and patterns for Databricks Apps including authentication, data visualization, and AI integration.",
+    "repo_org": "databricks-solutions",
+    "repo_name": "databricks-apps-examples"
   },
   {
     "title": "The Full Stack of Innovation: Building Data and AI Products With Databricks Apps",
@@ -207,5 +204,318 @@
     "category": "DevOps",
     "url": "https://www.youtube.com/watch?v=918cKxigzdI",
     "summary": "Deep-dive technical session from Data + AI Summit covering full-stack development of Databricks Apps including frameworks, testing, CI/CD, and monitoring."
+  },
+  {
+    "title": "Databricks Apps: Turning Data and AI Into Practical, User-Friendly Applications",
+    "date": "2025-06-10",
+    "authors": [
+      {
+        "name": "Justin DeBrabant",
+        "url": "https://www.linkedin.com/in/jdebrabant/"
+      },
+      {
+        "name": "Nic Heier",
+        "url": ""
+      }
+    ],
+    "type": "Video",
+    "category": "Getting started",
+    "url": "https://www.youtube.com/watch?v=ZPR1YY7qzCg",
+    "summary": "Overview of Databricks Apps GA release covering common use cases, best practices, and future roadmap for building production-ready data and AI applications on the integrated hosting platform."
+  },
+  {
+    "title": "Real-Time Market Insights — Powering Optiver's Live Trading Dashboard with Databricks Apps and Dash",
+    "date": "2025-06-10",
+    "authors": [
+      {
+        "name": "Huy Nguyen",
+        "url": ""
+      }
+    ],
+    "type": "Video",
+    "category": "Real-time systems",
+    "url": "https://www.youtube.com/watch?v=tHaQVCzF88g",
+    "summary": "Learn how Optiver built real-time trading dashboards using Databricks Apps and Dash integration to enable traders to analyze market data and make instant trading decisions with low-latency performance."
+  },
+  {
+    "title": "Streamlining AI Application Development With Databricks Apps",
+    "date": "2025-06-11",
+    "authors": [
+      {
+        "name": "Domonkos Pal",
+        "url": ""
+      }
+    ],
+    "type": "Video",
+    "category": "AI/ML",
+    "url": "https://www.youtube.com/watch?v=YvdKLBqYoM0",
+    "summary": "Learn how to build and scale full-stack AI applications handling thousands of queries per second entirely on Databricks using Apps, Model Serving, Jobs, and Gateways without additional cloud platforms."
+  },
+  {
+    "title": "Advanced Governance and Auth With Databricks Apps",
+    "date": "2025-06-10",
+    "authors": [
+      {
+        "name": "Andre Furlan Bueno",
+        "url": "https://www.linkedin.com/in/andrefurlanbueno/"
+      },
+      {
+        "name": "Doug Judice",
+        "url": ""
+      }
+    ],
+    "type": "Video",
+    "category": "Security & governance",
+    "url": "https://www.youtube.com/watch?v=0QRU24r_Z6Y",
+    "summary": "Learn advanced governance and authentication patterns for building secure, enterprise-grade Databricks Apps, including on-behalf-of-user authorization, Unity Catalog access control, and API authentication for handling sensitive data."
+  },
+  {
+    "title": "Building Real-time Trading Dashboards with Lakeflow Declarative Pipelines, Serverless OLTP and Databricks Apps",
+    "date": "2025-06-10",
+    "authors": [
+      {
+        "name": "Matt Slack",
+        "url": "https://www.linkedin.com/in/matthew-slack-0116721b/"
+      },
+      {
+        "name": "Matthew Moorcroft",
+        "url": "https://www.linkedin.com/in/matthew-moorcroft/"
+      }
+    ],
+    "type": "Video",
+    "category": "Real-time systems",
+    "url": "https://www.youtube.com/watch?v=fzlSd_rVzf8",
+    "summary": "Learn how Barclays modernized their real-time trade monitoring platform using Databricks Lakeflow Declarative Pipelines with real-time mode and Serverless OLTP database to enable low-latency streaming and responsive trading dashboards."
+  },
+  {
+    "title": "Build AI-Powered Applications Natively on Databricks",
+    "date": "2025-06-11",
+    "authors": [
+      {
+        "name": "Andre Furlan Bueno",
+        "url": "https://www.linkedin.com/in/andrefurlanbueno/"
+      }
+    ],
+    "type": "Video",
+    "category": "Getting started",
+    "url": "https://www.youtube.com/watch?v=85sbR06ZyKE",
+    "summary": "Learn to build and deploy AI-powered applications on Databricks using popular frameworks with serverless deployment, built-in governance, and seamless data integration for production-ready solutions."
+  },
+  {
+    "title": "Databricks Apps + AI Agents Template",
+    "date": "2025-06-16",
+    "authors": [],
+    "type": "Code sample",
+    "category": "AI/ML",
+    "url": "https://github.com/databricks-solutions/agent-monitoring-demo-app",
+    "summary": "Databricks Apps code sample integrating MLFlow 3.0 Agent Monitoring with Databricks Apps and FastAPI.",
+    "repo_org": "databricks-solutions",
+    "repo_name": "agent-monitoring-demo-app"
+  },
+  {
+    "title": "Terrametria - 3D population density map",
+    "date": "2024-10-30",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Advanced examples",
+    "url": "https://github.com/renardeinside/terrametria",
+    "summary": "This project shows an example of interactive 3d density map, with data processed by Databricks and deployed as a Databricks App.",
+    "repo_org": "renardeinside",
+    "repo_name": "terrametria"
+  },
+  {
+    "title": "Custom MCP server on Databricks Apps",
+    "date": "2025-05-19",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Integrations",
+    "url": "https://github.com/databrickslabs/mcp/tree/master/examples/custom-server",
+    "summary": "This example shows how to create and launch a custom agent on Databricks Apps.",
+    "repo_org": "databrickslabs",
+    "repo_name": "mcp"
+  },
+  {
+    "title": "Chatten - GenAI RAG chatbot",
+    "date": "2025-02-09",
+    "authors": [],
+    "type": "Code sample",
+    "category": "AI/ML",
+    "url": "https://github.com/renardeinside/chatten",
+    "summary": "Retrieval-augmented generation (RAG) with sources, built with Dash, FastAPI, and the Databricks platform.",
+    "repo_org": "renardeinside",
+    "repo_name": "chatten"
+  },
+  {
+    "title": "Lakebase FastAPI Databricks App",
+    "date": "2025-06-18",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Database applications",
+    "url": "https://github.com/DoyleDev/lakebase-fastapi-app",
+    "summary": "A production-ready FastAPI application for accessing Databricks Lakebase data. Features scalable architecture, automatic token refresh, and optimized database connection management.",
+    "repo_org": "DoyleDev",
+    "repo_name": "lakebase-fastapi-app"
+  },
+  {
+    "title": "n8n on Databricks Apps",
+    "date": "2025-02-08",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Integrations",
+    "url": "https://github.com/hellomikelo/databricks-n8n",
+    "summary": "Self-host n8n, an open-source AI workflow designer, on Databricks Apps.",
+    "repo_org": "hellomikelo",
+    "repo_name": "databricks-n8n"
+  },
+  {
+    "title": "Kasal",
+    "date": "2025-06-17",
+    "authors": [],
+    "type": "Code sample",
+    "category": "AI/ML",
+    "url": "https://github.com/databrickslabs/kasal/",
+    "summary": "Kasal transforms complex AI orchestration into an intuitive visual experience. Design, deploy, and monitor autonomous AI agents that collaborate seamlessly to solve real-world business challenges.",
+    "repo_org": "databrickslabs",
+    "repo_name": "kasal"
+  },
+  {
+    "title": "Databricks MCP Server Template",
+    "date": "2025-07-22",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Integrations",
+    "url": "https://github.com/databricks-solutions/custom-mcp-databricks-app",
+    "summary": "Host Model Context Protocol (MCP) prompts and tools on Databricks Apps, enabling AI assistants like Claude to interact with your Databricks workspace through a secure, authenticated interface.",
+    "repo_org": "databricks-solutions",
+    "repo_name": "custom-mcp-databricks-app"
+  },
+  {
+    "title": "Claude Code + Databricks App Template",
+    "date": "2025-08-01",
+    "authors": [],
+    "type": "Code sample",
+    "category": "DevOps",
+    "url": "https://github.com/jokerslab/databricks-app-builder",
+    "summary": "Modern full-stack Databricks Apps template featuring Python FastAPI backend and React TypeScript frontend with Claude Code integration for automated development workflow from ideation to deployment.",
+    "repo_org": "jokerslab",
+    "repo_name": "databricks-app-builder"
+  },
+  {
+    "title": "knot",
+    "date": "2025-05-09",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Advanced examples",
+    "url": "https://github.com/renardeinside/knot",
+    "summary": "Example for building and deploying full-stack applications with JavaScript frontend frameworks and Python backends using Databricks Apps.",
+    "repo_org": "renardeinside",
+    "repo_name": "knot"
+  },
+  {
+    "title": "MLflow Review App - Custom Evaluation Framework",
+    "date": "2025-07-21",
+    "authors": [],
+    "type": "Code sample",
+    "category": "AI/ML",
+    "url": "https://github.com/databricks-solutions/custom-mlflow-review-app",
+    "summary": "Build custom review applications on Databricks Apps to collect expert labels with tailored interfaces, customizable MLflow trace displays, and integrated AI analysis for model improvement.",
+    "repo_org": "databricks-solutions",
+    "repo_name": "custom-mlflow-review-app"
+  },
+  {
+    "title": "AI/BI Genie Slack Bot on Databricks Apps",
+    "date": "2025-07-01",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Integrations",
+    "url": "https://github.com/Gabriel-Rangel/slack-bot",
+    "summary": "This repository shows how to deploy a Slack app directly within Databricks Apps. Integrate seamlessly with Databricks Genie to allow users to interact with Genie through Slack.",
+    "repo_org": "Gabriel-Rangel",
+    "repo_name": "slack-bot"
+  },
+  {
+    "title": "Databricks Apps CI/CD with GitHub Actions and Databricks Asset Bundles",
+    "date": "2025-03-16",
+    "authors": [],
+    "type": "Code sample",
+    "category": "DevOps",
+    "url": "https://github.com/pbv0/databricks-apps-dabs",
+    "summary": "This repository provides a minimal example of how to automate the deployment of Databricks Apps using GitHub Actions and Databricks Asset Bundles (DABs).",
+    "repo_org": "pbv0",
+    "repo_name": "databricks-apps-dabs"
+  },
+  {
+    "title": "Trifold",
+    "date": "2025-07-17",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Database applications",
+    "url": "https://github.com/renardeinside/trifold",
+    "summary": "A full-stack real-time table editor built with FastAPI, React, Databricks Apps and Lakebase.",
+    "repo_org": "renardeinside",
+    "repo_name": "trifold"
+  },
+  {
+    "title": "Automate your Databricks Apps deployments with GitHub Actions and Databricks Asset Bundles",
+    "date": "2025-03-17",
+    "authors": [
+      {
+        "name": "Pascal Vogel",
+        "url": "https://www.linkedin.com/in/pascal-vogel/"
+      },
+      {
+        "name": "Antonio Samaniego Jurado",
+        "url": "https://www.linkedin.com/in/antonio-samaniego/"
+      }
+    ],
+    "type": "Blog post",
+    "category": "DevOps",
+    "url": "https://apps-cookbook.dev/blog/automate-apps-deployments-dabs/",
+    "summary": "This blog post demonstrates how you can quickly set up a CI/CD pipeline for Databricks Apps using DABs and GitHub Actions.",
+    "repo_org": "",
+    "repo_name": ""
+  },
+  {
+    "title": "Integrating Databricks Apps Logs with Datadog Log HTTP Endpoints: Step-by-Step Guide",
+    "date": "2025-06-07",
+    "authors": [
+      {
+        "name": "Wenxin Liu",
+        "url": "https://www.linkedin.com/in/wenxin-liu-22b33492/"
+      }
+    ],
+    "type": "Blog post",
+    "category": "Observability",
+    "url": "https://medium.com/databricks-platform-sme/integrating-databricks-apps-logs-with-datadog-log-http-endpoints-step-by-step-guide-a071998d9ca9",
+    "summary": "Step-by-step guide to securely integrate Databricks Apps logs with Datadog using HTTP endpoints and Databricks Secret Scope for credential management.",
+    "repo_org": "",
+    "repo_name": ""
+  },
+  {
+    "title": "Integrating Databricks Apps Logs with New Relic APM: Step-by-Step Guide",
+    "date": "2025-05-20",
+    "authors": [
+      {
+        "name": "Wenxin Liu",
+        "url": "https://www.linkedin.com/in/wenxin-liu-22b33492/"
+      }
+    ],
+    "type": "Blog post",
+    "category": "Observability",
+    "url": "https://medium.com/databricks-platform-sme/integrating-databricks-apps-logs-with-new-relic-apm-step-by-step-guide-2efdaf3744e8",
+    "summary": "Learn how to integrate Databricks Apps logs with New Relic APM for centralized monitoring by configuring the New Relic Python agent and modifying your app deployment settings.",
+    "repo_org": "",
+    "repo_name": ""
+  },
+  {
+    "title": "Databricks Apps integration with New Relic and Datadog",
+    "date": "2025-05-19",
+    "authors": [],
+    "type": "Code sample",
+    "category": "Observability",
+    "url": "https://github.com/db-wenxin/databricks-apps-log-solutions/",
+    "summary": "Example integration of Databricks Apps logs with New Relic and Datadog APMs for centralized monitoring.",
+    "repo_org": "db-wenxin",
+    "repo_name": "databricks-apps-log-solutions"
   }
 ]

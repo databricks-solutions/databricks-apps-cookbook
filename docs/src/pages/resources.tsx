@@ -9,11 +9,13 @@ interface Author {
 interface Resource {
   title: string;
   date: string;
-  authors: Author[];
+  authors?: Author[];
   type: string;
   category: string;
   url: string;
   summary?: string;
+  repo_org?: string;
+  repo_name?: string;
 }
 
 function ResourcesPage() {
@@ -35,8 +37,15 @@ function ResourcesPage() {
   };
 
   const filteredResources = resources.filter((resource) => {
+    const authorString = resource.authors
+      ? resource.authors.map((a) => a.name).join(" ")
+      : "";
+    const repoString =
+      resource.repo_org && resource.repo_name
+        ? `${resource.repo_org} ${resource.repo_name}`
+        : "";
     const searchString =
-      `${resource.title} ${resource.summary} ${resource.authors.map((a) => a.name).join(" ")} ${resource.type} ${resource.category}`.toLowerCase();
+      `${resource.title} ${resource.summary} ${authorString} ${repoString} ${resource.type} ${resource.category}`.toLowerCase();
     const year = new Date(resource.date).getFullYear().toString();
 
     return (
@@ -51,9 +60,9 @@ function ResourcesPage() {
   useEffect(() => {
     fetch("/resources.json")
       .then((response) => response.json())
-      .then((data) => {
+      .then((data: Resource[]) => {
         const sortedData = data.sort(
-          (a, b) => new Date(b.date) - new Date(a.date),
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
         );
         setResources(sortedData);
         const allCategories = [...new Set(data.map((r) => r.category))];
@@ -100,7 +109,7 @@ function ResourcesPage() {
             <aside className="hidden w-1/5 pr-8 md:block">
               <input
                 type="text"
-                placeholder="Search resources..."
+                placeholder={`Search ${resources.length} resources...`}
                 className="mb-4 w-full border border-gray-800 bg-transparent px-4 py-2 text-gray-900 dark:border-gray-400 dark:text-gray-200"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -185,23 +194,36 @@ function ResourcesPage() {
                       </span>{" "}
                       |{" "}
                       <span className="font-bold">
-                        {resource.authors.map((author, index) => (
-                          <React.Fragment key={author.name}>
-                            {author.url ? (
-                              <a
-                                href={author.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:underline"
-                              >
-                                {author.name}
-                              </a>
-                            ) : (
-                              author.name
-                            )}
-                            {index < resource.authors.length - 1 && ", "}
-                          </React.Fragment>
-                        ))}
+                        {resource.type === "Code sample" &&
+                        resource.repo_org &&
+                        resource.repo_name ? (
+                          <a
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            {resource.repo_org}/{resource.repo_name}
+                          </a>
+                        ) : (
+                          resource.authors?.map((author, index) => (
+                            <React.Fragment key={author.name}>
+                              {author.url ? (
+                                <a
+                                  href={author.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:underline"
+                                >
+                                  {author.name}
+                                </a>
+                              ) : (
+                                author.name
+                              )}
+                              {index < resource.authors.length - 1 && ", "}
+                            </React.Fragment>
+                          ))
+                        )}
                       </span>
                     </div>
                     {resource.summary && (
