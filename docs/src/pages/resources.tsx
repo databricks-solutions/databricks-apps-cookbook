@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@theme/Layout";
+import { createClient } from "@sanity/client";
 
 interface Author {
   name: string;
-  url?: string;
+  linkedinUrl?: string;
 }
 
 interface Resource {
@@ -14,9 +15,17 @@ interface Resource {
   category: string;
   url: string;
   summary?: string;
-  repo_org?: string;
-  repo_name?: string;
+  repoOrg?: string;
+  repoName?: string;
 }
+
+// Create Sanity client
+const client = createClient({
+  projectId: "5f7a73bz",
+  dataset: "production",
+  useCdn: false, // Since the site is behind Cloudflare, we don't need Sanity CDN
+  apiVersion: "2025-02-06",
+});
 
 function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -41,8 +50,8 @@ function ResourcesPage() {
       ? resource.authors.map((a) => a.name).join(" ")
       : "";
     const repoString =
-      resource.repo_org && resource.repo_name
-        ? `${resource.repo_org} ${resource.repo_name}`
+      resource.repoOrg && resource.repoName
+        ? `${resource.repoOrg} ${resource.repoName}`
         : "";
     const searchString =
       `${resource.title} ${resource.summary} ${authorString} ${repoString} ${resource.type} ${resource.category}`.toLowerCase();
@@ -58,24 +67,38 @@ function ResourcesPage() {
   });
 
   useEffect(() => {
-    fetch("/resources.json")
-      .then((response) => response.json())
-      .then((data: Resource[]) => {
-        const sortedData = data.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    const fetchResources = async () => {
+      try {
+        const data: Resource[] = await client.fetch(`
+          *[_type == "resource"] | order(date desc) {
+            ...,
+            "authors": authors[]->{ name, linkedinUrl },
+            "category": category->title,
+            "type": type->title
+          }
+        `);
+
+        setResources(data);
+        const allCategories = [...new Set(data.map((r) => r.category))].filter(
+          (cat): cat is string => typeof cat === "string",
         );
-        setResources(sortedData);
-        const allCategories = [...new Set(data.map((r) => r.category))];
-        const allTypes = [...new Set(data.map((r) => r.type))];
+        const allTypes = [...new Set(data.map((r) => r.type))].filter(
+          (type): type is string => typeof type === "string",
+        );
         const allYears = [
           ...new Set(
             data.map((r) => new Date(r.date).getFullYear().toString()),
           ),
-        ];
+        ].filter((year): year is string => typeof year === "string");
         setCategories(allCategories.sort());
         setTypes(allTypes.sort());
         setYears(allYears.sort().reverse());
-      });
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+      }
+    };
+
+    fetchResources();
   }, []);
 
   return (
@@ -195,22 +218,22 @@ function ResourcesPage() {
                       |{" "}
                       <span className="font-bold">
                         {resource.type === "Code sample" &&
-                        resource.repo_org &&
-                        resource.repo_name ? (
+                        resource.repoOrg &&
+                        resource.repoName ? (
                           <a
                             href={resource.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:underline"
                           >
-                            {resource.repo_org}/{resource.repo_name}
+                            {resource.repoOrg}/{resource.repoName}
                           </a>
                         ) : (
                           resource.authors?.map((author, index) => (
                             <React.Fragment key={author.name}>
-                              {author.url ? (
+                              {author.linkedinUrl ? (
                                 <a
-                                  href={author.url}
+                                  href={author.linkedinUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="hover:underline"
