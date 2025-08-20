@@ -32,5 +32,5 @@ sqlmodel==0.0.24
 starlette==0.46.2
 typing-extensions==4.14.0
 typing-inspection==0.4.1
-urllib3==2.4.0
+urllib3==2.5.0
 uuid==1.30
