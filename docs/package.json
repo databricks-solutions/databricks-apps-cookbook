@@ -7,7 +7,9 @@
     "start": "docusaurus start",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
+    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler deploy --dry-run",
+    "dev:workers": "wrangler dev",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
@@ -35,7 +37,8 @@
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
-    "typescript": "~5.6.2"
+    "typescript": "~5.6.2",
+    "wrangler": "^4.31.0"
   },
   "browserslist": {
     "production": [
