@@ -19,6 +19,10 @@ ip = headers.get("X-Real-Ip")
 print(f"E-mail: {email}, username: {username}, user: {user}, ip: {ip}")
 ```
 
+:::info
+For this sample to work when running on your local machine, use the `databricks apps run-local` CLI command which injects the necessary HTTP headers.
+:::
+
 ## Permissions
 
 No permissions configuration required.
