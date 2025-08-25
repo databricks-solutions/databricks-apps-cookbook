@@ -12,7 +12,7 @@ tab_a, tab_b, tab_c = st.tabs(["**Try it**", "**Code snippet**", "**Requirements
 
 with tab_a:
     st.info(
-        "This sample will only work when deployed to Databricks Apps and not when running locally. Enable [on-behalf-of-user authentication](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-development#-using-the-databricks-apps-authorization-model) for your app to access the `X-Forwarded-Access-Token` header.",
+        "For this sample to work when running on your local machine, use the `databricks apps run-local` CLI command which injects the necessary HTTP headers.",
         icon="ℹ️",
     )
 
