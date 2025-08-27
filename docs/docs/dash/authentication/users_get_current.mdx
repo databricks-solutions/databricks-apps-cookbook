@@ -20,7 +20,7 @@ print(f"E-mail: {email}, username: {username}, user: {user}, ip: {ip}")
 ```
 
 :::info
-For this sample to work when running on your local machine, use the `databricks apps run-local` CLI command which injects the necessary HTTP headers.
+This sample requires on-behalf-of-user authentication to be enabled for your app to access the X-Forwarded-Access-Token header. Without this, you will only have access to basic user information from the headers, not the detailed information from the Databricks API. Without the user token present, w.current_user.me() will return information about the app service principal.
 :::
 
 ## Permissions
