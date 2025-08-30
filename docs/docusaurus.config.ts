@@ -24,7 +24,7 @@ const config: Config = {
 
   scripts: [
     {
-      src: "https://plausible.io/js/script.outbound-links.js",
+      src: "https://analytics.pascal-vogel.com/js/script.js",
       defer: true,
       "data-domain": "apps-cookbook.dev",
     },
