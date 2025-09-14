@@ -29,7 +29,7 @@ def process_genie_response(response):
         if i.text:
             print(f"A: {i.text.content}")
         elif i.query:
-            data = get_query_result(i.query.statement_id)
+            data = get_query_result(response.query_result.statement_id)
             print(f"A: {i.query.description}")
             print(f"Data: {data}")
             print(f"Generated code: {i.query.query}")
