@@ -44,7 +44,7 @@ def process_genie_response(response):
         if i.text:
             print(f"A: {i.text.content}")
         elif i.query:
-            data = get_query_result(i.query.statement_id)
+            data = get_query_result(response.query_result.statement_id)
             print(f"A: {i.query.description}")
             print(f"Data: {data}")
             print(f"Generated code: {i.query.query}")
@@ -146,7 +146,7 @@ def process_genie_response(response: GenieMessage, chat_history: List[Dict]) -> 
                 "content": attachment.text.content
             })
         elif attachment.query:
-            data_table = get_query_result(attachment.query.statement_id)
+            data_table = get_query_result(response.query_result.statement_id)
             chat_history.append({
                 "role": "assistant",
                 "content": f"Query: {attachment.query.description}\nGenerated SQL: {attachment.query.query}",
