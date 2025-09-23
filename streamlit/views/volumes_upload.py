@@ -22,7 +22,7 @@ def check_upload_permissions(volume_name: str):
         volume = w.volumes.read(name=volume_name)
         current_user = w.current_user.me()
         grants = w.grants.get_effective(
-            securable_type=SecurableType.VOLUME,
+            securable_type="volume",
             full_name=volume.full_name,
             principal=current_user.user_name,
         )
