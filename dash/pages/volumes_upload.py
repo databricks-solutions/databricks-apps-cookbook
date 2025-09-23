@@ -1,7 +1,6 @@
 from dash import Dash, html, dcc, callback, Input, Output, State
 import dash_bootstrap_components as dbc
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.catalog import SecurableType
 import os
 import io
 import base64
