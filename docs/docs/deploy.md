@@ -14,7 +14,7 @@ These samples are experimental and meant for demonstration purposes only. They a
 
 ## Deploy to Databricks
 
-1. Navigate to the [databricks-apps-cookbook](https://github.com/pbv0/databricks-apps-cookbook) GitHub repository and [load it a Databricks Git folder](https://docs.databricks.com/en/repos/index.html) in your Databricks workspace.
+1. Navigate to the [databricks-apps-cookbook](https://github.com/databricks-solutions/databricks-apps-cookbook) GitHub repository and [load it a Databricks Git folder](https://docs.databricks.com/en/repos/index.html) in your Databricks workspace.
 1. In your Databricks workspace, switch to **Compute** -> **Apps**.
 1. Choose **Create app**.
 1. Under **Choose how to start**, select **Custom** and choose **Next**.
@@ -31,9 +31,9 @@ Check the Requirements tab of each recipe to understand what [service principal 
 
 ## Run locally
 
-1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the [databricks-apps-cookbook](https://github.com/pbv0/databricks-apps-cookbook) GitHub repository or your fork to your local machine and switch into the `databricks-apps-cookbook` folder:
+1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the [databricks-apps-cookbook](https://github.com/databricks-solutions/databricks-apps-cookbook) GitHub repository or your fork to your local machine and switch into the `databricks-apps-cookbook` folder:
    ```bash
-   git clone https://github.com/pbv0/databricks-apps-cookbook.git
+   git clone https://github.com/databricks-solutions/databricks-apps-cookbook.git
    cd databricks-apps-cookbook
    ```
 1. Navigate to the sub-folder for the cookbook framework you want to run (either `dash` or `streamlit`). Create and activate a Python virtual environment in this folder [`venv`](https://docs.python.org/3/library/venv.html). We recommend using separate environments for each framework:
@@ -66,6 +66,12 @@ Check the Requirements tab of each recipe to understand what [service principal 
 
    ```bash
    python app.py
+   ```
+
+   FastAPI:
+
+   ```bash
+   uvicorn app:app
    ```
 
 :::info

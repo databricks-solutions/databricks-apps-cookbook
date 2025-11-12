@@ -1,0 +1,170 @@
+---
+sidebar_position: 1
+---
+
+# Create a FastAPI app
+
+This recipe demonstrates how to create a simple [FastAPI](https://fastapi.tiangolo.com/) application that can be deployed on Databricks Apps.
+
+## Code structure
+
+Our FastAPI application will initially have the following structure:
+
+| File                       | Purpose                                                            |
+| -------------------------- | ------------------------------------------------------------------ |
+| `app.py`                   | Main FastAPI application entrypoint                                |
+| `app.yaml`                 | Databricks Apps deployment configuration                           |
+| `requirements.txt`         | Main application dependencies                                      |
+| `routes/__init__.py`       | Module initialisation for API-router                               |
+| `routes/v1/__init__.py`    | Sub-module initialisation for API-router (e.g. `/api/v1/*` routes) |
+| `routes/v1/healthcheck.py` | Isolated code handler for healthcheck                              |
+
+```bash
+tree -L 3
+.
+├── app.py
+├── app.yaml
+├── routes
+│   ├── __init__.py
+│   └── v1
+│       ├── __init__.py
+│       └── healthcheck.py
+├── requirements.txt
+```
+
+### Main application entrypoint
+
+```python title="app.py"
+from fastapi import FastAPI
+
+from routes import api_router
+
+app = FastAPI(
+    title="FastAPI & Databricks Apps",
+    description="A simple FastAPI application example for Databricks Apps runtime",
+    version="1.0.0",
+)
+
+# Router assignment
+app.include_router(api_router)
+```
+
+### API routes
+
+:::warning
+
+In order to use OAuth2 Bearer token authentication with Databricks Apps, your application code must provide valid routes with a prefix of `/api`.
+
+:::
+
+Let's define the main router entrypoint for the application.
+
+```python title="routes/__init__.py"
+from fastapi import APIRouter
+
+# Import routers from versioned packages
+from .v1 import router as v1_router
+
+# Create a router for the API
+api_router = APIRouter()
+
+# Include versioned routers - prefix must have /api for Databricks Apps token-based auth
+api_router.include_router(v1_router, prefix="/api/v1")
+```
+
+We then can define specific routers for the application, using versioning and specific endpoints for isolation per optimal practice.
+
+Next, we can create a dedicated file to handle healthchecks, exposed via `https://<app-url>/api/v1/healthcheck`.
+
+```python title="routes/v1/__init__.py"
+"""V1 API routes."""
+
+from fastapi import APIRouter
+
+from .healthcheck import router as healthcheck_router
+
+router = APIRouter()
+
+# Include endpoint-specific routers
+router.include_router(healthcheck_router)
+```
+
+```python title="routes/v1/healthcheck.py"
+from datetime import datetime, timezone
+from fastapi import APIRouter
+from typing import Dict
+
+router = APIRouter()
+
+@router.get("/healthcheck")
+async def healthcheck() -> Dict[str, str]:
+    """Return the API status."""
+    return {"status": "OK", "timestamp": datetime.now(timezone.utc).isoformat()}
+```
+
+## Running the FastAPI application
+
+### Local machine
+
+To run the application locally, use the following terminal command: `uvicorn app:app --reload`:
+
+```bash
+INFO:     Will watch for changes in these directories: ['/Users/user.name/home/databricks-apps-cookbook/fastapi']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [56162] using StatReload
+INFO:     Started server process [56164]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+Once the app is running, you will be to access the following endpoints:
+
+- Index Page: http://127.0.0.1:8000
+- OpenAPI Docs: http://127.0.0.1:8000/docs
+- Healthcheck: http://127.0.0.1:8000/api/v1/healthcheck
+
+Accessing the app or making changes to `app.py` will update the tailing application log in the terminal:
+
+```bash
+INFO:     127.0.0.1:54508 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58696 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58696 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58893 - "GET /api/v1/healthcheck HTTP/1.1" 200 OK
+```
+
+```bash
+WARNING:  StatReload detected changes in 'app.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [56164]
+INFO:     Started server process [63412]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+### Databricks Apps runtime
+
+Assuming the code works locally, you can also deploy this application to a Databricks workspace using Databaricks Apps.
+
+Follow the [Get started with Databricks Apps](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/get-started) for deployment instructions.
+
+For the app [configuration](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/configuration#configuring-your-databricks-apps-with-the-appyaml-file), use:
+
+```yaml title="app.yaml"
+command: ["uvicorn", "app:app"]
+```
+
+The [FastAPI](https://pypi.org/project/fastapi/) and [uvicorn](https://pypi.org/project/uvicorn/) packages are included in the [default Databricks Apps environment](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#installed-python-libraries).
+
+For parity with your local code and to trigger Databricks Apps to install the latest package version, include a `requirements.txt` in your application folder as described in the following section.
+
+## Dependencies
+
+- [FastAPI](https://pypi.org/project/fastapi/) - `fastapi`
+- [uvicorn](https://pypi.org/project/uvicorn/) - `uvicorn`
+
+```python title="requirements.txt"
+fastapi
+uvicorn
+```

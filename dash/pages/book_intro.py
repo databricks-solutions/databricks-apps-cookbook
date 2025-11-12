@@ -8,7 +8,6 @@ dash.register_page(__name__, path="/", title="Introduction", name="Introduction"
 
 
 def create_group_cards():
-    # Define category metadata with consistent order and grouping
     category_metadata = {
         "Tables": {
             "icon": "material-symbols:table",
@@ -20,11 +19,11 @@ def create_group_cards():
         },
         "AI / ML": {
             "icon": "material-symbols:science",
-            "views": ["Invoke a model", "Run vector search"],
+            "views": ["Invoke a model", "Run vector search", "Connect an MCP server", "Invoke a multi-modal LLM"],
         },
         "Business Intelligence": {
             "icon": "material-symbols:analytics",
-            "views": ["AI/BI Dashboard"],
+            "views": ["AI/BI Dashboard", "Genie"],
         },
         "Workflows": {
             "icon": "material-symbols:workflow",
@@ -33,12 +32,15 @@ def create_group_cards():
         "Compute": {"icon": "material-symbols:computer", "views": ["Connect"]},
         "Authentication": {
             "icon": "material-symbols:lock",
-            "views": ["Get current user", "Retrieve a secret"],
+            "views": ["Get current user"],
+        },
+        "External services": {
+            "icon": "material-symbols:link",
+            "views": ["External connections", "Retrieve a secret"],
         },
     }
 
     cards = []
-    # Create cards in specified order
     for category, metadata in category_metadata.items():
         category_pages = [
             page
@@ -99,134 +101,87 @@ def create_group_cards():
                         )
                     ],
                     md=6,
-                    lg=3,
-                    className="mb-4",
+                    lg=4,
+                    className="mb-3",
                 )
             )
 
-    return dbc.Row(cards, className="g-4")
+    return cards
 
 
 def layout():
-    return dbc.Container(
-        [
-            # Add more top padding and spacing
-            html.Div(
-                [
-                    html.H1(
-                        ["📖 Databricks Apps Cookbook 🔍"], className="display-3 mb-4"
-                    ),
-                    html.H2(
-                        "Welcome to the Databricks Apps Cookbook!",
-                        className="mb-3 mt-4",
-                    ),  # Added top margin
-                    html.P(
+    return dbc.Container([
+        # Header section matching Streamlit style
+        dbc.Row([
+            dbc.Col([
+                html.H1("📖 Databricks Apps Cookbook 🍳", className="mb-3"),
+                html.P([
+                    "Welcome to the Databricks Apps Cookbook!",
+                    html.Br(),
+                    html.Br(),
                         "Are you ready to serve some tasty apps to your users? You're in the right place!",
-                        className="lead mb-4",
-                    ),  # Increased bottom margin
-                    html.P(
-                        [
+                    html.Br(),
+                    html.Br(),
                             "Explore the recipes via the sidebar to quickly build flexible and engaging data apps directly on Databricks.",
+                    html.Br(),
                             html.Br(),
                             "Have a great recipe to share? Raise a pull request on the ",
-                            html.A(
-                                "GitHub repository",
-                                href="https://github.com/databricks/databricks-apps",
+                    html.A("GitHub repository", 
+                          href="https://github.com/pbv0/databricks-apps-cookbook",
                                 target="_blank",
-                            ),
-                            "!",
-                        ],
-                        className="mb-3",
-                    ),  # Increased bottom margin before recipes
-                ],
-                className="py-3",
-            ),  # Added vertical padding to the header section
-            html.H3("Recipes", className="mb-4 pb-2 border-bottom"),
-            create_group_cards(),
-            html.H3("Links", className="mb-4 pb-2 border-bottom mt-5"),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            html.H4("Official documentation", className="h5 mb-3"),
-                            html.Ul(
-                                [
-                                    html.Li(
-                                        html.A(
-                                            "AWS",
-                                            href="https://docs.databricks.com/en/dev-tools/databricks-apps/index.html",
-                                            target="_blank",
-                                        )
-                                    ),
-                                    html.Li(
-                                        html.A(
-                                            "Azure",
-                                            href="https://learn.microsoft.com/azure/databricks/dev-tools/databricks-apps/",
-                                            target="_blank",
-                                        )
-                                    ),
-                                    html.Li(
-                                        html.A(
-                                            "Python SDK",
-                                            href="https://databricks-sdk-py.readthedocs.io/en/latest/",
-                                            target="_blank",
-                                        )
-                                    ),
-                                ],
-                                className="list-unstyled",
-                            ),
-                        ],
-                        md=4,
-                    ),
-                    dbc.Col(
-                        [
-                            html.H4("Code samples", className="h5 mb-3"),
-                            html.Ul(
-                                [
-                                    html.Li(
-                                        html.A(
-                                            "Databricks Apps Templates",
-                                            href="https://github.com/databricks/databricks-apps",
-                                            target="_blank",
-                                        )
-                                    )
-                                ],
-                                className="list-unstyled",
-                            ),
-                        ],
-                        md=4,
-                    ),
-                    dbc.Col(
-                        [
-                            html.H4("Blog posts", className="h5 mb-3"),
-                            html.Ul(
-                                [
-                                    html.Li(
-                                        html.A(
-                                            "End-to-end RAG application with source retriveal on Databricks Platform",
+                          className="text-primary"),
+                    "!"
+                ], className="mb-4")
+            ])
+        ]),
+        
+        # Recipes section
+        dbc.Row([
+            dbc.Col([
+                html.H2("Recipes", className="mb-3"),
+                html.Hr(className="mb-4")
+            ])
+        ]),
+        
+        # Recipe cards
+        dbc.Row(create_group_cards()),
+        
+        # Links section
+        dbc.Row([
+            dbc.Col([
+                html.H2("Links", className="mb-3 mt-4"),
+                html.Hr(className="mb-4")
+            ])
+        ]),
+        
+        dbc.Row([
+            dbc.Col(md=4, children=[
+                html.H4("Official documentation", className="mb-3"),
+                html.Ul([
+                    html.Li(html.A("AWS", href="https://docs.databricks.com/en/dev-tools/databricks-apps/index.html", target="_blank")),
+                    html.Li(html.A("Azure", href="https://learn.microsoft.com/en-us/azure/databricks/dev-tools/databricks-apps/", target="_blank")),
+                    html.Li(html.A("Python SDK", href="https://databricks-sdk-py.readthedocs.io/en/latest/", target="_blank"))
+                ])
+            ]),
+            dbc.Col(md=4, children=[
+                html.H4("Code samples", className="mb-3"),
+                html.Ul([
+                    html.Li(html.A("Databricks Apps Templates", href="https://github.com/databricks/app-templates", target="_blank"))
+                ])
+            ]),
+            dbc.Col(md=4, children=[
+                html.H4("Blog posts", className="mb-3"),
+                html.Ul([
+                    html.Li(html.A("End-to-end RAG application with source retrieval on Databricks Platform", 
                                             href="https://www.linkedin.com/pulse/end-to-end-rag-application-source-retriveal-platform-ivan-trusov-znvqf/",
-                                            target="_blank",
-                                        )
-                                    ),
-                                    html.Li(
-                                        html.A(
-                                            "Building Data Applications with Databricks Apps",
+                                  target="_blank")),
+                    html.Li(html.A("Building data applications with Databricks Apps", 
                                             href="https://www.linkedin.com/pulse/building-data-applications-databricks-apps-ivan-trusov-6pjwf/",
-                                            target="_blank",
-                                        )
-                                    ),
-                                ],
-                                className="list-unstyled",
-                            ),
-                        ],
-                        md=4,
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-        className="py-4",
-    )
+                                  target="_blank"))
+                ])
+            ])
+        ])
+    ], fluid=True)
 
 
 # Make layout available at module level

@@ -1,5 +1,29 @@
-import streamlit as st
 from view_groups import groups
+
+import streamlit as st
+
+st.markdown(
+    """
+    <style>
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        height: 100%; 
+        display: flex; 
+        flex-direction: column; 
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] > div:first-child {
+        height: 100%; 
+        display: flex;
+        flex-direction: column; 
+        align-items: flex-start;
+    }
+
+    div[data-testid="stTooltipHoverTarget"] {
+        justify-content: flex-start !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.markdown(
     """
@@ -19,7 +43,6 @@ groups = [group for group in groups if group.get("title")]
 
 for i in range(0, len(groups), 4):
     row_groups = groups[i : i + 4]
-    # Always create 4 columns
     cols = st.columns(4)
     for col, group in zip(cols, row_groups):
         with col:

@@ -1,0 +1,68 @@
+---
+sidebar_position: 1
+---
+
+# External connections
+
+This recipe demonstrates how to use Unity Catalog-managed external [HTTP connections](https://docs.databricks.com/aws/en/query-federation/http) for secure and governed access to MCP and non-MCP servers, for example, to GitHub, or Jira, and Slack.
+
+## Code snippets
+
+### OAuth User to Machine Per User (On-behalf-of-user)
+
+```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+from flask import request
+
+token = request.headers.get("x-forwarded-access-token")
+w = WorkspaceClient(token=token, auth_type="pat")
+
+response = w.serving_endpoints.http_request(
+    conn="github_u2m",
+    method=ExternalFunctionRequestHttpMethod.GET,
+    path="/user",
+    headers={"Accept": "application/vnd.github+json"},
+)
+
+print(response.json())
+```
+
+### Bearer token
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+w = WorkspaceClient()
+
+response = w.serving_endpoints.http_request(
+    conn="github_connection",
+    method=ExternalFunctionRequestHttpMethod.GET,
+    path="/traffic/views",
+    headers={"Accept": "application/vnd.github+json"},
+)
+
+print(response.json())
+```
+
+## Resources
+
+- [Unity Catalog HTTP Connection](https://docs.databricks.com/aws/en/query-federation/http)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `USE CONNECTION` permission on the HTTP Connection
+
+When using OAuth User to Machine Per User (On-behalf-of-user), you need to configure [User authorization](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth#user-authorization) by adding the Unity Catalog connection or other scopes.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Dash](https://pypi.org/project/dash/) - `dash`
+
+```python title="requirements.txt"
+databricks-sdk
+dash
+```

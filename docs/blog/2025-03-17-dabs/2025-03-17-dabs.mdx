@@ -13,6 +13,8 @@ Databricks Apps is supported by the Databricks [REST API](https://docs.databrick
 
 This blog post demonstrates how you can quickly set up a CI/CD pipeline using DABs and [GitHub Actions](https://github.com/features/actions). The associated GitHub repository provides a starting point and reference for your own deployments.
 
+{/* truncate */}
+
 ## Overview
 
 In the following sections of this blog post, you will set up a deployment pipeline that allows for local testing and development of your application, on-demand deployments to a live Databricks development environment, and fully automated deployments to a production environment.
@@ -66,7 +68,7 @@ if st.button(f"Trigger job with ID {JOB_ID}"):
         st.error(e)
 ```
 
-This code gets a `JOB_ID` from an environment variable which is populated by our DABs bundle on deployment.
+This code gets a `JOB_ID` from an environment variable, defined in `src/app/app.yaml`, which is populated by our DABs bundle on deployment.
 
 The [`WorkspaceClient`](https://databricks-sdk-py.readthedocs.io/en/latest/clients/workspace.html#databricks.sdk.WorkspaceClient) allows the app to interact with Databricks resources. When running locally, [U2M OAuth authentication](https://docs.databricks.com/aws/en/dev-tools/cli/authentication#oauth-user-to-machine-u2m-authentication) allows the app to automatically pick up your default credentials configured for the Databricks CLI. When deployed to a Databricks workspace, the `WorkspaceClient` automatically uses the credentials of the app’s service principal to authenticate.
 
@@ -81,14 +83,6 @@ resources:
       name: "hello-world-app"
       source_code_path: ../src/app
       description: "A Streamlit app that lets users trigger the job included in this bundle."
-      config:
-        command:
-          - "streamlit"
-          - "run"
-          - "app.py"
-        env:
-          - name: JOB_ID
-            value: ${resources.jobs.hello_world.id}
 
       resources:
         - name: "app-job"
@@ -101,9 +95,7 @@ resources:
 This `app.yml` contains the resource-level configuration for our app. It defines:
 
 - Where the app source code can be found: `../src/app`
-- Which command to run to start the app: `streamlit run app.py`
-- Which environment variables to pass to the app: the `JOB_ID` of the job which is also created as part of the DABs bundle under `resources/job.yml`
-- Which resources the app’s service principal is permitted to use: again the job which is also created as part of the DABs bundle with the `CAN_MANAGE_RUN` permission
+- Which resources the app’s service principal is permitted to use: the job which is also created as part of the DABs bundle with the `CAN_MANAGE_RUN` permission
 
 Before deploying the DABs bundle, let’s first run and test the app locally.
 
@@ -112,7 +104,7 @@ Before deploying the DABs bundle, let’s first run and test the app locally.
 To run and test the app locally, create a [Python virtual environment](https://docs.python.org/3/library/venv.html) where you can install the app’s dependencies:
 
 ```bash
-python3 venv -m .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r src/app/requirements.txt
 ```
@@ -152,6 +144,10 @@ targets:
     default: true
     workspace:
       host: <workspace-url> # change to your own host URL
+    resources:
+      apps:
+        hello-world-app:
+          name: "hello-world-app-dev"
   prod:
     mode: production
     workspace:
@@ -164,9 +160,9 @@ targets:
 
 The example bundle defines two environments: a default development environment and a production environment. Both environments are defined by their host URL. Based on your needs, you can expand this to include more stages, such as a staging or QA stage.
 
-For the sake of this guide, you can designate the same workspace as dev and prod target. This way, both dev and prod resources will be deployed in the same workspace.
+For the sake of this guide, you can designate the same workspace as `dev` and prod target. This way, both `dev` and `prod` resources will be deployed in the same workspace.
 
-You can differentiate them via a dev prefix that is added automatically. In a production setting, we recommend you designate two separate workspaces as dev and prod targets.
+For the `dev` target, we overwrite the `hello-world-app` name with `hello-world-app-dev` to not run into issues with identical app names for `dev` and `prod` if you use the same workspace for both stages. In a production setting, we recommend you designate two separate workspaces as dev and prod targets.
 
 See the [DABs documentation](https://docs.databricks.com/aws/en/dev-tools/bundles/settings) for a detailed syntax reference for bundle definition files.
 

@@ -6,6 +6,12 @@ sidebar_position: 2
 
 This recipe downloads a file from a [Unity Catalog volume](https://docs.databricks.com/en/volumes/index.html) using the [Databricks SDK for Python](https://databricks-sdk-py.readthedocs.io/en/latest/).
 
+:::note
+
+Unlike notebooks, Databricks Apps does not support mounting Unity Catalog volumes and directly reading and writing files. As this code snippet demonstrates, each file needs to be downloaded to the app compute before being able to manipulate it.
+
+:::
+
 ## Code snippet
 
 ```python title="app.py"

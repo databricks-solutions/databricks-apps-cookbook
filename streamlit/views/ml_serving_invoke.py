@@ -74,16 +74,17 @@ table = [
         "code": """
         ```python
         from databricks.sdk import WorkspaceClient
+        from databricks.sdk.service.serving import DataframeSplitInput
         import streamlit as st
 
         w = WorkspaceClient()
 
         response = w.serving_endpoints.query(
             name="custom-regression-model",
-            dataframe_split={
+            dataframe_split=DataframeSplitInput.from_dict({
                 "columns": ["feature1", "feature2"],
                 "data": [[1.5, 2.5]]
-            }
+            })
         )
         st.json(response.as_dict())
         ```

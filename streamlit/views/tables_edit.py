@@ -6,7 +6,7 @@ from databricks.sdk import WorkspaceClient
 
 
 st.header(body="Tables", divider=True)
-st.subheader("Edit a table")
+st.subheader("Edit a Delta table")
 st.write(
     "Use this recipe to read, edit, and write back data stored in a small Unity Catalog table "
     "with [Databricks SQL Connector]"

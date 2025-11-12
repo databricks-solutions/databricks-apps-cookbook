@@ -1,0 +1,130 @@
+---
+sidebar_position: 2
+---
+
+# Test a FastAPI app
+
+This recipe demonstrates how to test [FastAPI](https://fastapi.tiangolo.com/) applications using [Pytest](https://docs.pytest.org/en/stable/index.html).
+
+Testing is crucial in API development to ensure reliability, maintainability, and confidence in your codebase.
+
+Using Pytest with [dependency injection (via fixtures)](https://docs.pytest.org/en/4.6.x/fixture.html) provides several benefits:
+
+- Allows you to isolate components, making tests more focused and easier to debug.
+- Enables you to mock external dependencies (like databases or third-party services) to test your API logic in isolation.
+- Helps maintain test consistency by reusing setup code across multiple tests.
+
+This approach not only catches bugs early but also makes your code more modular and easier to refactor, as changes in one component can be tested without affecting others.
+
+Additionally, well-structured tests serve as living documentation, helping new developers understand how different parts of your API are expected to work.
+
+## Code structure
+
+To test our FastAPI application, we will augment the existing code structure to include the following:
+
+| File                                  | Purpose                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| `pytest.ini`                          | Pytest configuration                                                    |
+| `tests/conftest.py`                   | Root Pytest behaviours (e.g. global fixtures)                           |
+| `tests/test_app.py`                   | Test suite for main application                                         |
+| `tests/routes/v1/test_healthcheck.py` | Test suite for healthcheck endpoint                                     |
+| `tests/**/__init__.py`                | Dummy file to register folders as modules under respective test folders |
+
+```bash
+tree -L 4
+.
+├── pytest.ini
+├── tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── routes
+│   │   ├── __init__.py
+│   │   └── v1
+│   │       ├── __init__.py
+│   │       └── test_healthcheck.py
+│   └── test_app.py
+```
+
+### Pytest setup
+
+```ini title="pytest.ini"
+[pytest]
+testpaths = tests
+python_files = test_*.py
+python_functions = test_*
+python_classes = Test*
+addopts = -v
+```
+
+```python title="tests/conftest.py"
+import pytest
+from fastapi.testclient import TestClient
+
+from app import app
+
+@pytest.fixture
+def client():
+    """Create a test client for the FastAPI application."""
+    return TestClient(app)
+```
+
+### Tests per FastAPI code
+
+```python title="tests/test_app.py"
+from fastapi import status
+
+def test_root_endpoint(client):
+    """Test the root endpoint returns the expected response."""
+    response = client.get("/")
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert "app" in data
+    assert "message" in data
+    assert data["app"] == "Databricks FastAPI Example"
+```
+
+```python title="tests/routes/v1/test_healthcheck.py"
+from fastapi import status
+
+def test_healthcheck(client):
+    """Test the healthcheck endpoint."""
+    response = client.get("/api/v1/healthcheck")
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert "status" in data
+    assert data["status"] == "OK"
+    assert "timestamp" in data
+```
+
+## Running tests
+
+:::info
+
+The tests we have included do not require the FastAPI application to be running, but we provide examples of [dependency injection](https://docs.pytest.org/en/4.6.x/fixture.html#fixtures-a-prime-example-of-dependency-injection) in the cookbook source code when not connected to a live environment.
+
+:::
+
+```bash
+# Run all tests
+pytest
+
+# Run specific tests
+pytest tests/routes/v1/test_healthcheck.py
+
+# Run with coverage report
+pytest --cov=app tests/
+```
+
+## Dependencies
+
+- [FastAPI](https://pypi.org/project/fastapi/) - `fastapi`
+- [pytest](https://pypi.org/project/pytest/) - `pytest`
+- [pytest-cov](https://pypi.org/project/pytest-cov/) - `pytest-cov`
+- [uvicorn](https://pypi.org/project/uvicorn/) - `uvicorn`
+
+```python title="requirements.txt"
+fastapi
+pytest
+pytest-cov
+uvicorn
+```

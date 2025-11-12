@@ -14,19 +14,37 @@ These code snippets cover common use cases such as reading and writing to and fr
 
 For each snippet, you will find the **source code**, required **permissions**, list of **dependencies**, and any other information needed to implement it.
 
-Currently, we offer snippets for [Streamlit](/docs/category/streamlit) and [Dash](/docs/category/dash) and they can be easily adapted to other Python frameworks.
+Currently, we offer snippets for [Streamlit](/docs/category/streamlit), [Dash](/docs/category/dash), and [FastAPI](/docs/category/fastapi) and they can be easily adapted to other Python frameworks.
 
-<div className="mt-4 flex flex-wrap space-x-8 align-middle text-center">
-    <Link to="/docs/category/streamlit">
-        <button className="inline-flex items-center border-2 border-lava-600 px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline bg-transparent hover:cursor-pointer">
-            <img src="/img/logo_streamlit.svg" className="mr-4 h-8" />
-            <span clasName="m-0 p-0">Build with Streamlit</span>
+<div className="mt-6 flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
+    <Link to="/docs/category/streamlit" className="w-full sm:w-auto">
+        <button className="inline-flex h-14 w-full items-center justify-center gap-3 border-2 border-lava-600 bg-transparent px-6 py-2.5 text-lg font-semibold text-lava-600 transition-colors hover:border-lava-700 hover:bg-lava-600 hover:text-white">
+            <img 
+                src="/img/logo_streamlit.svg" 
+                alt="Streamlit logo"
+                className="h-6 w-6 object-contain" 
+            />
+            <span>Build with Streamlit</span>
         </button>
     </Link>
-    <Link to="/docs/category/dash">
-        <button className="inline-flex items-center border-2 border-lava-600 px-8 py-2.5 text-center align-middle text-lg font-semibold text-lava-600 hover:cursor-pointer hover:border-lava-700 hover:underline bg-transparent hover:cursor-pointer">
-            <img src="/img/logo_dash.png" className="mr-4 h-8" />
+    <Link to="/docs/category/dash" className="w-full sm:w-auto">
+        <button className="inline-flex h-14 w-full items-center justify-center gap-3 border-2 border-lava-600 bg-transparent px-6 py-2.5 text-lg font-semibold text-lava-600 transition-colors hover:border-lava-700 hover:bg-lava-600 hover:text-white">
+            <img 
+                src="/img/logo_dash.png" 
+                alt="Dash logo"
+                className="h-6 w-6 object-contain" 
+            />
             <span>Build with Dash</span>
+        </button>
+    </Link>
+    <Link to="/docs/category/fastapi" className="w-full sm:w-auto">
+        <button className="inline-flex h-14 w-full items-center justify-center gap-3 border-2 border-lava-600 bg-transparent px-6 py-2.5 text-lg font-semibold text-lava-600 transition-colors hover:border-lava-700 hover:bg-lava-600 hover:text-white">
+            <img 
+                src="/img/logo_fastapi.svg" 
+                alt="FastAPI logo"
+                className="h-6 w-6 object-contain" 
+            />
+            <span>Build with FastAPI</span>
         </button>
     </Link>
 </div>

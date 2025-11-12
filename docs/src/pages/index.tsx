@@ -24,44 +24,23 @@ function HomepageHeader() {
         <p className="mt-2 max-w-3xl text-gray-800 xs:text-xl md:mt-4 md:text-3xl md:leading-10 dark:text-white">
           {siteConfig.tagline}
         </p>
-        <div className="mt-2 flex w-full flex-row items-center justify-center space-x-4 sm:w-auto">
-          <Link
-            to="/docs/category/streamlit"
-            className="landing-button-horizontal"
-          >
+        <div className="mt-4 flex w-full flex-col items-center justify-center gap-4 xs:flex-col sm:w-auto sm:flex-row">
+          <Link to="/docs/category/streamlit" className="w-full sm:w-auto">
             <button className="w-full border-2 border-lava-600 bg-lava-600 px-8 py-2.5 align-middle font-semibold text-white hover:cursor-pointer hover:border-lava-700 hover:bg-lava-700 hover:underline xs:text-lg">
               Streamlit
             </button>
           </Link>
-          <Link to="/docs/category/dash" className="landing-button-horizontal">
+          <Link to="/docs/category/dash" className="w-full sm:w-auto">
             <button className="w-full border-2 border-lava-600 bg-lava-600 px-8 py-2.5 align-middle font-semibold text-white hover:cursor-pointer hover:border-lava-700 hover:bg-lava-700 hover:underline xs:text-lg">
               Dash
             </button>
           </Link>
-          <Link to="/docs/intro" className="landing-button-horizontal">
-            <button className="w-full border-2 border-gray-800 bg-transparent px-8 py-2.5 align-middle font-semibold text-gray-800 hover:cursor-pointer hover:underline xs:text-lg dark:border-white dark:text-white">
-              Learn more
-            </button>
-          </Link>
-        </div>
-        <div className="mt-2 flex w-full flex-col items-center justify-center space-y-4 sm:w-auto">
-          <Link
-            to="/docs/category/streamlit"
-            className="landing-button-vertical w-full"
-          >
+          <Link to="/docs/category/fastapi" className="w-full sm:w-auto">
             <button className="w-full border-2 border-lava-600 bg-lava-600 px-8 py-2.5 align-middle font-semibold text-white hover:cursor-pointer hover:border-lava-700 hover:bg-lava-700 hover:underline xs:text-lg">
-              Streamlit
+              FastAPI
             </button>
           </Link>
-          <Link
-            to="/docs/category/dash"
-            className="landing-button-vertical w-full"
-          >
-            <button className="w-full border-2 border-lava-600 bg-lava-600 px-8 py-2.5 align-middle font-semibold text-white hover:cursor-pointer hover:border-lava-700 hover:bg-lava-700 hover:underline xs:text-lg">
-              Dash
-            </button>
-          </Link>
-          <Link to="/docs/intro" className="landing-button-vertical w-full">
+          <Link to="/docs/intro" className="w-full sm:w-auto">
             <button className="w-full border-2 border-gray-800 bg-transparent px-8 py-2.5 align-middle font-semibold text-gray-800 hover:cursor-pointer hover:underline xs:text-lg dark:border-white dark:text-white">
               Learn more
             </button>

@@ -1,0 +1,89 @@
+---
+sidebar_position: 1
+---
+
+# On-behalf-of-user authentication
+
+This recipe demonstrates how to use Databricks Apps [on-behalf-of-user authentication](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-development#-using-the-databricks-apps-authorization-model) to run a SQL query using the user's credentials instead of the app's service principal.
+
+## Code snippet
+
+```python title="app.py"
+import streamlit as st
+from databricks import sql
+from databricks.sdk.core import Config
+
+cfg = Config()
+
+def get_user_token():
+    headers = st.context.headers
+    user_token = headers["X-Forwarded-Access-Token"]
+    return user_token
+
+@st.cache_resource
+def connect_with_obo(http_path, user_token):
+    return sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        access_token=user_token
+    )
+
+def execute_query(table_name, conn):
+    with conn.cursor() as cursor:
+        query = f"SELECT * FROM {table_name} LIMIT 10"
+        cursor.execute(query)
+        return cursor.fetchall_arrow().to_pandas()
+
+user_token = get_user_token()
+
+http_path = "/sql/1.0/warehouses/abcd1234"  # Replace with your SQL warehouse HTTP path
+table_name = "samples.nyctaxi.trips"  # Replace with your catalog.schema.table
+
+if st.button("Run Query"):
+    conn = connect_with_obo(http_path, user_token)
+    df = execute_query(table_name, conn)
+    st.dataframe(df)
+```
+
+:::info
+
+This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) to cache the database connection across users, sessions, and reruns. The app will only work when deployed to Databricks Apps with on-behalf-of-user authentication enabled.
+
+:::
+
+:::warning
+
+You need to enable [on-behalf-of-user authentication](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-development#-using-the-databricks-apps-authorization-model) for your application for this sample to work. When running this code locally, the `X-Forwarded-Access-Token` will not be present and the sample will not work as intended.
+
+:::
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/)
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/)
+
+## Permissions
+
+For the on-behalf-of-user authentication model, permissions work as follows:
+
+- **User's permissions**: When using OBO authentication, the query runs with the end user's permissions
+  - User needs `SELECT` permissions on the tables being queried
+  - User needs `CAN USE` on the SQL warehouse
+
+- **App service principal**: When falling back to service principal authentication
+  - Needs `CAN USE` on the SQL warehouse
+  - Needs `SELECT` on the Unity Catalog tables for fallback access
+
+See [Databricks Apps authorization model](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) for more information.
+
+## Dependencies
+
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+
+```python title="requirements.txt"
+databricks-sdk
+databricks-sql-connector
+streamlit
+``` 

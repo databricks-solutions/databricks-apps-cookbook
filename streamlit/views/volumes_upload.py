@@ -2,7 +2,7 @@ import os
 import io
 import streamlit as st
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.catalog import SecurableType
+
 
 databricks_host = os.getenv("DATABRICKS_HOST") or os.getenv("DATABRICKS_HOSTNAME")
 w = WorkspaceClient()
@@ -22,7 +22,7 @@ def check_upload_permissions(volume_name: str):
         volume = w.volumes.read(name=volume_name)
         current_user = w.current_user.me()
         grants = w.grants.get_effective(
-            securable_type=SecurableType.VOLUME,
+            securable_type="volume",
             full_name=volume.full_name,
             principal=current_user.user_name,
         )

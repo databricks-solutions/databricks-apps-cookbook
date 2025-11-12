@@ -29,8 +29,9 @@ def create_sidebar():
     # Define category and page order
     sidebar_structure = {
         'Tables': [
-            'Read a table',
-            'Edit a table'
+            'Read a Delta table',
+            'Edit a Delta table',
+            'OLTP Database'
         ],
         'Volumes': [
             'Upload a file',
@@ -38,7 +39,9 @@ def create_sidebar():
         ],
         'AI / ML': [
             'Invoke a model',
-            'Run vector search'
+            'Run vector search',
+            'Connect an MCP server',
+            'Invoke a multi-modal LLM'
         ],
         'Business Intelligence': [
             'AI/BI Dashboard',
@@ -52,18 +55,24 @@ def create_sidebar():
             'Connect'
         ],
         'Authentication': [
-            'Get current user',
+            'Get current user'
+        ],
+        'External services': [
+            'External connections',
             'Retrieve a secret'
         ]
     }
     
     # Define page-specific icons
     page_icons = {
-        'Read a table': 'material-symbols:table-view',
-        'Edit a table': 'material-symbols:edit-document',
+        'Read a Delta table': 'material-symbols:table-view',
+        'Edit a Delta table': 'material-symbols:edit-document',
+        'OLTP Database': 'material-symbols:database',
         'Upload a file': 'material-symbols:upload',
         'Download a file': 'material-symbols:download',
         'Invoke a model': 'material-symbols:model-training',
+        'Connect an MCP server': 'material-symbols:modeling',
+        'Invoke a multi-modal LLM': 'material-symbols:sensors',
         'Run vector search': 'material-symbols:search',
         'AI/BI Dashboard': 'material-symbols:dashboard',
         'Genie': 'material-symbols:chat',
@@ -71,7 +80,8 @@ def create_sidebar():
         'Retrieve job results': 'material-symbols:list-alt',
         'Connect': 'material-symbols:link',
         'Get current user': 'material-symbols:fingerprint',
-        'Retrieve a secret': 'material-symbols:key'
+        'Retrieve a secret': 'material-symbols:key',
+        'External connections': 'material-symbols:link'
     }
     
     # Group pages by category
@@ -126,7 +136,7 @@ app.layout = html.Div([
                     }),
                 ], className="sidebar-header"),
                 html.Div(create_sidebar(), className="ps-4")
-            ], width=2, className="bg-light border-end overflow-auto p-0"),
+            ], width=2, className="sidebar overflow-auto p-0"),
             
             dbc.Col([
                 page_container

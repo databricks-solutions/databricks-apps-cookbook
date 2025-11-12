@@ -13,13 +13,19 @@ groups = [
         "title": "Tables",
         "views": [
             {
-                "label": "Read a table",
+                "label": "Connect an OLTP database",
+                "help": "Query an OLTP database instance table.",
+                "page": "views/oltp_database_connect.py",
+                "icon": ":material/database:",
+            },
+            {
+                "label": "Read a Delta table",
                 "help": "Query a Unity Catalog Delta table.",
                 "page": "views/tables_read.py",
                 "icon": ":material/table_view:",
             },
             {
-                "label": "Edit a table",
+                "label": "Edit a Delta table",
                 "help": "Interactively edit a Delta table in the UI.",
                 "page": "views/tables_edit.py",
                 "icon": ":material/edit_document:",
@@ -57,6 +63,18 @@ groups = [
                 "help": "Use Mosaic AI to generate embeddings for textual data and perform vector search.",
                 "page": "views/ml_vector_search.py",
                 "icon": ":material/search:",
+            },
+            {
+                "label": "Connect an MCP server",
+                "help": "Connect to a Model Context Protocol server.",
+                "page": "views/mcp_connect.py",
+                "icon": ":material/modeling:",
+            },
+            {
+                "label": "Invoke multi-modal LLM",
+                "help": "Send text and images for visual-language LLM tasks.",
+                "page": "views/ml_serving_invoke_mllm.py",
+                "icon": ":material/sensors:",
             },
         ],
     },
@@ -126,10 +144,10 @@ groups = [
                 "icon": ":material/fingerprint:",
             },
             {
-                "label": "Retrieve a secret",
-                "help": "Get a sensitive API key without hard-coding it.",
-                "page": "views/secrets_retrieve.py",
-                "icon": ":material/lock:",
+                "label": "On-behalf-of-user",
+                "help": "Run commands on behalf of a user instead of the app's service principal.",
+                "page": "views/users_obo.py",
+                "icon": ":material/key:",
             },
         ],
     },
@@ -150,4 +168,20 @@ groups = [
             },
         ],
     },
+    "title": "External services",
+    "views": [
+        {
+            "label": "External connections",
+            "help": "Connect to a Unity Catalog-governed HTTP endpoint.",
+            "page": "views/external_connections.py",
+            "icon": ":material/link:",
+        },
+        {
+            "label": "Retrieve a secret",
+            "help": "Get a sensitive API key without hard-coding it.",
+            "page": "views/secrets_retrieve.py",
+            "icon": ":material/lock:",
+        },
+    ],
+},
 ]

@@ -1,0 +1,181 @@
+---
+sidebar_position: 1
+---
+
+# Read a table
+
+This recipe demonstrates how to query Databricks [Unity Catalog tables](https://docs.databricks.com/aws/en/tables/) from a FastAPI application using the [Databricks SQL Connector](https://docs.databricks.com/en/dev-tools/python-sql-connector.html).
+
+:::info
+In this example, we set up our API to be called using the `GET` HTTP method which is the standard choice for reading data in REST APIs as defined in RFC 7231. It's designed to be safe (non-modifying) and idempotent, making it ideal for data retrieval operations.
+
+GET requests are cacheable by default, improving performance, and their parameters are URL-encoded, making them bookmarkable and shareable.
+
+For detailed specifications, refer to [RFC 7231 Section 4.3.1](https://datatracker.ietf.org/doc/html/rfc7231#section-4.3.1) which defines the GET method's semantics and requirements.
+
+:::
+
+## Code snippet
+
+```python title="app.py"
+import os
+from typing import Dict, List
+
+from fastapi import FastAPI, Query
+
+from databricks import sql
+from databricks.sdk.core import Config
+
+DATABRICKS_WAREHOUSE_ID = os.environ.get("DATABRICKS_WAREHOUSE_ID") or None
+
+app = FastAPI()
+databricks_cfg = Config()
+
+
+def get_connection(warehouse_id: str):
+    http_path = f"/sql/1.0/warehouses/{DATABRICKS_WAREHOUSE_ID}"
+    return sql.connect(
+        server_hostname=databricks_cfg.host,
+        http_path=http_path,
+        credentials_provider=lambda: databricks_cfg.authenticate,
+    )
+
+
+def query(sql_query: str, warehouse_id: str, as_dict: bool = True) -> List[Dict]:
+    conn = get_connection(warehouse_id)
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql_query)
+            result = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in result]
+
+    except Exception as e:
+        raise Exception(f"DBSQL Query Failed: {str(e)}")
+
+
+@app.get("/api/v1/table")
+def table(
+    sql_query: str = Query("SELECT * FROM samples.nyctaxi.trips LIMIT 5", description="SQL query to execute"),
+):
+    results = None
+    try:
+        results = query(sql_query, warehouse_id=DATABRICKS_WAREHOUSE_ID)
+    except Exception as e:
+        raise Exception(f"FastAPI Request Failed: {str(e)}")
+
+    return {"results": results}
+
+```
+
+:::warning
+
+The above example is shortened for brevity and not suitable for production use.
+You can find a more advanced sample in the databricks-apps-cookbook GitHub repository.
+
+:::
+
+### Example Usage
+
+The query below retrieves data from the [`system.billing.usage` table](https://docs.databricks.com/aws/en/admin/system-tables/billing) via the above code snippet.  
+Note that we need to encode the `sql_query` contents when making the API request.
+
+```shell
+curl -X GET "https://your-app-url/api/v1/table?sql_query=SELECT%20%2A%20FROM%20system.billing.usage%20LIMIT%201" \
+  -H "Authorization: Bearer YOUR_DATABRICKS_TOKEN" | jq
+```
+
+```json
+{
+  "results": [
+    {
+      "account_id": "abcdef",
+      "workspace_id": "12345",
+      "record_id": "I_rcFQmY7QFNlZ3nXzNT5uMs",
+      "sku_name": "ENTERPRISE_JOBS_SERVERLESS_COMPUTE_US_WEST_OREGON",
+      "cloud": "AWS",
+      "usage_start_time": "2025-03-20T16:00:00+00:00",
+      "usage_end_time": "2025-03-20T17:00:00+00:00",
+      "usage_date": "2025-03-20",
+      "custom_tags": [],
+      "usage_unit": "DBU",
+      "usage_quantity": 0.016312123333333334,
+      "usage_metadata": {
+        "cluster_id": null,
+        "job_id": null,
+        "warehouse_id": null,
+        "instance_pool_id": null,
+        "node_type": null,
+        "job_run_id": null,
+        "notebook_id": null,
+        "dlt_pipeline_id": "1f26d5ff-35d2-4d51-b7e7-b64500ec1c6b",
+        "endpoint_name": null,
+        "endpoint_id": null,
+        "dlt_update_id": null,
+        "dlt_maintenance_id": null,
+        "run_name": null,
+        "job_name": null,
+        "notebook_path": null,
+        "central_clean_room_id": null,
+        "source_region": null,
+        "destination_region": null,
+        "app_id": null,
+        "app_name": null,
+        "metastore_id": null,
+        "private_endpoint_name": null,
+        "storage_api_type": null,
+        "budget_policy_id": null,
+        "ai_runtime_pool_id": null,
+        "ai_runtime_workload_id": null
+      },
+      "identity_metadata": {
+        "run_as": "user@example.com",
+        "created_by": null,
+        "owned_by": null
+      },
+      "record_type": "ORIGINAL",
+      "ingestion_date": "2025-03-20",
+      "billing_origin_product": "SQL",
+      "product_features": {
+        "jobs_tier": null,
+        "sql_tier": null,
+        "dlt_tier": null,
+        "is_serverless": true,
+        "is_photon": true,
+        "serving_type": null,
+        "networking": null,
+        "ai_runtime": null
+      },
+      "usage_type": "COMPUTE_TIME"
+    }
+  ]
+}
+```
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/)
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `SELECT` on the Unity Catalog table
+- `CAN USE` on the SQL warehouse
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Databricks SQL Connector for Python](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [FastAPI](https://pypi.org/project/fastapi/) - `fastapi`
+- [uvicorn](https://pypi.org/project/uvicorn/) - `uvicorn`
+
+```python title="requirements.txt"
+databricks-sdk
+databricks-sql-connector
+fastapi
+uvicorn
+```

@@ -11,7 +11,7 @@ dash.register_page(
     __name__,
     path='/tables/edit',
     title='Edit Table',
-    name='Edit a table',
+    name='Edit a Delta table',
     category='Tables',
     icon='table'
 )

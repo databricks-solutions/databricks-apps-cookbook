@@ -11,7 +11,7 @@ const config: Config = {
   url: "https://apps-cookbook.dev",
   baseUrl: "/",
 
-  organizationName: "pbv0",
+  organizationName: "databricks-solutions",
   projectName: "databricks-apps-cookbook",
 
   onBrokenLinks: "throw",
@@ -22,6 +22,14 @@ const config: Config = {
     locales: ["en"],
   },
 
+  scripts: [
+    {
+      src: "https://analytics.pascal-vogel.com/js/script.js",
+      defer: true,
+      "data-domain": "apps-cookbook.dev",
+    },
+  ],
+
   presets: [
     [
       "classic",
@@ -29,7 +37,7 @@ const config: Config = {
         docs: {
           sidebarPath: "./sidebars.ts",
           editUrl:
-            "https://github.com/pbv0/databricks-apps-cookbook/edit/main/docs/",
+            "https://github.com/databricks-solutions/databricks-apps-cookbook/edit/main/docs/",
         },
         blog: {
           showReadingTime: true,
@@ -37,11 +45,6 @@ const config: Config = {
             type: ["rss", "atom"],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
-          // Useful options to enforce blogging best practices
           onInlineTags: "warn",
           onInlineAuthors: "warn",
           onUntruncatedBlogPosts: "warn",
@@ -54,16 +57,8 @@ const config: Config = {
   ],
 
   plugins: [
+    "./src/plugins/tailwind-config.js",
     require.resolve("docusaurus-lunr-search"),
-    function tailwindPlugin(context, options) {
-      return {
-        name: "tailwind-plugin",
-        configurePostCss(postcssOptions) {
-          postcssOptions.plugins = [require("@tailwindcss/postcss")];
-          return postcssOptions;
-        },
-      };
-    },
   ],
 
   themeConfig: {
@@ -71,7 +66,7 @@ const config: Config = {
     metadata: [
       {
         name: "keywords",
-        content: "databricks, databricks apps, streamlit, dash",
+        content: "databricks, databricks apps, streamlit, dash, fastapi",
       },
     ],
     navbar: {
@@ -95,7 +90,13 @@ const config: Config = {
           position: "left",
           activeBasePath: "docs/category/dash",
         },
-        { to: "blog", label: "Blog", position: "left" },
+        {
+          to: "docs/category/fastapi",
+          label: "FastAPI",
+          position: "left",
+          activeBasePath: "docs/category/fastapi",
+        },
+        { to: "resources", label: "Resources", position: "left" },
         {
           href: "https://github.com/pbv0/databricks-apps-cookbook/",
           label: "GitHub",

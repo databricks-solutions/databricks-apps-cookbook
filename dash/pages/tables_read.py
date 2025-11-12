@@ -12,7 +12,7 @@ dash.register_page(
     __name__,
     path='/tables/read',
     title='Read Table',
-    name='Read a table',
+    name='Read a Delta table',
     category='Tables',
     icon='table'
 )
@@ -37,48 +37,50 @@ def read_table(table_name, conn):
         return cursor.fetchall_arrow().to_pandas()
 
 layout = dbc.Container([
-    html.H1("Tables", className="my-4"),
+    # Header section matching Streamlit style
+    dbc.Row([
+        dbc.Col([
+            html.H1("Tables", className="mb-2"),
+            html.Hr(className="mb-3"),
     html.H2("Read a table", className="mb-3"),
     html.P([
         "This recipe reads a Unity Catalog table using the ",
         html.A("Databricks SQL Connector", 
               href="https://docs.databricks.com/en/dev-tools/python-sql-connector.html",
               target="_blank",
-              className="text-primary")
-    ], className="mb-4"),
+                      className="text-primary"),
+                "."
+            ], className="mb-4")
+        ])
+    ]),
     
+            # Tabbed layout matching Streamlit style
     dbc.Tabs([
-        dbc.Tab(label="Try it", tab_id="try-it", children=[
-            dbc.Form([
+            # Try it tab
+            dbc.Tab([
                 dbc.Row([
                     dbc.Col([
-                        dbc.Label("Enter your Databricks HTTP Path:", className="fw-bold mb-2"),
-                        dbc.Input(
+                        dbc.Card([
+                            dbc.CardBody([
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Label("Enter your Databricks HTTP Path:", className="form-label"),
+                                        dcc.Input(
                             id="http-path-input",
                             type="text",
                             placeholder="/sql/1.0/warehouses/xxxxxx",
-                            className="mb-3",
-                            style={
-                                "backgroundColor": "#f8f9fa",
-                                "border": "1px solid #dee2e6",
-                                "boxShadow": "inset 0 1px 2px rgba(0,0,0,0.075)"
-                            }
+                                            className="form-control mb-3"
                         )
                     ], width=12)
                 ]),
                 dbc.Row([
                     dbc.Col([
-                        dbc.Label("Specify a Unity Catalog table name:", className="fw-bold mb-2"),
-                        dbc.Input(
+                                        html.Label("Specify a Unity Catalog table name:", className="form-label"),
+                                        dcc.Input(
                             id="table-name-input",
                             type="text",
                             placeholder="catalog.schema.table",
-                            className="mb-3",
-                            style={
-                                "backgroundColor": "#f8f9fa",
-                                "border": "1px solid #dee2e6",
-                                "boxShadow": "inset 0 1px 2px rgba(0,0,0,0.075)"
-                            }
+                                            className="form-control mb-3"
                         )
                     ], width=12)
                 ]),
@@ -86,10 +88,8 @@ layout = dbc.Container([
                     "Load Table",
                     id="load-button-read",
                     color="primary",
-                    className="mb-4",
-                    size="md"
-                )
-            ], className="mt-3"),
+                                    className="mb-3"
+                                ),
             dbc.Spinner(
                 html.Div(id="table-area-read", className="mt-3"),
                 color="primary",
@@ -97,17 +97,23 @@ layout = dbc.Container([
                 fullscreen=False,
             ),
             html.Div(id="status-area-read", className="mt-3")
-        ], className="p-3"),
-        
-        dbc.Tab(label="Code snippet", tab_id="code-snippet", children=[
-            dcc.Markdown('''```python
+                            ])
+                        ])
+                    ])
+                ])
+            ], label="Try it", tab_id="tab-try"),
+            
+            # Code snippet tab
+            dbc.Tab([
+                dcc.Markdown(
+                    """```python
+import streamlit as st
 from databricks import sql
 from databricks.sdk.core import Config
-from functools import lru_cache
 
-cfg = Config()  # Set the DATABRICKS_HOST environment variable when running locally
+cfg = Config()
 
-@lru_cache(maxsize=1)
+@st.cache_resource
 def get_connection(http_path):
     return sql.connect(
         server_hostname=cfg.host,
@@ -121,41 +127,54 @@ def read_table(table_name, conn):
         cursor.execute(query)
         return cursor.fetchall_arrow().to_pandas()
 
-http_path_input = "/sql/1.0/warehouses/xxxxxx"
-table_name = "catalog.schema.table"
+http_path_input = st.text_input(
+    "Enter your Databricks HTTP Path:", 
+    placeholder="/sql/1.0/warehouses/xxxxxx"
+)
+
+table_name = st.text_input(
+    "Specify a Unity Catalog table name:", 
+    placeholder="catalog.schema.table"
+)
+
+if http_path_input and table_name:
 conn = get_connection(http_path_input)
 df = read_table(table_name, conn)
-```''',className="border rounded p-3")
-        ], className="p-3"),
-        
-        dbc.Tab(label="Requirements", tab_id="requirements", children=[
+    st.dataframe(df)
+```""",
+                    className="mb-0"
+                )
+            ], label="Code snippet", tab_id="tab-code"),
+            
+            # Requirements tab
+            dbc.Tab([
             dbc.Row([
-                dbc.Col([
-                    html.H4("Permissions (app service principal)", className="mb-3"),
+                    dbc.Col(md=4, children=[
+                        html.H5("Permissions", className="mb-3"),
                     html.Ul([
-                        dcc.Markdown("**```SELECT```** on the Unity Catalog table"),
-                        dcc.Markdown("**```CAN USE```** on the SQL warehouse")
-                    ], className="mb-4")
+                            html.Li("SELECT on the Unity Catalog table"),
+                            html.Li("CAN USE on the SQL warehouse")
+                        ])
                 ]),
-                dbc.Col([
-                    html.H4("Databricks resources", className="mb-3"),
+                    dbc.Col(md=4, children=[
+                        html.H5("Databricks Resources", className="mb-3"),
                     html.Ul([
                         html.Li("SQL warehouse"),
                         html.Li("Unity Catalog table")
-                    ], className="mb-4")
+                        ])
                 ]),
-                dbc.Col([
-                    html.H4("Dependencies", className="mb-3"),
+                    dbc.Col(md=4, children=[
+                        html.H5("Dependencies", className="mb-3"),
                     html.Ul([
-                        dcc.Markdown("* [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`"),
-                        dcc.Markdown("* [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`"),
-                        dcc.Markdown("* [Dash](https://pypi.org/project/dash/) - `dash`")
-                    ], className="mb-4")
+                            html.Li("databricks-sdk"),
+                            html.Li("databricks-sql-connector"),
+                            html.Li("dash")
+                        ])
                 ])
             ])
-        ], className="p-3")
-    ], id="tabs", active_tab="try-it", className="mb-4")
-], fluid=True, className="py-4")
+            ], label="Requirements", tab_id="tab-requirements")
+        ], id="tabs", active_tab="tab-try")
+], fluid=True)
 
 @callback(
     [Output("table-area-read", "children"),

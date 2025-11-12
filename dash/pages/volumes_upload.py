@@ -1,7 +1,6 @@
 from dash import Dash, html, dcc, callback, Input, Output, State
 import dash_bootstrap_components as dbc
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.catalog import SecurableType
 import os
 import io
 import base64
@@ -25,7 +24,7 @@ def check_upload_permissions(volume_name: str):
         volume = w.volumes.read(name=volume_name)
         current_user = w.current_user.me()
         grants = w.grants.get_effective(
-            securable_type=SecurableType.VOLUME,
+            securable_type="volume",
             full_name=volume.full_name,
             principal=current_user.user_name,
         )
