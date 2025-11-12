@@ -20,7 +20,7 @@ Find **deployment instructions** and all **code snippets** on [apps-cookbook.dev
 
 ## Contributions
 
-We welcome contributions! Submit a [pull request](https://github.com/pbv0/databricks-apps-cookbook/pulls) to add or improve recipes. Raise an [issue](https://github.com/pbv0/databricks-apps-cookbook/issues) to report a bug or raise a feature request.
+We welcome contributions! Submit a [pull request](https://github.com/databricks-solutions/databricks-apps-cookbook/pulls) to add or improve recipes. Raise an [issue](https://github.com/databricks-solutions/databricks-apps-cookbook/issues) to report a bug or raise a feature request.
 
 Not sure what to contribute? Here are some commonly requested samples:
 
@@ -34,14 +34,13 @@ Not sure what to contribute? Here are some commonly requested samples:
 
 These samples are experimental and meant for demonstration purposes only. They are provided as-is and without formal support by Databricks. Ensure your organization's security, compliance, and operational best practices are applied before deploying them to production.
 
-
 ## License
 
-&copy; 2025 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the [Databricks License](https://databricks.com/db-license-source).  All included or referenced third party libraries are subject to the licenses set forth below.
+&copy; 2025 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the [Databricks License](https://databricks.com/db-license-source). All included or referenced third party libraries are subject to the licenses set forth below.
 
-| library   | description                                       | license     | source                                              |
-|-----------|---------------------------------------------------|-------------|-----------------------------------------------------|
-| Plotly    | Graphing library for interactive visualizations   | MIT         | [GitHub](https://github.com/plotly/plotly.py)       |
-| Dash      | Framework for building web apps with Plotly       | MIT         | [GitHub](https://github.com/plotly/dash)            |
-| Streamlit | App framework for Machine Learning and Data Apps  | Apache 2.0  | [GitHub](https://github.com/streamlit/streamlit)    |
-| FastAPI   | High-performance API framework based on Starlette | MIT         | [GitHub](https://github.com/tiangolo/fastapi)       |
+| library   | description                                       | license    | source                                           |
+| --------- | ------------------------------------------------- | ---------- | ------------------------------------------------ |
+| Plotly    | Graphing library for interactive visualizations   | MIT        | [GitHub](https://github.com/plotly/plotly.py)    |
+| Dash      | Framework for building web apps with Plotly       | MIT        | [GitHub](https://github.com/plotly/dash)         |
+| Streamlit | App framework for Machine Learning and Data Apps  | Apache 2.0 | [GitHub](https://github.com/streamlit/streamlit) |
+| FastAPI   | High-performance API framework based on Starlette | MIT        | [GitHub](https://github.com/tiangolo/fastapi)    |

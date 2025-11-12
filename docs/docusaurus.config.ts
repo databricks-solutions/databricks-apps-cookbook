@@ -98,7 +98,7 @@ const config: Config = {
         },
         { to: "resources", label: "Resources", position: "left" },
         {
-          href: "https://github.com/pbv0/databricks-apps-cookbook/",
+          href: "https://github.com/databricks-solutions/databricks-apps-cookbook/",
           label: "GitHub",
           position: "right",
         },
