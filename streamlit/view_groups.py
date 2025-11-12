@@ -152,6 +152,22 @@ groups = [
         ],
     },
     {
+        "title": "Visualizations",
+        "views": [
+            {
+                "label": "Charts",
+                "help": "Visualize data using Streamlit's built-in chart components.",
+                "page": "views/visualizations_charts.py",
+                "icon": ":material/bar_chart:",
+            },
+            {
+                "label": "Map display and interaction",
+                "help": "Display geo information on a map and allow users to draw on the map.",
+                "page": "views/visualizations_map.py",
+                "icon": ":material/globe:",
+            },
+        ],
+    },
     "title": "External services",
     "views": [
         {
