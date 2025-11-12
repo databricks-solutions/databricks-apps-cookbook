@@ -105,36 +105,6 @@ groups = [
             },
         ],
     },
-
-    {
-        "title": "Alerts",
-        "views": [
-            {
-                "label": "List alerts",
-                "help": "List all alerts.",
-                "page": "views/alerts.py",
-                "icon": ":material/notifications_none:",
-            },
-        ],
-    },
-    {
-        "title": "Geo Visualization",
-        "views": [
-            {
-                "label": "Display Geo Input",
-                "help": "Display geo information on a map.",
-                "page": "views/maps_display.py",
-                "icon": ":material/globe:",
-            },
-              {
-                "label": "User Geo Input",
-                "help": "Enable users to select own geo input.",
-                "page": "views/maps_draw.py",
-                "icon": ":material/pin_drop:",
-            },
-        ],
-    },
-
     {
         "title": "Unity Catalog",
         "views": [
@@ -160,6 +130,23 @@ groups = [
                 "help": "Get a sensitive API key without hard-coding it.",
                 "page": "views/secrets_retrieve.py",
                 "icon": ":material/lock:",
+            },
+        ],
+    },
+    {
+        "title": "Visualizations",
+        "views": [
+            {
+                "label": "Charts",
+                "help": "Visualize data using Streamlit's built-in chart components.",
+                "page": "views/visualizations_charts.py",
+                "icon": ":material/bar_chart:",
+            },
+            {
+                "label": "Map display and interaction",
+                "help": "Display geo information on a map and allow users to draw on the map.",
+                "page": "views/visualizations_map.py",
+                "icon": ":material/globe:",
             },
         ],
     },
