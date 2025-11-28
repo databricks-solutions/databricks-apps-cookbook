@@ -22,7 +22,7 @@ function FilterPills({
   };
 
   const basePillClasses =
-    "mr-2 mb-2 inline-block cursor-pointer select-none border px-3 py-1 text-sm font-semibold transition-colors rounded-none";
+    "mr-2 mb-2 inline-block !whitespace-nowrap cursor-pointer select-none border px-3 py-1 text-sm font-semibold transition-colors rounded-none";
 
   const renderPill = (
     label: string,

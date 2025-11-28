@@ -26,14 +26,6 @@ const config: Config = {
     locales: ["en"],
   },
 
-  scripts: [
-    {
-      src: "https://analytics.pascal-vogel.com/js/script.js",
-      defer: true,
-      "data-domain": "apps-cookbook.dev",
-    },
-  ],
-
   presets: [
     [
       "classic",
