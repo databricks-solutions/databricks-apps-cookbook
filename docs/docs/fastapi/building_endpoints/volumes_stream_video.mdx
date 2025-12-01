@@ -99,7 +99,6 @@ async def stream_video_files_api(request: Request):
         encoded_path = quote(file_path, safe="/")
         
         # Files API download endpoint: GET /api/2.0/fs/files{file_path}
-        # According to Databricks docs: https://docs.databricks.com/api/workspace/files/download
         url = f"https://{databricks_host}/api/2.0/fs/files{encoded_path}"
         
         logger.info(f"Streaming from Files API URL: {url}")
