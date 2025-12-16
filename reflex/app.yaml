@@ -1,4 +1,9 @@
-command: ["reflex", "run"]
+command: [
+  "reflex",
+  "run",
+  "--env",
+  "prod",
+]
 
 env:
   - name: CI
