@@ -1,0 +1,162 @@
+---
+sidebar_position: 1
+---
+
+# Invoke a model
+
+This recipe invokes a model hosted on [Mosaic AI Model Serving](https://docs.databricks.com/aws/en/machine-learning/model-serving/) using the [Databricks SDK for Python](https://databricks-sdk-py.readthedocs.io/en/latest/) and returns the result. Choose either a traditional ML model or a large language model (LLM).
+
+## Code snippets
+
+### Traditional Machine Learning
+
+#### Using `dataframe_split` (JSON-serialized DataFrame in split orientation)
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="custom-regression-model",
+    dataframe_split={
+        "columns": ["feature1", "feature2"],
+        "data": [[1.5, 2.5]]
+    }
+)
+st.json(response.as_dict())
+```
+
+#### Using `dataframe_records` (JSON-serialized DataFrame in records orientation)
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="custom-regression-model",
+    dataframe_records={
+        "feature1": [1.5],
+        "feature2": [2.5]
+    }
+)
+st.json(response.as_dict())
+```
+
+#### Using `instances` (Tensor inputs in row format for TensorFlow/PyTorch models)
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+tensor_input = [[1.0, 2.0, 3.0]]
+response = w.serving_endpoints.query(
+    name="tensor-processing-model",
+    instances=tensor_input,
+)
+st.json(response.as_dict())
+```
+
+#### Using `inputs` (Tensor inputs in columnar format for TensorFlow/PyTorch models)
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+tensor_input = {
+    "input1": [1.0, 2.0, 3.0],
+    "input2": [4.0, 5.0, 6.0],
+}
+response = w.serving_endpoints.query(
+    name="tensor-processing-model",
+    inputs=tensor_input,
+)
+st.json(response.as_dict())
+```
+
+### Large language models (LLMs)
+
+#### Using `prompt` (Input text for completion tasks)
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="llm-text-completions-model",
+    prompt="Generate a recipe for building scalable Databricks Apps.",
+    temperature=0.5,
+)
+st.json(response.as_dict())
+```
+
+#### Using `messages` (List of chat messages for conversational models)
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="chat-assistant-model",
+    messages=[
+        ChatMessage(
+            role=ChatMessageRole.SYSTEM,
+            content="You are a helpful assistant.",
+        ),
+        ChatMessage(
+            role=ChatMessageRole.USER,
+            content="Provide tips for deploying Databricks Apps.",
+        ),
+    ],
+)
+st.json(response.as_dict())
+```
+
+#### Using `input` (Input text for embedding tasks)
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="embedding-model",
+    input="Databricks provides a unified analytics platform.",
+)
+st.json(response.as_dict())
+```
+
+## Resources
+
+- [Model Serving endpoint](https://docs.databricks.com/aws/en/machine-learning/model-serving/manage-serving-endpoints)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN QUERY` on the model serving endpoint
+
+See [Manage permissions on your model serving endpoint](https://docs.databricks.com/aws/en/machine-learning/model-serving/manage-serving-endpoints#manage-permissions-on-your-model-serving-endpoint) for more information.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+
+```python title="requirements.txt"
+databricks-sdk
+streamlit
+```
