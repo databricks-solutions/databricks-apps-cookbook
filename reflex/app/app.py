@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_enterprise as rxe
 from app.pages.introduction import introduction_page
 from app.pages.oltp_database import oltp_database_page
 from app.states.oltp_database_state import OltpDatabaseState
@@ -25,7 +26,7 @@ from app.states.read_delta_table_state import ReadTableState
 from app.states.invoke_model_state import InvokeModelState
 
 index = introduction_page
-app = rx.App(theme=rx.theme(appearance="light"))
+app = rxe.App(theme=rx.theme(appearance="light"))
 app.add_page(index, route="/")
 app.add_page(introduction_page, route="/introduction")
 app.add_page(
