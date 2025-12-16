@@ -6,6 +6,6 @@ config = rxe.Config(
     app_name="app",
     use_single_port=True,
     show_built_with_reflex=True,
-    plugins=[rx.plugins.TailwindV3Plugin()]
+    plugins=[rx.plugins.TailwindV4Plugin()]
     # output_dir="out",  # optional
 )
