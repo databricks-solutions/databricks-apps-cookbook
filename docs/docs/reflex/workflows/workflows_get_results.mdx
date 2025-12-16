@@ -1,0 +1,47 @@
+---
+sidebar_position: 2
+---
+
+# Retrieve workflow results
+
+This recipe retreives the results of a [Databricks Workflows](https://docs.databricks.com/en/jobs/index.html) job task run using the [Databricks SDK for Python](https://databricks-sdk-py.readthedocs.io/en/latest/)..
+
+## Code snippet
+
+```python title="app.py"
+import streamlit as st
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+task_run_id = st.text_input(
+    label="Specify a task run ID",
+    placeholder="293894477334278",
+)
+
+results = w.jobs.get_run_output(task_run_id)
+
+st.text(results)
+```
+
+## Resources
+
+- [Job](https://docs.databricks.com/aws/en/jobs/configure-job)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN VIEW` permission on the job
+
+See [Control access to a job](https://docs.databricks.com/en/jobs/privileges.html#control-access-to-a-job) for more information.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+
+```python title="requirements.txt"
+databricks-sdk
+streamlit
+```

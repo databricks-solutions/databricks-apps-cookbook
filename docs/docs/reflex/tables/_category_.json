@@ -1,0 +1,8 @@
+{
+  "label": "Tables",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "Read data from and write data to Unity Catalog tables."
+  }
+}

@@ -1,0 +1,5 @@
+command: ["reflex", "run"]
+
+env:
+  - name: CI
+    value: "1"
