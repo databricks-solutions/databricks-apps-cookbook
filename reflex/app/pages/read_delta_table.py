@@ -4,6 +4,7 @@ from app.components.tabbed_page_template import (
     tabbed_page_template,
     placeholder_requirements,
 )
+from app.components.loading_spinner import loading_spinner
 from app.states.read_delta_table_state import ReadTableState
 from app import theme
 
@@ -25,7 +26,7 @@ def get_connection(http_path: str):
     connection = sql.connect(
         server_hostname=cfg.host,
         http_path=http_path,
-        credentials_provider=cfg.authenticate,
+        credentials_provider=lambda: cfg.authenticate,
     )
     _connection = connection
     return connection
@@ -39,12 +40,37 @@ def read_table(table_name: str, conn) -> pd.DataFrame:
 
 def pandas_to_editor_format(
     df: pd.DataFrame,
-) -> tuple[list[list[Any]], list[dict[str, str]]]:
+) -> tuple[list[list[str | int | float | bool | None]], list[dict[str, str]]]:
     """Convert a pandas DataFrame to the format required by rx.data_editor."""
     if df.empty:
         return ([], [])
-    data = df.values.tolist()
-    columns = [{"title": col, "id": col, "type": "str"} for col in df.columns]
+    columns = []
+    df_processed = df.copy()
+    for col in df.columns:
+        dtype = df[col].dtype
+        col_type = "str"
+        if pd.api.types.is_integer_dtype(dtype):
+            col_type = "int"
+            # Default value below
+            df_processed[col] = df_processed[col].fillna(0)
+        elif pd.api.types.is_float_dtype(dtype):
+            col_type = "float"
+            # Default value below
+            df_processed[col] = df_processed[col].fillna(0.0)
+        elif pd.api.types.is_bool_dtype(dtype):
+            col_type = "bool"
+            # Default value below
+            df_processed[col] = df_processed[col].fillna(False)
+        elif pd.api.types.is_datetime64_any_dtype(dtype):
+            col_type = "str"
+            # Default value below
+            df_processed[col] = df_processed[col].astype(str).replace("NaT", "")
+        else:
+            col_type = "str"
+            # Default value below
+            df_processed[col] = df_processed[col].fillna("").astype(str)
+        columns.append({"title": col, "id": col, "type": col_type})
+    data = df_processed.values.tolist()
     return (data, columns)
 
 
@@ -243,20 +269,16 @@ def read_delta_content() -> rx.Component:
         ),
         rx.cond(
             ReadTableState.is_loading,
-            rx.vstack(
-                rx.spinner(size="3"),
-                rx.text("Loading...", class_name="text-gray-500"),
-                align="center",
-                justify="center",
-                class_name="w-full h-48 bg-gray-50 rounded-lg",
-            ),
+            loading_spinner("Loading table data..."),
             rx.cond(
                 ReadTableState.df_data,
                 rx.data_editor(
                     columns=ReadTableState.columns_for_editor,
                     data=ReadTableState.data_for_editor,
                     is_readonly=True,
-                    class_name="w-full h-96",
+                    height="60vh",
+                    width="95%",
+                    class_name="overflow-auto",
                 ),
             ),
         ),

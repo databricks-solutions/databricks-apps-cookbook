@@ -19,7 +19,7 @@ def get_connection(http_path: str):
     connection = sql.connect(
         server_hostname=cfg.host,
         http_path=http_path,
-        credentials_provider=cfg.authenticate,
+        credentials_provider=lambda: cfg.authenticate,
     )
     _connection = connection
     return connection
@@ -37,8 +37,28 @@ def pandas_to_editor_format(
     """Convert a pandas DataFrame to the format required by rx.data_editor."""
     if df.empty:
         return ([], [])
-    data = df.values.tolist()
-    columns = [{"title": col, "id": col, "type": "str"} for col in df.columns]
+    columns = []
+    df_processed = df.copy()
+    for col in df.columns:
+        dtype = df[col].dtype
+        col_type = "str"
+        if pd.api.types.is_integer_dtype(dtype):
+            col_type = "int"
+            df_processed[col] = df_processed[col].fillna(0)
+        elif pd.api.types.is_float_dtype(dtype):
+            col_type = "float"
+            df_processed[col] = df_processed[col].fillna(0.0)
+        elif pd.api.types.is_bool_dtype(dtype):
+            col_type = "bool"
+            df_processed[col] = df_processed[col].fillna(False)
+        elif pd.api.types.is_datetime64_any_dtype(dtype):
+            col_type = "str"
+            df_processed[col] = df_processed[col].astype(str).replace("NaT", "")
+        else:
+            col_type = "str"
+            df_processed[col] = df_processed[col].fillna("").astype(str)
+        columns.append({"title": col, "id": col, "type": col_type})
+    data = df_processed.values.tolist()
     return (data, columns)
 
 
@@ -200,11 +220,13 @@ class EditDeltaTableState(rx.State):
     async def set_selected_table(self, value: str):
         async with self:
             self.selected_table = value
+            if value:
+                self.is_loading = True
         if value:
-            return EditDeltaTableState.load_table_data
+            return EditDeltaTableState.load_table
 
     @rx.event(background=True)
-    async def load_table_data(self):
+    async def load_table(self):
         """Load data for the selected table."""
         async with self:
             self.is_loading = True
@@ -244,30 +266,34 @@ class EditDeltaTableState(rx.State):
                 self.is_loading = False
 
     @rx.event
-    def handle_cell_change(
-        self, new_value: str | int | float | bool | None, row_index: int, col_index: int
-    ):
+    def handle_cell_change(self, pos: tuple[int, int], val: dict[str, Any]):
         """Update table data when a cell is edited."""
+        col_index, row_index = pos
         if row_index < len(self.table_data):
             row = self.table_data[row_index]
             if col_index < len(row):
-                self.table_data[row_index][col_index] = new_value
+                self.table_data[row_index][col_index] = val["data"]
 
-    @rx.event
+    @rx.event(background=True)
     async def save_changes(self):
         """Save changes to the Delta table."""
-        self.is_saving = True
-        yield
+        async with self:
+            self.is_saving = True
+            current_table_data = self.table_data
+            current_columns = self.columns
+            warehouse = self.selected_warehouse
+            catalog = self.selected_catalog
+            schema = self.selected_schema
+            table = self.selected_table
+            http_path = self.warehouse_paths.get(warehouse)
         try:
-            col_names = [col["title"] for col in self.columns]
-            df = pd.DataFrame(self.table_data, columns=col_names)
-            http_path = self.warehouse_paths.get(self.selected_warehouse)
-            full_table_name = (
-                f"{self.selected_catalog}.{self.selected_schema}.{self.selected_table}"
-            )
+            full_table_name = f"{catalog}.{schema}.{table}"
+            col_names = [col["title"] for col in current_columns]
+            df = pd.DataFrame(current_table_data, columns=col_names)
             conn = get_connection(http_path)
             insert_overwrite_table(full_table_name, df, conn)
-            self.original_table_data = [row[:] for row in self.table_data]
+            async with self:
+                self.original_table_data = [row[:] for row in current_table_data]
             yield rx.toast(
                 f"Successfully saved changes to {full_table_name}.", duration=3000
             )
@@ -275,4 +301,5 @@ class EditDeltaTableState(rx.State):
             logging.exception(f"Error saving changes: {e}")
             yield rx.toast(f"Error saving changes: {e}", level="error", duration=5000)
         finally:
-            self.is_saving = False
+            async with self:
+                self.is_saving = False

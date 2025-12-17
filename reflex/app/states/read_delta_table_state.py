@@ -17,7 +17,7 @@ def get_connection(http_path: str):
     connection = sql.connect(
         server_hostname=cfg.host,
         http_path=http_path,
-        credentials_provider=cfg.authenticate,
+        credentials_provider=lambda: cfg.authenticate,
     )
     _connection = connection
     return connection
@@ -35,8 +35,28 @@ def pandas_to_editor_format(
     """Convert a pandas DataFrame to the format required by rx.data_editor."""
     if df.empty:
         return ([], [])
-    data = df.values.tolist()
-    columns = [{"title": col, "id": col, "type": "str"} for col in df.columns]
+    columns = []
+    df_processed = df.copy()
+    for col in df.columns:
+        dtype = df[col].dtype
+        col_type = "str"
+        if pd.api.types.is_integer_dtype(dtype):
+            col_type = "int"
+            df_processed[col] = df_processed[col].fillna(0)
+        elif pd.api.types.is_float_dtype(dtype):
+            col_type = "float"
+            df_processed[col] = df_processed[col].fillna(0.0)
+        elif pd.api.types.is_bool_dtype(dtype):
+            col_type = "bool"
+            df_processed[col] = df_processed[col].fillna(False)
+        elif pd.api.types.is_datetime64_any_dtype(dtype):
+            col_type = "str"
+            df_processed[col] = df_processed[col].astype(str).replace("NaT", "")
+        else:
+            col_type = "str"
+            df_processed[col] = df_processed[col].fillna("").astype(str)
+        columns.append({"title": col, "id": col, "type": col_type})
+    data = df_processed.values.tolist()
     return (data, columns)
 
 
@@ -143,6 +163,8 @@ class ReadTableState(rx.State):
     async def set_selected_table(self, value: str):
         async with self:
             self.selected_table = value
+            if value:
+                self.is_loading = True
         if value:
             return ReadTableState.load_table
 

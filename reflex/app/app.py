@@ -1,3 +1,4 @@
+import reflex_enterprise as rxe
 import reflex as rx
 import reflex_enterprise as rxe
 from app.pages.introduction import introduction_page
@@ -30,7 +31,7 @@ app = rxe.App(theme=rx.theme(appearance="light"))
 app.add_page(index, route="/")
 app.add_page(introduction_page, route="/introduction")
 app.add_page(
-    oltp_database_page, route="/oltp-database", on_load=OltpDatabaseState.load_instances
+    oltp_database_page, route="/oltp-database", on_load=OltpDatabaseState.on_load
 )
 app.add_page(
     read_delta_table_page, route="/read-delta-table", on_load=ReadTableState.on_load

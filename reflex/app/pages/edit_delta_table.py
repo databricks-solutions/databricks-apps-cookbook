@@ -4,10 +4,11 @@ from app.components.tabbed_page_template import (
     tabbed_page_template,
     placeholder_requirements,
 )
+from app.components.loading_spinner import loading_spinner
 from app.states.edit_delta_table_state import EditDeltaTableState
 from app import theme
 
-CODE_SNIPPET = """
+CODE_SNIPPET = '''
 import reflex as rx
 from typing import Any
 import pandas as pd
@@ -25,10 +26,40 @@ def get_connection(http_path: str):
     connection = sql.connect(
         server_hostname=cfg.host,
         http_path=http_path,
-        credentials_provider=cfg.authenticate,
+        credentials_provider=lambda: cfg.authenticate,
     )
     _connection = connection
     return connection
+
+def pandas_to_editor_format(
+    df: pd.DataFrame,
+) -> tuple[list[list[str | int | float | bool | None]], list[dict[str, str]]]:
+    """Convert a pandas DataFrame to the format required by rx.data_editor."""
+    if df.empty:
+        return ([], [])
+    columns = []
+    df_processed = df.copy()
+    for col in df.columns:
+        dtype = df[col].dtype
+        col_type = "str"
+        if pd.api.types.is_integer_dtype(dtype):
+            col_type = "int"
+            df_processed[col] = df_processed[col].fillna(0)
+        elif pd.api.types.is_float_dtype(dtype):
+            col_type = "float"
+            df_processed[col] = df_processed[col].fillna(0.0)
+        elif pd.api.types.is_bool_dtype(dtype):
+            col_type = "bool"
+            df_processed[col] = df_processed[col].fillna(False)
+        elif pd.api.types.is_datetime64_any_dtype(dtype):
+            col_type = "str"
+            df_processed[col] = df_processed[col].astype(str).replace("NaT", "")
+        else:
+            col_type = "str"
+            df_processed[col] = df_processed[col].fillna("").astype(str)
+        columns.append({"title": col, "id": col, "type": col_type})
+    data = df_processed.values.tolist()
+    return (data, columns)
 
 def insert_overwrite_table(table_name: str, df: pd.DataFrame, connection):
     if df.empty:
@@ -71,14 +102,13 @@ class EditDeltaTableState(rx.State):
     is_saving: bool = False
 
     @rx.event
-    def handle_cell_change(
-        self, new_value: Any, row_index: int, col_index: int
-    ):
-        "Update table data when a cell is edited."
+    def handle_cell_change(self, pos: tuple[int, int], val: dict[str, Any]):
+        """Update table data when a cell is edited."""
+        col_index, row_index = pos
         if row_index < len(self.table_data):
             row = self.table_data[row_index]
             if col_index < len(row):
-                self.table_data[row_index][col_index] = new_value
+                self.table_data[row_index][col_index] = val["data"]
 
     @rx.event
     async def save_changes(self):
@@ -100,8 +130,7 @@ class EditDeltaTableState(rx.State):
             yield rx.toast(f"Error saving changes: {e}", level="error")
         finally:
             self.is_saving = False
-"""
-
+'''
 
 def edit_delta_requirements() -> rx.Component:
     return rx.grid(
@@ -246,59 +275,19 @@ def editable_table_component() -> rx.Component:
                 class_name="flex items-center p-4 bg-red-50 border border-red-200 rounded-lg w-full mb-4",
             ),
         ),
-        rx.cond(
-            EditDeltaTableState.is_loading,
-            rx.vstack(
-                rx.spinner(size="3", class_name="mb-2"),
-                rx.text("Loading Table Data...", class_name="text-gray-500"),
-                align="center",
-                justify="center",
-                class_name="w-full h-64 bg-gray-50 rounded-lg",
-            ),
-        ),
+        rx.cond(EditDeltaTableState.is_loading, loading_spinner("Loading...")),
         rx.cond(
             EditDeltaTableState.selected_table
             & ~EditDeltaTableState.is_loading
             & EditDeltaTableState.table_data,
             rx.vstack(
-                rx.el.div(
-                    rx.el.table(
-                        rx.el.thead(
-                            rx.el.tr(
-                                rx.foreach(
-                                    EditDeltaTableState.columns,
-                                    lambda col: rx.el.th(
-                                        col["title"],
-                                        class_name="px-4 py-2 text-left text-sm font-semibold text-gray-700 bg-gray-50",
-                                    ),
-                                ),
-                                class_name="border-b",
-                            )
-                        ),
-                        rx.el.tbody(
-                            rx.foreach(
-                                EditDeltaTableState.table_data,
-                                lambda row, row_index: rx.el.tr(
-                                    rx.foreach(
-                                        row,
-                                        lambda val, col_index: rx.el.td(
-                                            rx.el.input(
-                                                default_value=val,
-                                                on_change=lambda new_val: EditDeltaTableState.handle_cell_change(
-                                                    new_val, row_index, col_index
-                                                ),
-                                                class_name="w-full p-2 border-none focus:ring-2 rounded-md bg-transparent",
-                                            ),
-                                            class_name="px-4 py-2 text-sm",
-                                        ),
-                                    ),
-                                    class_name="border-b hover:bg-gray-50",
-                                ),
-                            )
-                        ),
-                        class_name="w-full table-auto",
-                    ),
-                    class_name="overflow-x-auto border rounded-lg",
+                rx.data_editor(
+                    columns=EditDeltaTableState.columns,
+                    data=EditDeltaTableState.table_data,
+                    on_cell_edited=EditDeltaTableState.handle_cell_change,
+                    height="60vh",
+                    width="95%",
+                    class_name="overflow-auto border rounded-lg",
                 ),
                 rx.hstack(
                     rx.button(
@@ -312,6 +301,9 @@ def editable_table_component() -> rx.Component:
                     ),
                     justify="end",
                     class_name="w-full mt-4",
+                ),
+                rx.cond(
+                    EditDeltaTableState.is_saving, loading_spinner("Saving changes...")
                 ),
                 align="start",
                 class_name="w-full",

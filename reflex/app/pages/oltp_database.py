@@ -1,137 +1,117 @@
 import reflex as rx
 from app.components.page_layout import main_layout
 from app.components.tabbed_page_template import tabbed_page_template
+from app.components.loading_spinner import loading_spinner
 from app.states.oltp_database_state import OltpDatabaseState
 from app import theme
 
 CODE_SNIPPET = '''
-import reflex as rx
 import uuid
+import reflex as rx
 import pandas as pd
+
 from databricks.sdk import WorkspaceClient
 import psycopg
 from psycopg_pool import ConnectionPool
-from typing import Union, Optional
-import datetime
 
-# This module-level variable will cache the connection pool across the app.
-_pool: Optional[ConnectionPool] = None
 
-# Define a custom connection class to handle token rotation.
+w = WorkspaceClient()
+
+
 class RotatingTokenConnection(psycopg.Connection):
-    def __init__(self, *args, **kwargs):
-        self._instance_name = kwargs.pop("_instance_name")
-        super().__init__(*args, **kwargs)
-
     @classmethod
-    def connect(cls, *args, **kwargs):
-        if "_instance_name" in kwargs:
-            instance_name = kwargs["_instance_name"]
-            # Generate a fresh OAuth token for each new connection.
-            w = WorkspaceClient()
-            credential = w.database.generate_database_credential(
-                request_id=str(uuid.uuid4()), instance_names=[instance_name]
-            )
-            kwargs["password"] = credential.token
-        return super().connect(*args, **kwargs)
+    def connect(cls, conninfo: str = "", **kwargs):
+        kwargs["password"] = w.database.generate_database_credential(
+            request_id=str(uuid.uuid4()),
+            instance_names=[kwargs.pop("_instance_name")]
+        ).token
+        kwargs.setdefault("sslmode", "require")
+        return super().connect(conninfo, **kwargs)
 
 
-def build_pool(instance_name: str, host: str, user: str, database: str) -> ConnectionPool:
-    """Builds and returns a new connection pool with token rotation."""
-    # Note: sslmode is set to require to ensure encrypted connections.
-    return ConnectionPool(
-        conninfo=f"host={host} dbname={database} user={user} sslmode=require",
-        min_size=1,
-        max_size=5,
-        open=True,
-        kwargs={"_instance_name": instance_name},
-        connection_class=RotatingTokenConnection,
-    )
+_pool = None
 
-def query_df(query: str, params=None) -> pd.DataFrame:
-    """Executes a query using the global pool and returns a DataFrame."""
+def get_pool(instance_name: str, host: str, user: str, database: str) -> ConnectionPool:
     global _pool
     if _pool is None:
-        raise ConnectionError("Connection pool is not initialized.")
-    with _pool.connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(query, params)
-            if cursor.description is None:
+        _pool = ConnectionPool(
+            conninfo=f"host={host} dbname={database} user={user}",
+            connection_class=RotatingTokenConnection,
+            kwargs={"_instance_name": instance_name},
+            min_size=1,
+            max_size=5,
+            open=True,
+        )
+    return _pool
+
+
+def query_df(pool: ConnectionPool, sql: str) -> pd.DataFrame:
+    with pool.connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            if cur.description is None:
                 return pd.DataFrame()
-            cols = [desc[0] for desc in cursor.description]
-            return pd.DataFrame(cursor.fetchall(), columns=cols)
-
-
-def upsert_app_state(schema: str, table: str, session_id: str, key: str, value: str):
-    """Helper to create a table and upsert a key-value pair for a session."""
-    create_sql = f"""
-    CREATE TABLE IF NOT EXISTS {schema}.{table} (
-        session_id TEXT,
-        key TEXT,
-        value TEXT,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (session_id, key)
-    );
-    """
-    query_df(create_sql)
-
-    upsert_sql = f"""
-    INSERT INTO {schema}.{table} (session_id, key, value, updated_at) 
-    VALUES (%(session_id)s, %(key)s, %(value)s, CURRENT_TIMESTAMP)
-    ON CONFLICT (session_id, key) DO UPDATE SET
-        value = EXCLUDED.value,
-        updated_at = EXCLUDED.updated_at;
-    """
-    query_df(upsert_sql, params={"session_id": session_id, "key": key, "value": value})
+            cols = [d.name for d in cur.description]
+            rows = cur.fetchall()
+    return pd.DataFrame(rows, columns=cols)
 
 
 class OltpDatabaseState(rx.State):
-    session_id: str = str(uuid.uuid4())
-    selected_instance: str = "your_instance_name"
+    session_id: str = ""
+    instance_name: str = "dbase_instance"
     database: str = "databricks_postgres"
-    schema_name: str = "public"
-    table_name: str = "app_state"
-    result_data: list[dict[str, Union[str, int, float, bool, None, datetime.datetime]]] = []
+    schema: str = "public"
+    table: str = "app_state"
+    df_data: list[list] = []
+    df_columns: list[dict] = []
     is_loading: bool = False
     error_message: str = ""
 
     @rx.event(background=True)
-    async def run_query(self):
-        global _pool
+    async def on_load(self):
         async with self:
             self.is_loading = True
             self.error_message = ""
+            self.session_id = str(uuid.uuid4())
+
         try:
-            # Initialize the pool if it's the first run.
-            if _pool is None:
-                w = WorkspaceClient()
-                user = w.current_user.me().user_name
-                instance = w.database.get_database_instance(name=self.selected_instance)
-                host = instance.read_write_dns
-                _pool = build_pool(
-                    instance_name=self.selected_instance,
-                    host=host, user=user, database=self.database
-                )
+            user = w.current_user.me().user_name
+            host = w.database.get_database_instance(name=self.instance_name).read_write_dns
+            pool = get_pool(self.instance_name, host, user, self.database)
 
-            # Create table and insert/update a record for this session.
-            upsert_app_state(
-                self.schema_name, self.table_name, self.session_id, "feedback_message", "true"
-            )
+            with pool.connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"""
+                    CREATE TABLE IF NOT EXISTS {self.schema}.{self.table} (
+                        session_id TEXT,
+                        key TEXT,
+                        value TEXT,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (session_id, key)
+                    )
+                    """)
 
-            # Fetch the data to display.
-            select_sql = f"SELECT * FROM {self.schema_name}.{self.table_name} WHERE session_id = %(session_id)s"
-            df = query_df(select_sql, params={"session_id": self.session_id})
+                    cur.execute(f"""
+                        INSERT INTO {self.schema}.{self.table} (session_id, key, value, updated_at)
+                        VALUES ('{self.session_id}', 'feedback_message', 'true', CURRENT_TIMESTAMP)
+                        ON CONFLICT (session_id, key) DO UPDATE
+                        SET value = EXCLUDED.value,
+                            updated_at = CURRENT_TIMESTAMP
+                    """)
+
+            df = query_df(pool, f"SELECT * FROM {self.schema}.{self.table} WHERE session_id = '{self.session_id}'")
+            data = df.values.tolist()
+            columns = [{"title": col, "id": col, "type": "str"} for col in df.columns]
 
             async with self:
-                self.result_data = df.to_dict("records")
-
+                self.df_data = data
+                self.df_columns = columns
         except Exception as e:
             async with self:
-                self.error_message = f"An error occurred: {e}"
+                self.error_message = str(e)
         finally:
             async with self:
                 self.is_loading = False
-
 '''
 
 
@@ -189,16 +169,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE app_state TO "099f0306-9e29-4a87-8
                     "Dependencies", size="4", class_name="font-semibold text-gray-800"
                 ),
                 rx.el.ul(
-                    rx.el.li(
-                        rx.link(
-                            "reflex",
-                            href="https://pypi.org/project/reflex/",
-                            is_external=True,
-                        )
-                    ),
-                    rx.el.li("databricks-sdk>=0.60.0"),
                     rx.el.li("psycopg[binary]"),
-                    rx.el.li("psycopg-pool"),
+                    rx.el.li("psycopg_pool"),
+                    rx.el.li("databricks-sdk"),
+                    rx.el.li("reflex"),
                     rx.el.li("pandas"),
                     class_name="list-disc list-inside text-sm text-gray-600 pl-2",
                 ),
@@ -224,11 +198,10 @@ def oltp_db_content() -> rx.Component:
         rx.hstack(
             rx.vstack(
                 rx.text("Instance Name", class_name="font-semibold text-sm"),
-                rx.select(
-                    OltpDatabaseState.instance_names,
-                    placeholder="Select an instance...",
-                    on_change=OltpDatabaseState.set_selected_instance,
-                    value=OltpDatabaseState.selected_instance,
+                rx.el.input(
+                    default_value=OltpDatabaseState.instance_name,
+                    on_change=OltpDatabaseState.set_instance_name,
+                    class_name="w-full p-2 border rounded-md",
                 ),
                 align="start",
                 width="100%",
@@ -256,8 +229,8 @@ def oltp_db_content() -> rx.Component:
             rx.vstack(
                 rx.text("Table", class_name="font-semibold text-sm"),
                 rx.el.input(
-                    default_value=OltpDatabaseState.table_name,
-                    on_change=OltpDatabaseState.set_table_name,
+                    default_value=OltpDatabaseState.table,
+                    on_change=OltpDatabaseState.set_table,
                     class_name="w-full p-2 border rounded-md",
                 ),
                 align="start",
@@ -285,19 +258,15 @@ def oltp_db_content() -> rx.Component:
         ),
         rx.cond(
             OltpDatabaseState.is_loading,
-            rx.vstack(
-                rx.spinner(size="3"),
-                rx.text("Connecting to database and running query..."),
-                align="center",
-                justify="center",
-                class_name="w-full h-48 bg-gray-50 rounded-lg mt-4",
-            ),
+            loading_spinner("Connecting to database and running query..."),
             rx.cond(
-                OltpDatabaseState.result_data,
+                OltpDatabaseState.df_data,
                 rx.data_editor(
-                    data=OltpDatabaseState.result_data_for_editor,
-                    columns=OltpDatabaseState.result_columns_for_editor,
-                    class_name="mt-4 w-full",
+                    data=OltpDatabaseState.df_data,
+                    columns=OltpDatabaseState.df_columns,
+                    height="60vh",
+                    width="95%",
+                    class_name="mt-4 overflow-auto",
                     is_readonly=True,
                 ),
                 rx.box(
