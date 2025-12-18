@@ -3,6 +3,7 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.core import Config
 from typing import Any
 import logging
+import asyncio
 
 
 class GenieState(rx.State):
@@ -112,19 +113,26 @@ class GenieState(rx.State):
             self.add_message("user", "text", user_input)
             self.is_loading = True
             self.error_message = ""
+            space_id = self.genie_space_id
+            conversation_id = self.conversation_id
+        yield
         try:
             w = WorkspaceClient()
-            response = None
-            if not self.conversation_id:
-                response = w.genie.start_conversation_and_wait(
-                    space_id=self.genie_space_id, content=user_input
-                )
-            else:
-                response = w.genie.create_message_and_wait(
-                    space_id=self.genie_space_id,
-                    conversation_id=self.conversation_id,
-                    content=user_input,
-                )
+            loop = asyncio.get_running_loop()
+
+            def _call_genie(sid, cid, content):
+                if not cid:
+                    return w.genie.start_conversation_and_wait(
+                        space_id=sid, content=content
+                    )
+                else:
+                    return w.genie.create_message_and_wait(
+                        space_id=sid, conversation_id=cid, content=content
+                    )
+
+            response = await loop.run_in_executor(
+                None, _call_genie, space_id, conversation_id, user_input
+            )
             async with self:
                 await self.process_genie_response(response)
         except Exception as e:

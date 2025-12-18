@@ -229,7 +229,7 @@ def genie_content() -> rx.Component:
                 on_change=GenieState.set_input_text,
                 class_name="flex-1",
                 on_key_down=GenieState.handle_key_down,
-                default_value=GenieState.input_text,
+                value=GenieState.input_text,
             ),
             rx.button(
                 rx.icon("send", class_name="h-4 w-4"),
