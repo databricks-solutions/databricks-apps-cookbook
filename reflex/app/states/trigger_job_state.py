@@ -9,7 +9,7 @@ def trigger_workflow(job_id: str, params: dict) -> dict:
     w = WorkspaceClient()
     try:
         run = w.jobs.run_now(job_id=int(job_id), job_parameters=params)
-        return {"run_id": run.run_id, "number_in_job": run.number_in_job}
+        return {"run_id": run.run_id, "state": "Triggered"}
     except Exception as e:
         logging.exception(f"Error triggering workflow: {e}")
         return {"error": str(e)}
@@ -40,14 +40,14 @@ class TriggerJobState(rx.State):
             if not self.job_id:
                 yield rx.toast("Please specify a Job ID.", level="warning")
                 return
-            if not self.parameters_input:
-                yield rx.toast("Please specify job parameters.", level="warning")
-                return
             self.is_loading = True
         yield
         try:
             try:
-                params = json.loads(self.parameters_input.strip())
+                if not self.parameters_input.strip():
+                    params = {}
+                else:
+                    params = json.loads(self.parameters_input.strip())
             except json.JSONDecodeError as e:
                 logging.exception(f"Invalid JSON parameters: {e}")
                 async with self:

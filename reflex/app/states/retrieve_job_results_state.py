@@ -42,21 +42,40 @@ class RetrieveJobResultsState(rx.State):
                     self.error_message = "Task Run ID must be a valid number."
                     yield rx.toast("Task Run ID must be a valid number.", level="error")
                 return
-            run_output = w.jobs.get_run_output(run_id=run_id_int)
-            output_dict = run_output.as_dict()
+            run = w.jobs.get_run(run_id=run_id_int)
+            agg_sql = []
+            agg_dbt = []
+            agg_job = []
+            agg_nb = []
+
+            def _collect(output_resp, name):
+                d = output_resp.as_dict()
+                if "sql_output" in d:
+                    agg_sql.append({"task": name, "output": d["sql_output"]})
+                if "dbt_output" in d:
+                    agg_dbt.append({"task": name, "output": d["dbt_output"]})
+                if "run_job_output" in d:
+                    agg_job.append({"task": name, "output": d["run_job_output"]})
+                if "notebook_output" in d:
+                    agg_nb.append({"task": name, "output": d["notebook_output"]})
+
+            if run.tasks:
+                for task in run.tasks:
+                    if task.run_id:
+                        t_out = w.jobs.get_run_output(run_id=task.run_id)
+                        _collect(t_out, task.task_key or f"Task {task.run_id}")
+            else:
+                run_output = w.jobs.get_run_output(run_id=run_id_int)
+                _collect(run_output, "Main Run")
             async with self:
-                if "sql_output" in output_dict:
-                    self.sql_output = json.dumps(output_dict["sql_output"], indent=2)
-                if "dbt_output" in output_dict:
-                    self.dbt_output = json.dumps(output_dict["dbt_output"], indent=2)
-                if "run_job_output" in output_dict:
-                    self.run_job_output = json.dumps(
-                        output_dict["run_job_output"], indent=2
-                    )
-                if "notebook_output" in output_dict:
-                    self.notebook_output = json.dumps(
-                        output_dict["notebook_output"], indent=2
-                    )
+                if agg_sql:
+                    self.sql_output = json.dumps(agg_sql, indent=2)
+                if agg_dbt:
+                    self.dbt_output = json.dumps(agg_dbt, indent=2)
+                if agg_job:
+                    self.run_job_output = json.dumps(agg_job, indent=2)
+                if agg_nb:
+                    self.notebook_output = json.dumps(agg_nb, indent=2)
                 yield rx.toast("Results retrieved successfully.", level="success")
         except Exception as e:
             logging.exception(f"Error retrieving job results: {e}")

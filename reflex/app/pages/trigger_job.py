@@ -4,6 +4,7 @@ from app.components.tabbed_page_template import (
     tabbed_page_template,
     placeholder_requirements,
 )
+from app.components.loading_spinner import loading_spinner
 from app.states.trigger_job_state import TriggerJobState
 from app import theme
 
@@ -15,7 +16,7 @@ def trigger_workflow(job_id: str, params: dict):
     w = WorkspaceClient()
     try:
         run = w.jobs.run_now(job_id=int(job_id), job_parameters=params)
-        return {"run_id": run.run_id, "number_in_job": run.number_in_job}
+        return {"run_id": run.run_id, "state": "Triggered"}
     except Exception as e:
         return {"error": str(e)}
 
@@ -134,10 +135,11 @@ def trigger_job_content() -> rx.Component:
         ),
         rx.vstack(
             rx.text(
-                "Specify job parameters as JSON:", class_name="font-semibold text-sm"
+                "Specify job parameters as JSON (optional):",
+                class_name="font-semibold text-sm",
             ),
             rx.text_area(
-                placeholder='{"key": "value"}',
+                placeholder='{"key": "value"} or leave empty',
                 on_change=TriggerJobState.set_parameters_input,
                 class_name="w-full h-32 font-mono text-sm",
                 default_value=TriggerJobState.parameters_input,
@@ -151,6 +153,7 @@ def trigger_job_content() -> rx.Component:
             bg=theme.PRIMARY_COLOR,
             class_name="text-white",
         ),
+        rx.cond(TriggerJobState.is_loading, loading_spinner("Triggering job...")),
         rx.cond(
             TriggerJobState.error_message,
             rx.box(
