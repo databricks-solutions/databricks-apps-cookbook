@@ -7,14 +7,40 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
 
 
-def get_client_obo(headers: dict[str, str]) -> WorkspaceClient:
+def get_client_obo(headers) -> WorkspaceClient:
     """
     Returns a WorkspaceClient configured for On-Behalf-Of (OBO) authentication.
     It attempts to retrieve the 'x-forwarded-access-token' from the request headers.
     """
-    token = headers.get("x-forwarded-access-token")
-    host = headers.get("x-forwarded-host")
-    return WorkspaceClient(host=host, token=token)
+    token = getattr(headers, "x_forwarded_access_token", "")
+    host = getattr(headers, "x_forwarded_host", "")
+    return WorkspaceClient(host=host, token=token, auth_type="pat")
+
+
+def init_mcp_session(headers, connection_name: str) -> Optional[str]:
+    """Initializes an MCP session and returns the session ID."""
+    w = get_client_obo(headers)
+    init_payload = {
+        "jsonrpc": "2.0",
+        "id": "init-auto",
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "reflex-cookbook", "version": "1.0"},
+        },
+    }
+    response = w.serving_endpoints.http_request(
+        conn=connection_name,
+        method=ExternalFunctionRequestHttpMethod.POST,
+        path="/",
+        json=init_payload,
+    )
+    if hasattr(response, "headers") and response.headers:
+        return response.headers.get("mcp-session-id") or response.headers.get(
+            "Mcp-Session-Id"
+        )
+    return None
 
 
 def is_connection_login_error(error_msg: str) -> bool:
@@ -108,31 +134,11 @@ class ConnectMcpServerState(rx.State):
                 and (payload.get("method") != "initialize")
             ):
                 try:
-                    init_payload = {
-                        "jsonrpc": "2.0",
-                        "id": "init-auto",
-                        "method": "initialize",
-                        "params": {
-                            "protocolVersion": "2024-11-05",
-                            "capabilities": {},
-                            "clientInfo": {"name": "reflex-cookbook", "version": "1.0"},
-                        },
-                    }
-                    init_response = w.serving_endpoints.http_request(
-                        conn=self.connection_name,
-                        method=ExternalFunctionRequestHttpMethod.POST,
-                        path="/",
-                        headers=req_headers,
-                        json=init_payload,
-                    )
-                    if hasattr(init_response, "headers") and init_response.headers:
-                        sid = init_response.headers.get(
-                            "mcp-session-id"
-                        ) or init_response.headers.get("Mcp-Session-Id")
-                        if sid:
-                            req_headers["Mcp-Session-Id"] = sid
-                            async with self:
-                                self.mcp_session_id = sid
+                    sid = init_mcp_session(headers, self.connection_name)
+                    if sid:
+                        req_headers["Mcp-Session-Id"] = sid
+                        async with self:
+                            self.mcp_session_id = sid
                 except Exception as e:
                     logging.exception(f"Auto-init failed: {e}")
             response = w.serving_endpoints.http_request(

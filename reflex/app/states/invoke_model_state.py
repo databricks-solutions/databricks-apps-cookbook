@@ -66,22 +66,24 @@ class InvokeModelState(rx.State):
     @rx.event(background=True)
     async def invoke_llm(self):
         async with self:
-            if not self.selected_model:
+            current_model = self.selected_model
+            current_prompt = self.prompt
+            current_temperature = self.temperature
+            if not current_model:
                 self.error_message = "Please select a model."
                 return
-            if not self.prompt:
+            if not current_prompt:
                 self.error_message = "Please enter a prompt."
                 return
-            self.is_invoking = True
+            self.is_loading = True
             self.error_message = ""
             self.response_data = {}
+        yield
         try:
             w = WorkspaceClient()
-            messages = [ChatMessage(role=ChatMessageRole.USER, content=self.prompt)]
+            messages = [ChatMessage(role=ChatMessageRole.USER, content=current_prompt)]
             response = w.serving_endpoints.query(
-                name=self.selected_model,
-                messages=messages,
-                temperature=self.temperature,
+                name=current_model, messages=messages, temperature=current_temperature
             )
             async with self:
                 self.response_data = response.as_dict()
@@ -91,7 +93,7 @@ class InvokeModelState(rx.State):
                 self.error_message = f"Error invoking LLM: {e}"
         finally:
             async with self:
-                self.is_invoking = False
+                self.is_loading = False
 
     @rx.event(background=True)
     async def invoke_traditional_ml(self):
@@ -102,9 +104,10 @@ class InvokeModelState(rx.State):
             if not self.input_value:
                 self.error_message = "Please enter input data."
                 return
-            self.is_invoking = True
+            self.is_loading = True
             self.error_message = ""
             self.response_data = {}
+        yield
         try:
             input_json = json.loads(self.input_value)
             w = WorkspaceClient()
@@ -123,4 +126,4 @@ class InvokeModelState(rx.State):
                 self.error_message = f"Error invoking model: {e}"
         finally:
             async with self:
-                self.is_invoking = False
+                self.is_loading = False

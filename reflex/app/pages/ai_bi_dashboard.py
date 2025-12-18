@@ -1,29 +1,54 @@
 import reflex as rx
 from app.components.page_layout import main_layout
 from app.components.tabbed_page_template import tabbed_page_template
+from app.components.loading_spinner import loading_spinner
 from app.states.ai_bi_dashboard_state import AiBiDashboardState
 from app import theme
 
 CODE_SNIPPET = """
 import reflex as rx
 import requests
+import time
 from databricks.sdk.core import Config
 
 # 1. Helper to fetch published dashboards from Databricks API
 def get_published_dashboards():
     cfg = Config()
     headers = {"Authorization": f"Bearer {cfg.token}"}
-    # The Lakeview API endpoint for listing dashboards
-    url = f"{cfg.host}/api/2.0/lakeview/dashboards"
+    host = cfg.host.rstrip("/")
+    url = f"{host}/api/2.0/lakeview/dashboards"
 
-    response = requests.get(url, headers=headers)
+    def fetch_with_retry(target_url):
+        retries = 3
+        delay = 1
+        for attempt in range(retries + 1):
+            response = requests.get(target_url, headers=headers)
+            if response.status_code == 429:
+                if attempt < retries:
+                    time.sleep(delay)
+                    delay *= 2
+                    continue
+            return response
+        return None
+
+    # Fetch all dashboards
+    response = fetch_with_retry(url)
+    if not response: return {}
     response.raise_for_status()
 
     data = response.json()
     published = {}
     for d in data.get("dashboards", []):
-        if d.get("published"):
-            published[d.get("display_name")] = d.get("dashboard_id")
+        dash_id = d.get("dashboard_id")
+        display = d.get("display_name", "Untitled")
+
+        # Check published status individually
+        pub_url = f"{host}/api/2.0/lakeview/dashboards/{dash_id}/published"
+        pub_resp = fetch_with_retry(pub_url)
+
+        if pub_resp and pub_resp.status_code == 200:
+            published[display] = dash_id
+
     return published
 
 class AiBiDashboardState(rx.State):
@@ -52,9 +77,10 @@ class AiBiDashboardState(rx.State):
     def update_src(self):
         # Construct the embed URL
         cfg = Config()
+        host = cfg.host.rstrip("/")
         dash_id = self.dashboard_options.get(self.selected_dashboard)
         if dash_id:
-            self.iframe_source = f"{cfg.host}/dashboardsv3/{dash_id}/published?embed=true"
+            self.iframe_source = f"{host}/embed/dashboardsv3/{dash_id}"
 """
 
 
@@ -143,15 +169,7 @@ def ai_bi_dashboard_content() -> rx.Component:
             ),
             rx.cond(
                 AiBiDashboardState.is_loading,
-                rx.vstack(
-                    rx.spinner(size="3"),
-                    rx.text(
-                        "Loading published dashboards...", class_name="text-gray-500"
-                    ),
-                    align="center",
-                    justify="center",
-                    class_name="w-full h-64 bg-gray-50 rounded-lg",
-                ),
+                loading_spinner("Loading published dashboards..."),
                 rx.box(
                     rx.text(
                         "No published dashboards found or selected.",

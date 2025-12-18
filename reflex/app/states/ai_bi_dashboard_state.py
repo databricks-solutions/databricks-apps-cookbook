@@ -1,6 +1,7 @@
 import reflex as rx
 import requests
 import logging
+import time
 from databricks.sdk.core import Config
 
 
@@ -14,16 +15,38 @@ def get_published_dashboards() -> dict[str, str]:
     headers = {"Authorization": f"Bearer {token}"}
     host = cfg.host.rstrip("/")
     url = f"{host}/api/2.0/lakeview/dashboards"
-    response = requests.get(url, headers=headers)
+
+    def fetch_with_retry(target_url):
+        retries = 3
+        delay = 1
+        for attempt in range(retries + 1):
+            response = requests.get(target_url, headers=headers)
+            if response.status_code == 429:
+                if attempt < retries:
+                    logging.warning(
+                        f"Rate limit hit (429) when fetching dashboards. Retrying in {delay} seconds..."
+                    )
+                    time.sleep(delay)
+                    delay *= 2
+                    continue
+            return response
+        return None
+
+    response = fetch_with_retry(url)
+    if not response:
+        return {}
     response.raise_for_status()
     data = response.json()
     published_dashboards = {}
     for dashboard in data.get("dashboards", []):
-        if dashboard.get("published"):
-            display_name = dashboard.get("display_name", "Untitled")
-            dashboard_id = dashboard.get("dashboard_id")
-            if display_name and dashboard_id:
-                published_dashboards[display_name] = dashboard_id
+        dashboard_id = dashboard.get("dashboard_id")
+        display_name = dashboard.get("display_name", "Untitled")
+        if not dashboard_id:
+            continue
+        pub_url = f"{host}/api/2.0/lakeview/dashboards/{dashboard_id}/published"
+        pub_response = fetch_with_retry(pub_url)
+        if pub_response and pub_response.status_code == 200:
+            published_dashboards[display_name] = dashboard_id
     return published_dashboards
 
 
@@ -70,9 +93,7 @@ class AiBiDashboardState(rx.State):
         if dashboard_id:
             cfg = Config()
             host = cfg.host.rstrip("/")
-            self.iframe_source = (
-                f"{host}/dashboardsv3/{dashboard_id}/published?embed=true"
-            )
+            self.iframe_source = f"{host}/embed/dashboardsv3/{dashboard_id}"
 
     @rx.event
     def set_selected_dashboard(self, value: str):

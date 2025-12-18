@@ -321,7 +321,7 @@ def invoke_model_content() -> rx.Component:
                 rx.button(
                     "Invoke LLM",
                     on_click=InvokeModelState.invoke_llm,
-                    is_loading=InvokeModelState.is_invoking,
+                    is_loading=InvokeModelState.is_loading,
                     bg=theme.PRIMARY_COLOR,
                     class_name="text-white",
                     _hover={"opacity": 0.8},
@@ -349,7 +349,7 @@ def invoke_model_content() -> rx.Component:
                 rx.button(
                     "Invoke Model",
                     on_click=InvokeModelState.invoke_traditional_ml,
-                    is_loading=InvokeModelState.is_invoking,
+                    is_loading=InvokeModelState.is_loading,
                     bg=theme.PRIMARY_COLOR,
                     class_name="text-white",
                     _hover={"opacity": 0.8},

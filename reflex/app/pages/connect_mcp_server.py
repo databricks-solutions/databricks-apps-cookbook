@@ -62,15 +62,25 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
 import json
 
-token = st.context.headers.get("x-forwarded-access-token")
-w = WorkspaceClient(token=token, auth_type="pat")
+def get_client_obo(headers) -> WorkspaceClient:
+    # Returns a WorkspaceClient configured for On-Behalf-Of (OBO) authentication.
+    # It attempts to retrieve the 'x-forwarded-access-token' from the request headers.
+    token = getattr(headers, "x_forwarded_access_token", "")
+    host = getattr(headers, "x_forwarded_host", "")
+    return WorkspaceClient(host=host, token=token, auth_type="pat")
 
-def init_mcp_session(w: WorkspaceClient, connection_name: str):
+def init_mcp_session(headers, connection_name: str) -> Optional[str]:
+    #Initializes an MCP session and returns the session ID.
+    w = get_client_obo(headers)
     init_payload = {
         "jsonrpc": "2.0",
-        "id": "init-1",
+        "id": "init-auto",
         "method": "initialize",
-        "params": {}
+        "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "reflex-cookbook", "version": "1.0"},
+        },
     }
     response = w.serving_endpoints.http_request(
         conn=connection_name,
@@ -78,29 +88,39 @@ def init_mcp_session(w: WorkspaceClient, connection_name: str):
         path="/",
         json=init_payload,
     )
-    return response.headers.get("mcp-session-id")
+    if hasattr(response, "headers") and response.headers:
+        return response.headers.get("mcp-session-id") or response.headers.get(
+            "Mcp-Session-Id"
+        )
+    return None
 
 class McpState(rx.State):
     response_data: str = ""
 
+    @rx.event
     async def send_request(self):
+        # 1. Get headers
+        headers = self.router.headers
         connection_name = "github_u2m_connection"
-        http_method = ExternalFunctionRequestHttpMethod.POST
-        path = "/"
-        headers = {"Content-Type": "application/json"}
-        payload = {"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}
 
-        session_id = init_mcp_session(w, connection_name)
-        headers["Mcp-Session-Id"] = session_id
+        # 2. Initialize Session
+        session_id = init_mcp_session(headers, connection_name)
+
+        # 3. Get client and make request with session ID
+        w = get_client_obo(headers)
+        req_headers = {"Content-Type": "application/json", "Mcp-Session-Id": session_id}
+        payload = {"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}
 
         response = w.serving_endpoints.http_request(
             conn=connection_name,
-            method=http_method,
-            path=path,
-            headers=headers,
+            method=ExternalFunctionRequestHttpMethod.POST,
+            path="/",
+            headers=req_headers,
             json=payload,
         )
-        self.response_data = response.json()
+
+        # 4. Update state
+        self.response_data = json.dumps(response, indent=2)
 """,
         ),
         _pattern_accordion(
