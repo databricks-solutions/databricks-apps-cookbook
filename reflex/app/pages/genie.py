@@ -4,6 +4,7 @@ from app.components.tabbed_page_template import (
     tabbed_page_template,
     placeholder_requirements,
 )
+from app.components.loading_spinner import loading_spinner
 from app.states.genie_state import GenieState
 from app import theme
 
@@ -126,10 +127,13 @@ def render_chat_message(message: dict) -> rx.Component:
                             "Query Result",
                             class_name="text-xs font-semibold text-gray-500 mb-1",
                         ),
-                        rx.data_editor(
-                            data=message["content"].to(list),
-                            is_readonly=True,
-                            class_name="h-64 border rounded-md overflow-auto bg-white",
+                        rx.data_table(
+                            data=message["content"],
+                            width="100%",
+                            pagination=True,
+                            search=True,
+                            sort=True,
+                            class_name="border rounded-md overflow-auto bg-white max-h-[60vh]",
                         ),
                         class_name="mt-2 w-full",
                     ),
@@ -212,17 +216,7 @@ def genie_content() -> rx.Component:
         rx.box(
             rx.vstack(
                 rx.foreach(GenieState.messages, render_chat_message),
-                rx.cond(
-                    GenieState.is_loading,
-                    rx.hstack(
-                        rx.spinner(size="2", class_name="mr-2"),
-                        rx.text(
-                            "Genie is thinking...", class_name="text-sm text-gray-500"
-                        ),
-                        align="center",
-                        class_name="p-4",
-                    ),
-                ),
+                rx.cond(GenieState.is_loading, loading_spinner("Genie is thinking...")),
                 align="start",
                 width="100%",
                 spacing="2",
