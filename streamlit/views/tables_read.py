@@ -84,7 +84,7 @@ with tab_b:
         cfg = Config()  # Set the DATABRICKS_HOST environment variable when running locally
 
 
-        @st.cache_resource(ttl="1h") # connection is cached
+        @st.cache_resource(ttl=300, show_spinner=True) # connection is cached
         def get_connection(http_path):
             return sql.connect(
                 server_hostname=cfg.host,

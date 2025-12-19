@@ -24,7 +24,7 @@ warehouse_paths = {wh.name: wh.odbc_params.path for wh in warehouses}
 catalogs = w.catalogs.list()
 
 
-@st.cache_resource(ttl="1h")
+@st.cache_resource(ttl=300, show_spinner=True)
 def get_connection(http_path):
     return sql.connect(
         server_hostname=cfg.host,
