@@ -34,8 +34,12 @@ def read_table(table_name: str, conn) -> pd.DataFrame:
 def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
     with conn.cursor() as cursor:
         rows = list(df.itertuples(index=False))
-        values = ",".join([f"({','.join(map(repr, row))})" for row in rows])
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {values}")
+        num_cols = len(rows[0])
+        placeholders = ",".join(
+            ["(" + ",".join(["%s"] * num_cols) + ")"] * len(rows)
+        )
+        params = [value for row in rows for value in row]
+        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {placeholders}", params)
 
 def layout():
     return dbc.Container([
@@ -111,8 +115,12 @@ def read_table(table_name: str, conn) -> pd.DataFrame:
 def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
     with conn.cursor() as cursor:
         rows = list(df.itertuples(index=False))
-        values = ",".join([f"({','.join(map(repr, row))})" for row in rows])
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {values}")
+        num_cols = len(rows[0])
+        placeholders = ",".join(
+            ["(" + ",".join(["%s"] * num_cols) + ")"] * len(rows)
+        )
+        params = [value for row in rows for value in row]
+        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {placeholders}", params)
 
 http_path_input = "/sql/1.0/warehouses/xxxxxx"
 table_name = "catalog.schema.table"

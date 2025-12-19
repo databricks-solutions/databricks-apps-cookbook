@@ -37,10 +37,15 @@ def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
     progress = st.empty()
     with conn.cursor() as cursor:
         rows = list(df.itertuples(index=False))
-        values = ",".join([f"({','.join(map(repr, row))})" for row in rows])
+        num_cols = len(rows[0])
+        placeholders = ",".join(
+            ["(" + ",".join(["%s"] * num_cols) + ")"] * len(rows)
+        )
+        params = [value for row in rows for value in row]
+        
         with progress:
             st.info("Calling Databricks SQL...")
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {values}")
+        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {placeholders}", params)
     progress.empty()
     st.success("Changes saved")
 
