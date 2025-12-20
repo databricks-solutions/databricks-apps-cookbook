@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Chat with a Genie Space
 
-This app uses the [AI/BI Genie](https://www.databricks.com/product/ai-bi) [Conversations API](https://docs.databricks.com/api/workspace/genie) to let users ask questions about your data for instant insights.
+This app uses the [AI/BI Genie](https://www.databricks.com/product/ai-bi) [Conversations API](https://docs.databricks.com/api/workspace/genie) to let users ask questions about your data for instant insights (answers and table-like output). Visualizations aren't yet supported in the API.
 
 ## Code snippet
 
@@ -33,7 +33,7 @@ def process_genie_response(response):
             print(f"A: {i.query.description}")
             print(f"Data: {data}")
             print(f"Generated code: {i.query.query}")
-
+            
 
 # Configuration
 w = WorkspaceClient()

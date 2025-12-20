@@ -13,7 +13,7 @@ st.subheader("Genie - Converse with your data")
 st.write(
     """
     This app uses [Genie](https://www.databricks.com/product/ai-bi) [API](https://docs.databricks.com/api/workspace/genie) 
-    to let users ask questions about your data for instant insights.
+    to let users ask questions about your data for instant insights (answers and table-like output). You are also able to collect their feedback on the responses. **Visualizations aren't yet supported in the API.**
     """
 )
 
