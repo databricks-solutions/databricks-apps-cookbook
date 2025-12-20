@@ -2,7 +2,7 @@ from typing import Dict
 
 import pandas as pd
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.dashboards import GenieMessage
+from databricks.sdk.service.dashboards import GenieMessage, GenieFeedbackRating
 
 import streamlit as st
 
@@ -43,6 +43,16 @@ with tab_a:
             with st.expander("Show generated code"):
                 st.code(message["code"], language="sql", wrap_lines=True)
 
+
+    def collect_feedback(message_id: str):
+        rating = st.feedback("thumbs", key=f"feedback_{message_id}")
+        mapping = {1: GenieFeedbackRating.POSITIVE, 0: GenieFeedbackRating.NEGATIVE}
+        if rating and message["message_id"]:
+            w.genie.send_message_feedback(
+                genie_space_id, st.session_state.conversation_id, message["message_id"], mapping[rating]
+            )
+
+
     def get_query_result(statement_id: str) -> pd.DataFrame:
         query = w.statement_execution.get_statement(statement_id)
         result = query.result.data_array
@@ -77,6 +87,8 @@ with tab_a:
                 }
                 display_message(message)
                 st.session_state.messages.append(message)
+
+        collect_feedback(response.message_id)
 
     if "messages" not in st.session_state:
         st.session_state.messages = []

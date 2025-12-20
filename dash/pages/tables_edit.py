@@ -33,13 +33,27 @@ def read_table(table_name: str, conn) -> pd.DataFrame:
 
 def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
     with conn.cursor() as cursor:
-        rows = list(df.itertuples(index=False))
-        num_cols = len(rows[0])
-        placeholders = ",".join(
-            ["(" + ",".join(["%s"] * num_cols) + ")"] * len(rows)
-        )
-        params = [value for row in rows for value in row]
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {placeholders}", params)
+        rows = list(df.itertuples(index=False, name=None))
+        if not rows:
+            return
+
+        cols = list(df.columns)
+        num_cols = len(cols)
+        params = {}
+        values_sql_parts = []
+        p = 0
+        for row in rows:
+            ph = []
+            for v in row:
+                key = f"p{p}"
+                ph.append(f":{key}")
+                params[key] = v
+                p += 1
+            values_sql_parts.append("(" + ",".join(ph) + ")")
+
+        values_sql = ",".join(values_sql_parts)
+        col_list_sql = ",".join(cols)
+        cursor.execute(f"INSERT OVERWRITE {table_name} ({col_list_sql}) VALUES {values_sql}", params)
 
 def layout():
     return dbc.Container([
@@ -114,13 +128,27 @@ def read_table(table_name: str, conn) -> pd.DataFrame:
 
 def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
     with conn.cursor() as cursor:
-        rows = list(df.itertuples(index=False))
-        num_cols = len(rows[0])
-        placeholders = ",".join(
-            ["(" + ",".join(["%s"] * num_cols) + ")"] * len(rows)
-        )
-        params = [value for row in rows for value in row]
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {placeholders}", params)
+        rows = list(df.itertuples(index=False, name=None))
+        if not rows:
+            return
+
+        cols = list(df.columns)
+        num_cols = len(cols)
+        params = {}
+        values_sql_parts = []
+        p = 0
+        for row in rows:
+            ph = []
+            for v in row:
+                key = f"p{p}"
+                ph.append(f":{key}")
+                params[key] = v
+                p += 1
+            values_sql_parts.append("(" + ",".join(ph) + ")")
+
+        values_sql = ",".join(values_sql_parts)
+        col_list_sql = ",".join(cols)
+        cursor.execute(f"INSERT OVERWRITE {table_name} ({col_list_sql}) VALUES {values_sql}", params)
 
 http_path_input = "/sql/1.0/warehouses/xxxxxx"
 table_name = "catalog.schema.table"

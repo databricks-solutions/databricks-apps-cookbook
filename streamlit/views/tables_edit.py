@@ -53,16 +53,30 @@ def get_table_names(catalog_name, schema_name):
 def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
     progress = st.empty()
     with conn.cursor() as cursor:
-        rows = list(df.itertuples(index=False))
-        num_cols = len(rows[0])
-        placeholders = ",".join(
-            ["(" + ",".join(["%s"] * num_cols) + ")"] * len(rows)
-        )
-        params = [value for row in rows for value in row]
-        
+        rows = list(df.itertuples(index=False, name=None))
+        if not rows:
+            return
+
+        cols = list(df.columns)
+        num_cols = len(cols)
+        params = {}
+        values_sql_parts = []
+        p = 0
+        for row in rows:
+            ph = []
+            for v in row:
+                key = f"p{p}"
+                ph.append(f":{key}")
+                params[key] = v
+                p += 1
+            values_sql_parts.append("(" + ",".join(ph) + ")")
+
+        values_sql = ",".join(values_sql_parts)
+        col_list_sql = ",".join(cols)
+                
         with progress:
             st.info("Calling Databricks SQL...")
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {placeholders}", params)
+        cursor.execute(f"INSERT OVERWRITE {table_name} ({col_list_sql}) VALUES {values_sql}", params)
     progress.empty()
     st.success("Changes saved")
 
@@ -136,16 +150,30 @@ with tab_b:
         def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
             progress = st.empty()
             with conn.cursor() as cursor:
-                rows = list(df.itertuples(index=False))
-                num_cols = len(rows[0])
-                placeholders = ",".join(
-                    ["(" + ",".join(["%s"] * num_cols) + ")"] * len(rows)
-                )
-                params = [value for row in rows for value in row]
-                
+                rows = list(df.itertuples(index=False, name=None))
+                if not rows:
+                    return
+
+                cols = list(df.columns)
+                num_cols = len(cols)
+                params = {}
+                values_sql_parts = []
+                p = 0
+                for row in rows:
+                    ph = []
+                    for v in row:
+                        key = f"p{p}"
+                        ph.append(f":{key}")
+                        params[key] = v
+                        p += 1
+                    values_sql_parts.append("(" + ",".join(ph) + ")")
+
+                values_sql = ",".join(values_sql_parts)
+                col_list_sql = ",".join(cols)
+                        
                 with progress:
                     st.info("Calling Databricks SQL...")
-                cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {placeholders}", params)
+                cursor.execute(f"INSERT OVERWRITE {table_name} ({col_list_sql}) VALUES {values_sql}", params)
             progress.empty()
             st.success("Changes saved")
 
