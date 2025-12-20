@@ -9,7 +9,7 @@ if "mcp_session_id" not in st.session_state:
     st.session_state.mcp_session_id = None
 
 
-@st.cache_resource
+@st.cache_resource(ttl=300, show_spinner=True)
 def get_client_obo() -> WorkspaceClient:
     user_token = st.context.headers.get("x-forwarded-access-token")
     if not user_token:
