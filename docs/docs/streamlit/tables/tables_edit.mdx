@@ -18,7 +18,7 @@ from databricks.sdk.core import Config
 cfg = Config() # Set the DATABRICKS_HOST environment variable when running locally
 
 
-@st.cache_resource
+@st.cache_resource(ttl=300, show_spinner=True)
 def get_connection(http_path):
     return sql.connect(
         server_hostname=cfg.host,
@@ -36,13 +36,30 @@ def read_table(table_name: str, conn) -> pd.DataFrame:
 def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
     progress = st.empty()
     with conn.cursor() as cursor:
-        rows = list(df.itertuples(index=False))
-        values = ",".join([f"({','.join(map(repr, row))})" for row in rows])
+        rows = list(df.itertuples(index=False, name=None))
+        if not rows:
+            return
+
+        cols = list(df.columns)
+        num_cols = len(cols)
+        params = {}
+        values_sql_parts = []
+        p = 0
+        for row in rows:
+            ph = []
+            for v in row:
+                key = f"p{p}"
+                ph.append(f":{key}")
+                params[key] = v
+                p += 1
+            values_sql_parts.append("(" + ",".join(ph) + ")")
+
+        values_sql = ",".join(values_sql_parts)
+        col_list_sql = ",".join(cols)
+                
         with progress:
             st.info("Calling Databricks SQL...")
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {values}")
-    progress.empty()
-    st.success("Changes saved")
+        cursor.execute(f"INSERT OVERWRITE {table_name} ({col_list_sql}) VALUES {values_sql}", params)
 
 
 http_path_input = st.text_input(
@@ -69,7 +86,7 @@ else:
 
 :::info
 
-This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) to cache the database connection across users, sessions, and reruns. Use Streamlit's caching decorators to implement a caching strategy that works for your use case.
+This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) with a 300-second TTL (time-to-live) to cache the database connection across users, sessions, and reruns. The cached connection will automatically expire after 1 hour, ensuring connections don't become stale. Use Streamlit's caching decorators and TTL parameter to implement a caching strategy that works for your use case.
 
 :::
 

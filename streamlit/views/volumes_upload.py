@@ -21,12 +21,15 @@ def check_upload_permissions(volume_name: str):
     try:
         volume = w.volumes.read(name=volume_name)
         current_user = w.current_user.me()
+        catalog = w.catalogs.get(name=volume.catalog_name)
         grants = w.grants.get_effective(
             securable_type="volume",
             full_name=volume.full_name,
             principal=current_user.user_name,
         )
-
+        if catalog.owner == current_user.user_name:
+            return "Volume and permissions validated"
+        
         if not grants or not grants.privilege_assignments:
             return "Insufficient permissions: No grants found."
 

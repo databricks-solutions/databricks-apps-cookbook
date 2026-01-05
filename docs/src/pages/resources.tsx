@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@theme/Layout";
 import { createClient } from "@sanity/client";
+import FilterPills from "../components/FilterPills";
 
 interface Author {
   name: string;
@@ -19,11 +20,10 @@ interface Resource {
   repoName?: string;
 }
 
-// Create Sanity client
 const client = createClient({
   projectId: "5f7a73bz",
   dataset: "production",
-  useCdn: false, // Since the site is behind Cloudflare, we don't need Sanity CDN
+  useCdn: false,
   apiVersion: "2025-02-06",
 });
 
@@ -37,13 +37,7 @@ function ResourcesPage() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
 
-  const handleFilterChange = (setter, value) => {
-    setter((prev) =>
-      prev.includes(value)
-        ? prev.filter((item) => item !== value)
-        : [...prev, value],
-    );
-  };
+  // no-op helper removed; selection handled inside FilterPills
 
   const filteredResources = resources.filter((resource) => {
     const authorString = resource.authors
@@ -90,9 +84,16 @@ function ResourcesPage() {
             data.map((r) => new Date(r.date).getFullYear().toString()),
           ),
         ].filter((year): year is string => typeof year === "string");
-        setCategories(allCategories.sort());
-        setTypes(allTypes.sort());
-        setYears(allYears.sort().reverse());
+        const sortedCategories = allCategories.sort();
+        const sortedTypes = allTypes.sort();
+        const sortedYears = allYears.sort().reverse();
+        setCategories(sortedCategories);
+        setTypes(sortedTypes);
+        setYears(sortedYears);
+        // Keep selections empty so empty means "show all"
+        setSelectedCategories([]);
+        setSelectedTypes([]);
+        setSelectedYears([]);
       } catch (error) {
         console.error("Error fetching resources:", error);
       }
@@ -108,22 +109,14 @@ function ResourcesPage() {
           <h1 className="mb-4 text-4xl font-bold">Databricks Apps Resources</h1>
           <p className="mb-8">
             A collection of resources for building data and AI applications
-            using Databricks Apps. Submit a resource by{" "}
-            <a
-              href="https://github.com/databricks-solutions/databricks-apps-cookbook/pulls"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline"
-            >
-              raising a PR
-            </a>{" "}
-            or using{" "}
+            using Databricks Apps. Submit a resource using
             <a
               href="https://docs.google.com/forms/d/e/1FAIpQLSe8rW3XUbCDMK2OsgPVVqfKYuVgw4FlnoWHkAksMJTNwKhibQ/viewform?usp=dialog"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:underline"
             >
+              {" "}
               this form
             </a>
             .
@@ -139,59 +132,31 @@ function ResourcesPage() {
 
               <div>
                 <h3 className="mb-2 font-semibold">Category</h3>
-                {categories.map((category) => (
-                  <div key={category}>
-                    <input
-                      type="checkbox"
-                      id={category}
-                      value={category}
-                      onChange={() =>
-                        handleFilterChange(setSelectedCategories, category)
-                      }
-                    />
-                    <label htmlFor={category} className="ml-2">
-                      {category}
-                    </label>
-                  </div>
-                ))}
+                <FilterPills
+                  options={categories}
+                  selected={selectedCategories}
+                  onChange={setSelectedCategories}
+                  className="mb-4"
+                />
               </div>
 
-              <div className="mt-4">
+              <div className="mt-2">
                 <h3 className="mb-2 font-semibold">Type</h3>
-                {types.map((type) => (
-                  <div key={type}>
-                    <input
-                      type="checkbox"
-                      id={type}
-                      value={type}
-                      onChange={() =>
-                        handleFilterChange(setSelectedTypes, type)
-                      }
-                    />
-                    <label htmlFor={type} className="ml-2">
-                      {type}
-                    </label>
-                  </div>
-                ))}
+                <FilterPills
+                  options={types}
+                  selected={selectedTypes}
+                  onChange={setSelectedTypes}
+                  className="mb-4"
+                />
               </div>
 
-              <div className="mt-4">
+              <div className="mt-2">
                 <h3 className="mb-2 font-semibold">Year</h3>
-                {years.map((year) => (
-                  <div key={year}>
-                    <input
-                      type="checkbox"
-                      id={year}
-                      value={year}
-                      onChange={() =>
-                        handleFilterChange(setSelectedYears, year)
-                      }
-                    />
-                    <label htmlFor={year} className="ml-2">
-                      {year}
-                    </label>
-                  </div>
-                ))}
+                <FilterPills
+                  options={years}
+                  selected={selectedYears}
+                  onChange={setSelectedYears}
+                />
               </div>
             </aside>
             <main className="w-full md:w-4/5">

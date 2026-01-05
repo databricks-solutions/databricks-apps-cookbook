@@ -1,0 +1,131 @@
+---
+sidebar_position: 1
+---
+
+# Charts
+
+Use this recipe to visualize data using Streamlit's built-in chart components: area charts, line charts, and bar charts. This example demonstrates loading data from a Unity Catalog table and creating various business insights through different chart visualizations.
+
+## Code snippet
+
+### Load data from a table
+
+```python title="app.py"
+import streamlit as st
+from databricks import sql
+from databricks.sdk.core import Config
+from databricks.sdk import WorkspaceClient
+import pandas as pd
+
+cfg = Config()
+w = WorkspaceClient()
+
+# List available SQL warehouses
+warehouses = w.warehouses.list()
+warehouse_paths = {wh.name: wh.odbc_params.path for wh in warehouses}
+
+# Connect to SQL warehouse
+@st.cache_resource(ttl=300, show_spinner=True)
+def get_connection(http_path):
+    return sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        credentials_provider=lambda: cfg.authenticate,
+    )
+
+# Read table
+def read_table(table_name, conn):
+    with conn.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM {table_name} LIMIT 1000")
+        return cursor.fetchall_arrow().to_pandas()
+
+# Get data
+warehouse_name = "your_warehouse_name"
+table_name = "samples.nyctaxi.trips"
+
+http_path = warehouse_paths[warehouse_name]
+conn = get_connection(http_path)
+df = read_table(table_name, conn)
+
+# Process datetime columns
+df["tpep_pickup_datetime"] = pd.to_datetime(df["tpep_pickup_datetime"])
+df["tpep_dropoff_datetime"] = pd.to_datetime(df["tpep_dropoff_datetime"])
+df["pickup_hour"] = df["tpep_pickup_datetime"].dt.hour
+df["trip_duration_minutes"] = (df["tpep_dropoff_datetime"] - df["tpep_pickup_datetime"]).dt.total_seconds() / 60
+```
+
+### Demand analysis: Trips by hour
+
+```python title="app.py"
+import streamlit as st
+
+# Count trips by hour to understand demand patterns
+hourly_demand = df["pickup_hour"].value_counts().sort_index()
+st.bar_chart(hourly_demand)
+
+peak_hour = hourly_demand.idxmax()
+st.info(f"Peak demand hour: {peak_hour}:00 with {hourly_demand.max()} trips")
+```
+
+### Revenue analysis: Average fare by hour
+
+```python title="app.py"
+import streamlit as st
+
+# Analyze when fares are highest
+avg_fare_by_hour = df.groupby("pickup_hour")["fare_amount"].mean()
+st.line_chart(avg_fare_by_hour)
+
+best_hour = avg_fare_by_hour.idxmax()
+st.success(f"Best earning hour: {best_hour}:00")
+```
+
+### Location analysis: Top pickup zones
+
+```python title="app.py"
+import streamlit as st
+
+# Identify high-demand pickup locations
+top_pickups = df["pickup_zip"].value_counts().head(15)
+st.bar_chart(top_pickups)
+```
+
+### Cumulative revenue over time
+
+```python title="app.py"
+import streamlit as st
+
+# Track total revenue accumulation
+revenue_df = df.set_index("tpep_pickup_datetime")[["fare_amount"]].sort_index()
+revenue_df["cumulative_revenue"] = revenue_df["fare_amount"].cumsum()
+st.area_chart(revenue_df["cumulative_revenue"])
+```
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/)
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN USE` on the SQL warehouse
+- `SELECT` on the Unity Catalog table
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [Pandas](https://pypi.org/project/pandas/) - `pandas`
+
+```python title="requirements.txt"
+streamlit
+databricks-sdk
+databricks-sql-connector
+pandas
+```
+

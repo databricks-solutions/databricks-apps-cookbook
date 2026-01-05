@@ -15,20 +15,16 @@ const config: Config = {
   projectName: "databricks-apps-cookbook",
 
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: "warn",
+    },
+  },
 
   i18n: {
     defaultLocale: "en",
     locales: ["en"],
   },
-
-  scripts: [
-    {
-      src: "https://analytics.pascal-vogel.com/js/script.js",
-      defer: true,
-      "data-domain": "apps-cookbook.dev",
-    },
-  ],
 
   presets: [
     [
@@ -59,6 +55,18 @@ const config: Config = {
   plugins: [
     "./src/plugins/tailwind-config.js",
     require.resolve("docusaurus-lunr-search"),
+    [
+      "./src/plugins/dynamic-routes.js",
+      {
+        routes: [
+          {
+            path: "/gallery/:id",
+            exact: true,
+            component: "@site/src/pages/GalleryApp.tsx",
+          },
+        ],
+      },
+    ],
   ],
 
   themeConfig: {
@@ -96,9 +104,10 @@ const config: Config = {
           position: "left",
           activeBasePath: "docs/category/fastapi",
         },
+        { to: "gallery", label: "Gallery", position: "left" },
         { to: "resources", label: "Resources", position: "left" },
         {
-          href: "https://github.com/pbv0/databricks-apps-cookbook/",
+          href: "https://github.com/databricks-solutions/databricks-apps-cookbook/",
           label: "GitHub",
           position: "right",
         },

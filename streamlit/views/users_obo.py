@@ -2,7 +2,7 @@ import streamlit as st
 from databricks import sql
 from databricks.sdk.core import Config
 from databricks.sdk import WorkspaceClient
-from streamlit.web.server.websocket_headers import _get_websocket_headers
+
 
 cfg = Config()
 
@@ -15,7 +15,7 @@ def get_user_token():
     return user_token
 
 
-@st.cache_resource
+@st.cache_resource(ttl=300, show_spinner=True)
 def get_connection_obo(http_path, user_token):
     if not user_token:
         st.error("User token is required for OBO authentication")
@@ -28,7 +28,7 @@ def get_connection_obo(http_path, user_token):
     )
 
 
-@st.cache_resource
+@st.cache_resource(ttl=300, show_spinner=True)
 def get_connection_service_principal(http_path):
     return sql.connect(
         server_hostname=cfg.host,
@@ -175,7 +175,7 @@ def get_user_token():
     user_token = headers["X-Forwarded-Access-Token"]
     return user_token
 
-@st.cache_resource
+@st.cache_resource(ttl=300, show_spinner=True)
 def connect_with_obo(http_path, user_token):
     return sql.connect(
         server_hostname=cfg.host,

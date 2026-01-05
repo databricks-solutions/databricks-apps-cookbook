@@ -1,0 +1,113 @@
+---
+sidebar_position: 2
+---
+
+# Map display and interaction
+
+This recipe enables you to display geographic data on a map and collect user geo input through interactive map drawing. You can load location data from Unity Catalog tables or use the drawing tools to capture points, polygons, and geofences from users.
+
+## Code snippet
+
+### Display geo data from a table
+
+```python title="app.py"
+import streamlit as st
+from databricks import sql
+from databricks.sdk.core import Config
+from databricks.sdk import WorkspaceClient
+import pandas as pd
+
+cfg = Config()
+w = WorkspaceClient()
+
+# List available SQL warehouses
+warehouses = w.warehouses.list()
+warehouse_paths = {wh.name: wh.odbc_params.path for wh in warehouses}
+
+# Connect to SQL warehouse
+@st.cache_resource(ttl=300, show_spinner=True)
+def get_connection(http_path):
+    return sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        credentials_provider=lambda: cfg.authenticate,
+    )
+
+# Read table
+def read_table(table_name, conn):
+    with conn.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM {table_name}")
+        return cursor.fetchall_arrow().to_pandas()
+
+# Get data and display on map
+warehouse_name = "your_warehouse_name"
+table_name = "samples.accuweather.forecast_daily_calendar_metric"
+
+http_path = warehouse_paths[warehouse_name]
+conn = get_connection(http_path)
+df = read_table(table_name, conn)
+
+# Display map with latitude/longitude columns
+st.map(df, latitude="latitude", longitude="longitude")
+```
+
+### Collect user geo input
+
+```python title="app.py"
+import streamlit as st
+from streamlit_folium import st_folium
+import folium
+from folium.plugins import Draw
+
+# Create a map centered on a location
+m = folium.Map(location=[37.7749, -122.4194], zoom_start=13)
+
+# Enable drawing tools (set True for the tools you want to enable)
+draw = Draw(
+    draw_options={
+        "marker": True,      # For collecting points
+        "polygon": True,     # For collecting geofences/polygons
+        "polyline": True,    # For collecting polylines
+        "rectangle": True,   # For collecting rectangles
+        "circle": True,      # For collecting circles
+        "circlemarker": False,
+    },
+    edit_options={"edit": True},
+)
+draw.add_to(m)
+output = st_folium(m, width=700, height=500)
+
+# Access the drawn geometry
+if output["last_active_drawing"] and "geometry" in output["last_active_drawing"]:
+    geometry = output["last_active_drawing"]["geometry"]
+    st.json(geometry)
+```
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/) _(optional, only for reading table data)_
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/) _(optional, only for reading table data)_
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN USE` on the SQL warehouse _(only required if reading data from tables)_
+- `SELECT` on the Unity Catalog table _(only required if reading data from tables)_
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Streamlit Folium](https://pypi.org/project/streamlit-folium/) - `streamlit-folium`
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk` _(for table data)_
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector` _(for table data)_
+
+```python title="requirements.txt"
+streamlit
+streamlit-folium
+databricks-sdk
+databricks-sql-connector
+```
+

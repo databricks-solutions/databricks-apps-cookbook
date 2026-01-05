@@ -1,0 +1,219 @@
+---
+sidebar_position: 4
+---
+
+# Stream video from volumes
+
+This recipe demonstrates how to stream video files from [Unity Catalog volumes](https://docs.databricks.com/en/volumes/index.html) in a FastAPI application using the [Databricks Files API](https://docs.databricks.com/api/workspace/files) with OAuth authentication.
+
+:::info
+This example uses the `GET` HTTP method to stream video content with support for range requests, enabling features like video seeking and progressive loading. The endpoint uses OAuth 2.0 client credentials flow for secure authentication with the Databricks Files API.
+
+Streaming video chunk by chunk ensures efficient memory usage and allows browsers to start playback before the entire file is downloaded.
+:::
+
+## Code snippet
+
+```python title="app.py"
+import os
+import logging
+from urllib.parse import quote
+
+import requests
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import StreamingResponse
+
+app = FastAPI()
+logger = logging.getLogger(__name__)
+
+
+def get_oauth_token() -> str:
+    """Get OAuth token using client credentials flow (synchronous)"""
+    client_id = os.getenv("DATABRICKS_CLIENT_ID")
+    client_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        raise HTTPException(
+            status_code=500, 
+            detail="DATABRICKS_CLIENT_ID and DATABRICKS_CLIENT_SECRET environment variables must be set"
+        )
+    databricks_host = os.getenv("DATABRICKS_HOST")
+    if not databricks_host:
+        raise HTTPException(status_code=500, detail="DATABRICKS_HOST environment variable must be set")
+    
+    token_endpoint = f"https://{databricks_host}/oidc/v1/token"
+    
+    logger.info(f"Requesting OAuth token from: {token_endpoint}")
+    
+    try:
+        response = requests.post(
+            token_endpoint,
+            auth=(client_id, client_secret),
+            data={
+                'grant_type': 'client_credentials',
+                'scope': 'all-apis'
+            },
+            timeout=30
+        )
+        response.raise_for_status()
+        
+        token_data = response.json()
+        access_token = token_data.get("access_token")
+        
+        if not access_token:
+            logger.error(f"No access_token in response: {token_data}")
+            raise HTTPException(status_code=500, detail="Failed to get access token from response")
+        
+        expires_in = token_data.get("expires_in", 3600)
+        logger.info(f"Successfully obtained OAuth token, expires in {expires_in} seconds")
+        
+        return access_token
+    except requests.RequestException as e:
+        logger.error(f"OAuth token request failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to obtain OAuth token: {str(e)}")
+
+
+@app.get("/api/files-api/video")
+async def stream_video_files_api(request: Request):
+    """Stream video from volume using Databricks Files API with OAuth token chunk by chunk"""
+    try:
+        # Get video path from environment
+        file_path = os.getenv("VIDEO_PATH")
+        if not file_path:
+            raise HTTPException(status_code=400, detail="VIDEO_PATH environment variable not set")
+        
+        # Get Databricks host
+        databricks_host = os.getenv("DATABRICKS_HOST")
+        if not databricks_host:
+            raise HTTPException(status_code=500, detail="DATABRICKS_HOST environment variable must be set")
+        
+        # Get OAuth token
+        try:
+            token = get_oauth_token()
+            logger.info(f"Generated OAuth token for Files API streaming")
+        except Exception as e:
+            logger.error(f"Failed to get OAuth token: {str(e)}")
+            raise HTTPException(status_code=401, detail=f"Failed to get OAuth token: {str(e)}")
+        
+        # URL-encode path, keep slashes
+        encoded_path = quote(file_path, safe="/")
+        
+        # Files API download endpoint: GET /api/2.0/fs/files{file_path}
+        url = f"https://{databricks_host}/api/2.0/fs/files{encoded_path}"
+        
+        logger.info(f"Streaming from Files API URL: {url}")
+        
+        # Forward Range header for video seeking
+        range_header = request.headers.get("Range")
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "video/mp4,video/*,*/*",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+        if range_header:
+            headers["Range"] = range_header
+            logger.info(f"Forwarding Range header: {range_header}")
+        
+        # Stream the video chunk by chunk using requests with stream=True
+        response = requests.get(url, headers=headers, stream=True, timeout=60)
+        
+        # Log response details for debugging
+        logger.info(f"Files API response status: {response.status_code}")
+        logger.info(f"Content-Type: {response.headers.get('content-type', 'unknown')}")
+        logger.info(f"Content-Length: {response.headers.get('content-length', 'unknown')}")
+        
+        # Check if we got HTML instead of video (authentication issue)
+        content_type = response.headers.get("content-type", "").lower()
+        
+        # Read first chunk to verify it's not HTML
+        first_chunk = b""
+        for chunk in response.iter_content(chunk_size=1024):
+            first_chunk = chunk
+            break
+        
+        is_html = (
+            b"<html" in first_chunk.lower()
+            or b"<!doctype html" in first_chunk.lower()
+        )
+        
+        if is_html or "text/html" in content_type:
+            logger.error(f"Received HTML response instead of video. Content-Type: {content_type}")
+            logger.error(f"First bytes: {first_chunk[:100]}")
+            raise HTTPException(
+                status_code=401, 
+                detail="Files API returned HTML (likely authentication error). Check OAuth token."
+            )
+        
+        response.raise_for_status()
+        
+        logger.info(f"Successfully validated video stream from Files API")
+        
+        # Create generator that includes the first chunk we already read
+        def generate():
+            # Yield the first chunk we already read
+            yield first_chunk
+            # Then yield the rest
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+        
+        return StreamingResponse(
+            generate(),
+            status_code=response.status_code,
+            media_type="video/mp4",
+            headers={
+                "Accept-Ranges": "bytes",
+                "Content-Length": response.headers.get("Content-Length", ""),
+                "Content-Range": response.headers.get("Content-Range", "")
+            }
+        )
+        
+    except requests.RequestException as e:
+        logger.error(f"Files API request error: {str(e)}")
+        raise HTTPException(500, f"Network error: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Files API proxy error: {str(e)}")
+        raise HTTPException(500, f"Proxy error: {str(e)}")
+```
+
+:::warning
+
+The above example requires proper OAuth 2.0 credentials in your Databricks App. Ensure the service principal has the necessary permissions to access the volume files.
+
+:::
+
+### Environment Variables
+
+The following environment variables must be set in your app configuration:
+
+- `VIDEO_PATH`: Path to the video file in Unity Catalog volumes (e.g., `/Volumes/catalog/schema/volume/video.mp4`)
+
+## Resources
+
+- [Unity Catalog volumes](https://docs.databricks.com/en/volumes/index.html)
+- [Databricks Files API](https://docs.databricks.com/api/workspace/files)
+- [OAuth 2.0 authentication](https://docs.databricks.com/en/dev-tools/auth/oauth-m2m.html)
+- [FastAPI streaming responses](https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `READ VOLUME` privilege on the Unity Catalog volume containing the video file
+
+See [Unity Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [FastAPI](https://pypi.org/project/fastapi/) - `fastapi`
+- [requests](https://pypi.org/project/requests/) - `requests`
+- [uvicorn](https://pypi.org/project/uvicorn/) - `uvicorn`
+
+```python title="requirements.txt"
+fastapi
+requests
+uvicorn
+```
+

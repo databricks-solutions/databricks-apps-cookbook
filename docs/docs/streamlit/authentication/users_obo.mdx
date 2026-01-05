@@ -20,7 +20,7 @@ def get_user_token():
     user_token = headers["X-Forwarded-Access-Token"]
     return user_token
 
-@st.cache_resource
+@st.cache_resource(ttl=300, show_spinner=True)
 def connect_with_obo(http_path, user_token):
     return sql.connect(
         server_hostname=cfg.host,

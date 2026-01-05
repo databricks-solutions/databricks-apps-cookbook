@@ -1,0 +1,9 @@
+{
+  "label": "Visualizations",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Display data and collect user input using charts and maps."
+  }
+}
+

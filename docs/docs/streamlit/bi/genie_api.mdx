@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Chat with a Genie Space
 
-This app uses the [AI/BI Genie](https://www.databricks.com/product/ai-bi) [Conversations API](https://docs.databricks.com/api/workspace/genie) to let users ask questions about your data for instant insights.
+This app uses the [AI/BI Genie](https://www.databricks.com/product/ai-bi) [Conversations API](https://docs.databricks.com/api/workspace/genie) to let users ask questions about your data for instant insights (answers and table-like output). You are also able to collect their feedback on the responses. Visualizations aren't yet supported in the API.
 
 ## Code snippet
 
@@ -13,6 +13,7 @@ Refer to the Streamlit Cookbook Genie source code for the full implementation.
 ```python title="app.py"
 import streamlit as st
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.dashboards import GenieFeedbackRating
 import pandas as pd
 
 w = WorkspaceClient()
@@ -39,6 +40,15 @@ def get_query_result(statement_id):
     )
 
 
+def collect_feedback(message_id: str):
+    rating = st.feedback("thumbs", key=f"feedback_{message_id}")
+    mapping = {1: GenieFeedbackRating.POSITIVE, 0: GenieFeedbackRating.NEGATIVE}
+    if rating and message["message_id"]:
+        w.genie.send_message_feedback(
+            genie_space_id, st.session_state.conversation_id, message["message_id"], mapping[rating]
+        )
+
+
 def process_genie_response(response):
     for i in response.attachments:
         if i.text:
@@ -50,6 +60,7 @@ def process_genie_response(response):
                 "role": "assistant", "content": i.query.description, "data": data, "code": i.query.query
             }
             display_message(message)
+    collect_feedback(response.message_id)
 
 
 if prompt := st.chat_input("Ask your question..."):

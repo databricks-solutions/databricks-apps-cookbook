@@ -1,7 +1,8 @@
-import streamlit as st
 from databricks import sql
-from databricks.sdk.core import Config
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.core import Config
+
+import streamlit as st
 
 st.header(body="Tables", divider=True)
 st.subheader("Read a Delta table")
@@ -20,7 +21,7 @@ warehouse_paths = {wh.name: wh.odbc_params.path for wh in warehouses}
 catalogs = w.catalogs.list()
 
 
-@st.cache_resource
+@st.cache_resource(ttl="1h")
 def get_connection(http_path):
     return sql.connect(
         server_hostname=cfg.host,
@@ -83,7 +84,7 @@ with tab_b:
         cfg = Config()  # Set the DATABRICKS_HOST environment variable when running locally
 
 
-        @st.cache_resource # connection is cached
+        @st.cache_resource(ttl=300, show_spinner=True) # connection is cached
         def get_connection(http_path):
             return sql.connect(
                 server_hostname=cfg.host,
