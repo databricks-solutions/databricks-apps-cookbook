@@ -1,3 +1,4 @@
 # SPA routing for dynamic gallery app pages
-/gallery/:slug /GalleryApp 200
+# Serve main app shell - React Router handles /gallery/:id routing
+/gallery/:slug /index.html 200
 
