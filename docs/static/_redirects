@@ -1,0 +1,3 @@
+# SPA routing for dynamic gallery app pages
+/gallery/* /gallery/:id/index.html 200
+
