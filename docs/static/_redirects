@@ -1,4 +1,3 @@
 # SPA routing for dynamic gallery app pages
-# Redirect to GalleryApp page (avoids infinite loop since destination doesn't match /gallery/*)
-/gallery/* /GalleryApp/index.html 200
+/gallery/:slug /GalleryApp 200
 
