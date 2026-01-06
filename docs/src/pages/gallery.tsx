@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@theme/Layout";
 import { Github } from "lucide-react";
-import { useHistory } from "@docusaurus/router";
+import { useHistory, useLocation } from "@docusaurus/router";
 import FilterPills from "../components/FilterPills";
 import { createClient } from "@sanity/client";
+import GalleryAppPage from "./GalleryApp";
 
 interface Tag {
   name: string;
@@ -50,6 +51,7 @@ const client = createClient({
 
 function GalleryPage() {
   const history = useHistory();
+  const location = useLocation();
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,6 +63,15 @@ function GalleryPage() {
   const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>(
     [],
   );
+
+  // Check if we're on a detail page (e.g., /gallery/pixels)
+  const pathParts = location.pathname.split("/").filter(Boolean);
+  const isDetailPage = pathParts.length > 1 && pathParts[0] === "gallery";
+
+  // If we're on a detail page, render the GalleryApp component
+  if (isDetailPage) {
+    return <GalleryAppPage />;
+  }
 
   const filteredApps = apps.filter((app) => {
     const authorString = app.authors.map((a) => a.name).join(" ");
