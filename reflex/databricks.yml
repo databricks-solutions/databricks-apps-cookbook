@@ -1,0 +1,19 @@
+# This is a Databricks asset bundle definition for reflex_app.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: reflex_app
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+targets:
+  prod:
+    mode: production
+    workspace:
+      host: https://fe-vm-vdm-classic-hf57ks.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/michael.haskins@databricks.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/michael.haskins@databricks.com/.bundle/${bundle.name}/${bundle.target}
+    permissions:
+      - user_name: michael.haskins@databricks.com
+        level: CAN_MANAGE

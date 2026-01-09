@@ -1,0 +1,51 @@
+---
+sidebar_position: 1
+---
+
+# Embed a dashboard
+
+This recipe embeds a [Databricks AI/BI dashboard](https://docs.databricks.com/aws/en/dashboards/) into a Databricks App.
+
+## Code snippet
+
+```python title="app.py"
+import streamlit.components.v1 as components
+
+iframe_source = "https://workspace.azuredatabricks.net/embed/dashboardsv3/dashboard-id"
+
+components.iframe(
+    src=iframe_source,
+    height=600,
+    scrolling=True
+)
+```
+
+:::info
+
+Copy and paste the dashoard embedding URL from the dashboard UI **Share** -> **Embed iframe**.
+
+:::
+
+## Resources
+
+- [AI/BI dashboard](https://docs.databricks.com/aws/en/dashboards/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN VIEW` permission on the dashboard
+
+:::info
+
+A workspace admin needs to enable dashboard embedding in the Security settings of your Databricks workspace for specific domains (e.g., databricksapps.com) or all domains for this sample to work.
+
+:::
+
+## Dependencies
+
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+
+```python title="requirements.txt"
+streamlit
+```

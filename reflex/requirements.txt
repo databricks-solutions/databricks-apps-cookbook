@@ -1,0 +1,20 @@
+# Core dependencies
+reflex-enterprise>=0.3.6
+reflex
+databricks-connect==16.0.0
+databricks-sdk[openai]==0.60.0
+databricks-sdk
+databricks-sql-connector>=4.0.0
+pandas==2.2.3
+pillow
+psycopg
+psycopg[binary]
+psycopg-pool
+requests
+
+# MCP support
+mcp[cli]>=0.3.0
+
+# Type hints and utilities
+typing-extensions>=4.5.0
+pydantic>=2.0.0
