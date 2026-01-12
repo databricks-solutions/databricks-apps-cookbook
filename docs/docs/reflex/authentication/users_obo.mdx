@@ -9,40 +9,76 @@ This recipe demonstrates how to use Databricks Apps [on-behalf-of-user authentic
 ## Code snippet
 
 ```python title="app.py"
-import streamlit as st
+import reflex as rx
+import pandas as pd
 from databricks import sql
 from databricks.sdk.core import Config
 
 cfg = Config()
 
-def get_user_token():
-    headers = st.context.headers
-    user_token = headers["X-Forwarded-Access-Token"]
-    return user_token
+_connection = None
 
-@st.cache_resource
-def connect_with_obo(http_path, user_token):
-    return sql.connect(
+def get_user_token(headers):
+    return getattr(headers, "x_forwarded_access_token", "")
+
+def connect_with_obo(http_path: str, user_token: str):
+    global _connection
+    if _connection:
+        return _connection
+    _connection = sql.connect(
         server_hostname=cfg.host,
         http_path=http_path,
         access_token=user_token
     )
+    return _connection
 
-def execute_query(table_name, conn):
+def execute_query(table_name: str, conn):
     with conn.cursor() as cursor:
         query = f"SELECT * FROM {table_name} LIMIT 10"
         cursor.execute(query)
         return cursor.fetchall_arrow().to_pandas()
 
-user_token = get_user_token()
+class OboState(rx.State):
+    warehouse_paths: dict[str, str] = {}
+    selected_warehouse: str = ""
+    table_name: str = "samples.nyctaxi.trips"
+    data: list[list] = []
+    columns: list[dict] = []
+    is_loading: bool = False
+    error_message: str = ""
 
-http_path = "/sql/1.0/warehouses/abcd1234"  # Replace with your SQL warehouse HTTP path
-table_name = "samples.nyctaxi.trips"  # Replace with your catalog.schema.table
+    @rx.event(background=True)
+    async def run_query(self):
+        async with self:
+            self.is_loading = True
+            self.error_message = ""
+            headers = self.router.headers
+            user_token = get_user_token(headers)
 
-if st.button("Run Query"):
-    conn = connect_with_obo(http_path, user_token)
-    df = execute_query(table_name, conn)
-    st.dataframe(df)
+        if not user_token:
+            async with self:
+                self.error_message = "No OBO token found."
+                self.is_loading = False
+            return
+
+        try:
+            http_path = self.warehouse_paths.get(self.selected_warehouse)
+            conn = connect_with_obo(http_path, user_token)
+            df = execute_query(self.table_name, conn)
+
+            # Process dataframe for display
+            d = df.values.tolist()
+            c = [{"title": col, "id": col, "type": "str"} for col in df.columns]
+
+            async with self:
+                self.data = d
+                self.columns = c
+        except Exception as e:
+            async with self:
+                self.error_message = str(e)
+        finally:
+            async with self:
+                self.is_loading = False
 ```
 
 :::info
@@ -80,10 +116,10 @@ See [Databricks Apps authorization model](https://docs.databricks.com/aws/en/dev
 
 - [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
 - [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
 databricks-sql-connector
-streamlit
+reflex
 ``` 

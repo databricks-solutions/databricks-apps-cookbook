@@ -9,30 +9,57 @@ This recipe triggers a [Databricks Workflows](https://docs.databricks.com/en/job
 ## Code snippet
 
 ```python title="app.py"
-import streamlit as st
+import reflex as rx
+import json
 from databricks.sdk import WorkspaceClient
 
-w = WorkspaceClient()
-
-job_id = st.text_input(
-    label="Specify job id:",
-    placeholder="921773893211960",
-    help="You can find the job ID under job details after opening a job in the UI.",
-)
-
-parameters_input = st.text_area(
-    label="Specify job parameters as JSON:",
-    placeholder='{"param1": "value1", "param2": "value2"}',
-)
-
-parameters = eval(parameters_input.strip())
-
-if st.button(label="Trigger job"):
+def trigger_workflow(job_id: str, params: dict):
+    w = WorkspaceClient()
     try:
-        run = w.jobs.run_now(job_id=job_id, job_parameters=parameters)
-        st.text(f"Started run with ID {run.run_id}")
+        run = w.jobs.run_now(job_id=int(job_id), job_parameters=params)
+        return {"run_id": run.run_id, "number_in_job": run.number_in_job}
     except Exception as e:
-        st.warning(e)
+        return {"error": str(e)}
+
+class TriggerJobState(rx.State):
+    job_id: str = ""
+    parameters_input: str = ""
+    result_data: str = ""
+    error_message: str = ""
+    is_loading: bool = False
+
+    @rx.event(background=True)
+    async def trigger_job(self):
+        async with self:
+            self.is_loading = True
+            self.error_message = ""
+            self.result_data = ""
+
+            if not self.job_id:
+                yield rx.toast("Please specify a Job ID.", level="warning")
+                self.is_loading = False
+                return
+
+        try:
+            params = json.loads(self.parameters_input.strip())
+            result = trigger_workflow(self.job_id, params)
+
+            async with self:
+                if "error" in result:
+                    self.error_message = result["error"]
+                    yield rx.toast(f"Error: {result['error']}", level="error")
+                else:
+                    self.result_data = json.dumps(result, indent=2)
+                    yield rx.toast(f"Run started: {result.get('run_id')}", level="success")
+        except json.JSONDecodeError:
+             async with self:
+                yield rx.toast("Invalid JSON parameters", level="error")
+        except Exception as e:
+             async with self:
+                self.error_message = str(e)
+        finally:
+             async with self:
+                self.is_loading = False
 ```
 
 ## Resources
@@ -50,9 +77,9 @@ See [Control access to a job](https://docs.databricks.com/en/jobs/privileges.htm
 ## Dependencies
 
 - [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
-streamlit
+reflex
 ```

@@ -9,62 +9,98 @@ Use this recipe to read, edit, and write back data in a [Unity Catalog table](ht
 ## Code snippet
 
 ```python title="app.py"
+import reflex as rx
+from typing import Any
 import pandas as pd
-import streamlit as st
+import datetime
 from databricks import sql
 from databricks.sdk.core import Config
 
+_connection = None
 
-cfg = Config() # Set the DATABRICKS_HOST environment variable when running locally
-
-
-@st.cache_resource
-def get_connection(http_path):
-    return sql.connect(
+def get_connection(http_path: str):
+    global _connection
+    if _connection:
+        return _connection
+    cfg = Config()
+    connection = sql.connect(
         server_hostname=cfg.host,
         http_path=http_path,
-        credentials_provider=lambda: cfg.authenticate,
+        credentials_provider=cfg.authenticate,
     )
+    _connection = connection
+    return connection
 
+def insert_overwrite_table(table_name: str, df: pd.DataFrame, connection):
+    if df.empty:
+        # If the dataframe is empty, we skip the overwrite to avoid
+        # accidentally truncating the table if the UI state was not fully loaded.
+        return
 
-def read_table(table_name: str, conn) -> pd.DataFrame:
-    with conn.cursor() as cursor:
-        cursor.execute(f"SELECT * FROM {table_name}")
-        return cursor.fetchall_arrow().to_pandas()
+    def format_val(x):
+        if x is None or pd.isna(x):
+            return "NULL"
+        if isinstance(x, str):
+            return f"'{x.replace("'", "''")}'"
+        if isinstance(x, (datetime.date, datetime.datetime, pd.Timestamp)):
+            return f"'{x}'"
+        return str(x)
 
+    values = []
+    for _, row in df.iterrows():
+        row_values = [format_val(val) for val in row]
+        values.append(f"({', '.join(row_values)})")
 
-def insert_overwrite_table(table_name: str, df: pd.DataFrame, conn):
-    progress = st.empty()
-    with conn.cursor() as cursor:
-        rows = list(df.itertuples(index=False))
-        values = ",".join([f"({','.join(map(repr, row))})" for row in rows])
-        with progress:
-            st.info("Calling Databricks SQL...")
-        cursor.execute(f"INSERT OVERWRITE {table_name} VALUES {values}")
-    progress.empty()
-    st.success("Changes saved")
+    sql_query = f"INSERT OVERWRITE TABLE {table_name} VALUES {', '.join(values)}"
 
+    with connection.cursor() as cursor:
+        cursor.execute(sql_query)
 
-http_path_input = st.text_input(
-    "Specify the HTTP Path to your Databricks SQL Warehouse:",
-    placeholder="/sql/1.0/warehouses/xxxxxx",
-)
+class EditDeltaTableState(rx.State):
+    # Key state fields for managing selection and data
+    warehouse_paths: dict[str, str] = {}
+    selected_warehouse: str = ""
+    selected_catalog: str = ""
+    selected_schema: str = ""
+    selected_table: str = ""
 
-table_name = st.text_input(
-    "Specify a Catalog table name:", placeholder="catalog.schema.table"
-)
+    # Data for the editor
+    columns: list[dict[str, str]] = []
+    table_data: list[list[Any]] = []
+    original_table_data: list[list[Any]] = []
 
-if http_path_input and table_name:
-    conn = get_connection(http_path_input)
-    original_df = read_table(table_name, conn)
-    edited_df = st.data_editor(original_df, num_rows="dynamic", hide_index=True)
+    is_saving: bool = False
 
-    df_diff = pd.concat([original_df, edited_df]).drop_duplicates(keep=False)
-    if not df_diff.empty:
-        if st.button("Save changes"):
-            insert_overwrite_table(table_name, edited_df, conn)
-else:
-    st.warning("Provide both the warehouse path and a table name to load data.")
+    @rx.event
+    def handle_cell_change(
+        self, new_value: Any, row_index: int, col_index: int
+    ):
+        "Update table data when a cell is edited."
+        if row_index < len(self.table_data):
+            row = self.table_data[row_index]
+            if col_index < len(row):
+                self.table_data[row_index][col_index] = new_value
+
+    @rx.event
+    async def save_changes(self):
+        self.is_saving = True
+        yield
+        try:
+            col_names = [col["title"] for col in self.columns]
+            df = pd.DataFrame(self.table_data, columns=col_names)
+
+            http_path = self.warehouse_paths.get(self.selected_warehouse)
+            full_table_name = f"{self.selected_catalog}.{self.selected_schema}.{self.selected_table}"
+            conn = get_connection(http_path)
+
+            insert_overwrite_table(full_table_name, df, conn)
+
+            self.original_table_data = [row[:] for row in self.table_data]
+            yield rx.toast(f"Successfully saved changes to {full_table_name}.")
+        except Exception as e:
+            yield rx.toast(f"Error saving changes: {e}", level="error")
+        finally:
+            self.is_saving = False
 ```
 
 :::info
@@ -92,11 +128,11 @@ See Unity [Catalog privileges and securable objects](https://docs.databricks.com
 - [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
 - [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
 - [Pandas](https://pypi.org/project/pandas/) - `pandas`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
 databricks-sql-connector
 pandas
-streamlit
+reflex
 ```

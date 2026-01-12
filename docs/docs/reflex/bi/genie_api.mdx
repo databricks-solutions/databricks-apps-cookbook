@@ -11,28 +11,38 @@ This app uses the [AI/BI Genie](https://www.databricks.com/product/ai-bi) [Conve
 Refer to the Streamlit Cookbook Genie source code for the full implementation.
 
 ```python title="app.py"
-import streamlit as st
+import reflex as rx
 from databricks.sdk import WorkspaceClient
 import pandas as pd
 
 w = WorkspaceClient()
 
-genie_space_id = "01efe16a65e21836acefb797ae6a8fe4"
+genie_space_id = "01f0023d28a71e599b5a62f4117916d4"
 
 
 def display_message(message):
     if "content" in message:
-        st.markdown(message["content"])
+        rx.markdown(message["content"])
     if "data" in message:
-        st.dataframe(message["data"])
+        rx.data_table(message["data"])
     if "code" in message:
-        with st.expander("Show generated code"):
-            st.code(message["code"], language="sql", wrap_lines=True)
+        rx.accordion.root(
+            rx.accordion.item(
+                rx.accordion.header(
+                    rx.accordion.trigger("Show generated code")
+                ),
+                rx.accordion.content(
+                    rx.code_block(message["code"], language="sql")
+                ),
+                value="item-1",
+            ),
+            type="single",
+            collapsible=True,
+        )
 
 
 def get_query_result(statement_id):
     # For simplicity, let's say data fits in one chunk, query.manifest.total_chunk_count = 1
-
     result = w.statement_execution.get_statement(statement_id)
     return pd.DataFrame(
         result.result.data_array, columns=[i.name for i in result.manifest.schema.columns]
@@ -52,20 +62,26 @@ def process_genie_response(response):
             display_message(message)
 
 
-if prompt := st.chat_input("Ask your question..."):
-    # Refer to actual app code for chat history persistence on rerun
+class GenieState(rx.State):
+    conversation_id: str = ""
+    prompt: str = ""
 
-    st.chat_message("user").markdown(prompt)
-
-    with st.chat_message("assistant"):
-        if st.session_state.get("conversation_id"):
-            conversation = w.genie.create_message_and_wait(
-                genie_space_id, st.session_state.conversation_id, prompt
-            )
-            process_genie_response(conversation)
-        else:
-            conversation = w.genie.start_conversation_and_wait(genie_space_id, prompt)
-            process_genie_response(conversation)
+    @rx.event
+    async def send_message(self):
+        if self.prompt:
+            user_prompt = self.prompt
+            self.prompt = ""
+            # Display user message
+            # Then process with assistant
+            if self.conversation_id:
+                conversation = w.genie.create_message_and_wait(
+                    genie_space_id, self.conversation_id, user_prompt
+                )
+                process_genie_response(conversation)
+            else:
+                conversation = w.genie.start_conversation_and_wait(genie_space_id, user_prompt)
+                self.conversation_id = conversation.conversation_id
+                process_genie_response(conversation)
 ```
 
 :::info
@@ -88,12 +104,12 @@ Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databr
 
 ## Dependencies
 
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 - [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
 - [Pandas](https://pypi.org/project/pandas/) - `pandas`
 
 ```python title="requirements.txt"
-streamlit
+reflex
 databricks-sdk
 pandas
 ```

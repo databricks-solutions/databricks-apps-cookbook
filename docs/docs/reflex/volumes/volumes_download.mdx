@@ -15,21 +15,21 @@ Unlike notebooks, Databricks Apps does not support mounting Unity Catalog volume
 ## Code snippet
 
 ```python title="app.py"
+import reflex as rx
 import os
-import streamlit as st
 from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
-download_file_path = st.text_input(
-    label="Path to file", placeholder="/Volumes/catalog/schema/volume_name/file.csv"
-)
+class DownloadFileState(rx.State):
+    download_file_path: str = ""
 
-response = w.files.download(download_file_path)
-file_data = response.contents.read()
-file_name = os.path.basename(download_file_path)
+    async def handle_download(self):
+        response = w.files.download(self.download_file_path)
+        file_data = response.contents.read()
+        file_name = os.path.basename(self.download_file_path)
 
-st.download_button(label="Download", data=file_data, file_name=file_name)
+        return rx.download(data=file_data, filename=file_name)
 ```
 
 ## Resources
@@ -49,9 +49,9 @@ See [Privileges required for volume operations](https://docs.databricks.com/en/v
 ## Dependencies
 
 - [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
-streamlit
+reflex
 ```
