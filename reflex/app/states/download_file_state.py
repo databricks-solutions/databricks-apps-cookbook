@@ -11,12 +11,13 @@ class DownloadFileState(rx.State):
     is_loading: bool = False
     error_message: str = ""
 
-    @rx.event
+    @rx.event(background=True)
     async def handle_download(self):
         if not self.download_file_path:
             yield rx.toast("Please enter a file path.", level="error")
             return
-        self.is_loading = True
+        async with self:
+            self.is_loading = True
         yield
         try:
             w = WorkspaceClient()
@@ -29,4 +30,5 @@ class DownloadFileState(rx.State):
             logging.exception(f"Download failed: {e}")
             yield rx.toast(f"Download failed: {e}", level="error")
         finally:
-            self.is_loading = False
+            async with self:
+                self.is_loading = False
