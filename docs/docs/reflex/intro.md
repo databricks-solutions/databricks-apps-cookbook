@@ -14,7 +14,7 @@ These code snippets cover common use cases such as reading and writing to and fr
 
 For each snippet, you will find the **source code**, required **permissions**, list of **dependencies**, and any other information needed to implement it.
 
-Currently, we offer snippets for [Streamlit](/docs/category/streamlit), [Dash](/docs/category/dash), and [FastAPI](/docs/category/fastapi) and they can be easily adapted to other Python frameworks.
+Currently, we offer snippets for [Streamlit](/docs/category/streamlit), [Dash](/docs/category/dash), [FastAPI](/docs/category/fastapi), and [Reflex](/docs/category/reflex) and they can be easily adapted to other Python frameworks.
 
 <div className="mt-6 flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
     <Link to="/docs/category/streamlit" className="w-full sm:w-auto">
@@ -45,6 +45,16 @@ Currently, we offer snippets for [Streamlit](/docs/category/streamlit), [Dash](/
                 className="h-6 w-6 object-contain" 
             />
             <span>Build with FastAPI</span>
+        </button>
+    </Link>
+    <Link to="/docs/category/reflex" className="w-full sm:w-auto">
+        <button className="inline-flex h-14 w-full items-center justify-center gap-3 border-2 border-lava-600 bg-transparent px-6 py-2.5 text-lg font-semibold text-lava-600 transition-colors hover:border-lava-700 hover:bg-lava-600 hover:text-white">
+            <img 
+                src="/img/logo_reflex.svg" 
+                alt="Reflex logo"
+                className="h-6 w-6 object-contain" 
+            />
+            <span>Build with Reflex</span>
         </button>
     </Link>
 </div>

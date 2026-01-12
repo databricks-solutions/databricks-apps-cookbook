@@ -9,32 +9,75 @@ This recipe uploads a file to a [Unity Catalog volume](https://docs.databricks.c
 ## Code snippet
 
 ```python title="app.py"
+import reflex as rx
 import io
-import streamlit as st
 from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
-uploaded_file = st.file_uploader(label="Select file")
+def check_upload_permissions(volume_name: str):
+    try:
+        volume = w.volumes.read(name=volume_name)
+        current_user = w.current_user.me()
+        grants = w.grants.get_effective(
+            securable_type="volume",
+            full_name=volume.full_name,
+            principal=current_user.user_name,
+        )
 
-upload_volume_path = st.text_input(
-    label="Specify a three-level Unity Catalog volume name (catalog.schema.volume_name)",
-    placeholder="main.marketing.raw_files",
-)
+        if not grants or not grants.privilege_assignments:
+            return "Insufficient permissions: No grants found."
 
-if st.button("Save changes"):
-    file_bytes = uploaded_file.read()
-    binary_data = io.BytesIO(file_bytes)
-    file_name = uploaded_file.name
+        for assignment in grants.privilege_assignments:
+            for privilege in assignment.privileges:
+                if privilege.privilege.value in ["ALL_PRIVILEGES", "WRITE_VOLUME"]:
+                    return "Volume and permissions validated"
 
-    parts = upload_volume_path.strip().split(".")
+        return "Insufficient permissions: Required privileges not found."
+    except Exception as e:
+        return f"Error: {e}"
 
-    catalog = parts[0]
-    schema = parts[1]
-    volume_name = parts[2]
+class UploadFileState(rx.State):
+    upload_volume_path: str = ""
+    volume_check_success: bool = False
+    permission_result: str = ""
+    is_checking: bool = False
+    is_uploading: bool = False
+    uploaded_files: list[str] = []
 
-    volume_file_path = f"/Volumes/{catalog}/{schema}/{volume_name}/{file_name}"
-    w.files.upload(volume_file_path, binary_data, overwrite=True)
+    @rx.event
+    async def check_volume_permissions(self):
+        self.is_checking = True
+        self.permission_result = ""
+        self.volume_check_success = False
+        yield
+
+        result = check_upload_permissions(self.upload_volume_path)
+
+        self.permission_result = result
+        if "validated" in result:
+            self.volume_check_success = True
+        self.is_checking = False
+
+    @rx.event
+    async def handle_upload(self, files: list[rx.UploadFile]):
+        if not files: return
+        self.is_uploading = True
+        yield
+        try:
+            parts = self.upload_volume_path.strip().split(".")
+            catalog, schema, volume_name = parts[0], parts[1], parts[2]
+            for file in files:
+                file_bytes = await file.read()
+                binary_data = io.BytesIO(file_bytes)
+                path = f"/Volumes/{catalog}/{schema}/{volume_name}/{file.filename}"
+                w.files.upload(path, binary_data, overwrite=True)
+                self.uploaded_files.append(file.filename)
+                yield rx.toast(f"Uploaded {file.filename} to {path}", level="success")
+        except Exception as e:
+            yield rx.toast(f"Upload failed: {e}", level="error")
+        finally:
+            self.is_uploading = False
 ```
 
 ## Resources
@@ -54,9 +97,9 @@ See [Privileges required for volume operations](https://docs.databricks.com/en/v
 ## Dependencies
 
 - [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
-streamlit
+reflex
 ```

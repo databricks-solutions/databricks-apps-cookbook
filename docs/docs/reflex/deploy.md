@@ -36,9 +36,9 @@ Check the Requirements tab of each recipe to understand what [service principal 
    git clone https://github.com/databricks-solutions/databricks-apps-cookbook.git
    cd databricks-apps-cookbook
    ```
-1. Navigate to the sub-folder for the cookbook framework you want to run (either `dash` or `streamlit`). Create and activate a Python virtual environment in this folder [`venv`](https://docs.python.org/3/library/venv.html). We recommend using separate environments for each framework:
+1. Navigate to the sub-folder for the cookbook framework you want to run (either `dash` or `streamlit` or `reflex`). Create and activate a Python virtual environment in this folder [`venv`](https://docs.python.org/3/library/venv.html). We recommend using separate environments for each framework:
    ```bash
-   cd streamlit
+   cd reflex
    python3 -m venv .venv
    source .venv/bin/activate
    ```
@@ -60,6 +60,12 @@ Check the Requirements tab of each recipe to understand what [service principal 
 
    ```bash
    streamlit run app.py
+   ```
+   
+   Reflex:
+
+   ```bash
+   reflex run app.py
    ```
 
    Dash:

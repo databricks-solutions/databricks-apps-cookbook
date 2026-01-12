@@ -9,38 +9,63 @@ This recipe uses [Databricks Connect](https://docs.databricks.com/en/dev-tools/d
 ## Code snippet
 
 ```python title="app.py"
+import reflex as rx
 import os
-import streamlit as st
+import asyncio
+from typing import Any
 from databricks.connect import DatabricksSession
+import pandas as pd
 
-cluster_id = st.text_input(
-    "Specify cluster id:",
-    placeholder="0709-132523-cnhxf2p6",
-    help="Copy a shared Compute [cluster ID](https://docs.databricks.com/en/workspace/workspace-details.html#cluster-url-and-id) to connect to.",
-)
+def run_spark_workload(host: str, cluster_id: str):
+    spark = DatabricksSession.builder.remote(
+        host=host,
+        cluster_id=cluster_id
+    ).getOrCreate()
 
-if cluster_id:
-    spark = connect_to_cluster(cluster_id)
-    st.success("Successfully connected to Spark:", icon="✅")
     session_info = {
-            "App Name": spark.conf.get("spark.app.name", "Unknown"),
-            "Master URL": spark.conf.get("spark.master", "Unknown"),
-        }
-    st.json(session_info)
+        "App Name": spark.conf.get("spark.app.name", "Unknown"),
+        "Master URL": spark.conf.get("spark.master", "Unknown"),
+    }
 
-spark = DatabricksSession.builder.remote(
-    host=os.getenv("DATABRICKS_HOST"),
-    cluster_id=cluster_id
-).getOrCreate()
+    query = "SELECT 'I''m a stellar cook!' AS message"
+    df_sql = spark.sql(query).toPandas()
 
-query = "SELECT 'I'm a stellar cook!' AS message"
-sql_output = spark.sql(query).toPandas()
+    df_range = spark.range(10).toPandas()
 
-st.dataframe(sql_output)
+    return session_info, df_sql.values.tolist(), df_range.values.tolist()
 
-result = spark.range(10).toPandas()
+class ConnectClusterState(rx.State):
+    cluster_id: str = ""
+    session_info: dict = {}
+    sql_output: list[list[Any]] = []
+    range_output: list[list[Any]] = []
+    is_loading: bool = False
+    error_message: str = ""
+    success_message: str = ""
 
-st.dataframe(result)
+    @rx.event(background=True)
+    async def connect_and_run(self):
+        async with self:
+            self.is_loading = True
+            self.error_message = ""
+            self.success_message = ""
+        try:
+            host = os.getenv("DATABRICKS_HOST")
+            loop = asyncio.get_running_loop()
+            info, sql_res, range_res = await loop.run_in_executor(
+                None, run_spark_workload, host, self.cluster_id
+            )
+            async with self:
+                self.session_info = info
+                self.sql_output = sql_res
+                self.range_output = range_res
+                self.success_message = "Successfully connected to Spark"
+        except Exception as e:
+            async with self:
+                self.error_message = str(e)
+        finally:
+            async with self:
+                self.is_loading = False
 ```
 
 :::info
@@ -64,9 +89,9 @@ See [Compute permissions](https://docs.databricks.com/aws/en/compute/clusters-ma
 ## Dependencies
 
 - [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
-streamlit
+reflex
 ```

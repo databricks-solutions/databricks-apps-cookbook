@@ -13,72 +13,70 @@ This recipe invokes a model hosted on [Mosaic AI Model Serving](https://docs.dat
 #### Using `dataframe_split` (JSON-serialized DataFrame in split orientation)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import DataframeSplitInput
+import reflex as rx
 
 w = WorkspaceClient()
 
 response = w.serving_endpoints.query(
-    name="custom-regression-model",
+    name="traditional-model",
     dataframe_split={
         "columns": ["feature1", "feature2"],
-        "data": [[1.5, 2.5]]
+        "data": [[1, 2], [3, 4]]
     }
 )
-st.json(response.as_dict())
+rx.text(response.as_dict())
 ```
 
 #### Using `dataframe_records` (JSON-serialized DataFrame in records orientation)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
+import reflex as rx
 
 w = WorkspaceClient()
 
 response = w.serving_endpoints.query(
-    name="custom-regression-model",
-    dataframe_records={
-        "feature1": [1.5],
-        "feature2": [2.5]
-    }
+    name="traditional-model",
+    dataframe_records=[
+        {"feature1": 1, "feature2": 2},
+        {"feature1": 3, "feature2": 4}
+    ]
 )
-st.json(response.as_dict())
+rx.text(response.as_dict())
 ```
 
 #### Using `instances` (Tensor inputs in row format for TensorFlow/PyTorch models)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
+import reflex as rx
 
 w = WorkspaceClient()
 
-tensor_input = [[1.0, 2.0, 3.0]]
 response = w.serving_endpoints.query(
-    name="tensor-processing-model",
-    instances=tensor_input,
+    name="tf-model",
+    instances=[
+        [1, 2], [3, 4]
+    ]
 )
-st.json(response.as_dict())
+rx.text(response.as_dict())
 ```
 
 #### Using `inputs` (Tensor inputs in columnar format for TensorFlow/PyTorch models)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
+import reflex as rx
 
 w = WorkspaceClient()
 
-tensor_input = {
-    "input1": [1.0, 2.0, 3.0],
-    "input2": [4.0, 5.0, 6.0],
-}
 response = w.serving_endpoints.query(
-    name="tensor-processing-model",
-    inputs=tensor_input,
+    name="pytorch-model",
+    inputs={"input_ids": [1, 2, 3]}
 )
-st.json(response.as_dict())
+rx.text(response.as_dict())
 ```
 
 ### Large language models (LLMs)
@@ -86,57 +84,50 @@ st.json(response.as_dict())
 #### Using `prompt` (Input text for completion tasks)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
+import reflex as rx
 
 w = WorkspaceClient()
 
 response = w.serving_endpoints.query(
-    name="llm-text-completions-model",
-    prompt="Generate a recipe for building scalable Databricks Apps.",
-    temperature=0.5,
+    name="completion-model",
+    prompt="Once upon a time"
 )
-st.json(response.as_dict())
+rx.text(response.as_dict())
 ```
 
 #### Using `messages` (List of chat messages for conversational models)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
+import reflex as rx
 
 w = WorkspaceClient()
 
 response = w.serving_endpoints.query(
-    name="chat-assistant-model",
+    name="chat-model",
     messages=[
-        ChatMessage(
-            role=ChatMessageRole.SYSTEM,
-            content="You are a helpful assistant.",
-        ),
-        ChatMessage(
-            role=ChatMessageRole.USER,
-            content="Provide tips for deploying Databricks Apps.",
-        ),
-    ],
+        {"role": "user", "content": "Hello!"},
+        {"role": "assistant", "content": "Hi there!"}
+    ]
 )
-st.json(response.as_dict())
+rx.text(response.as_dict())
 ```
 
 #### Using `input` (Input text for embedding tasks)
 
 ```python title="app.py"
-import streamlit as st
 from databricks.sdk import WorkspaceClient
+import reflex as rx
 
 w = WorkspaceClient()
 
 response = w.serving_endpoints.query(
-    name="embedding-model",
-    input="Databricks provides a unified analytics platform.",
+    name="embeddings-model",
+    input=["text to embed"]
 )
-st.json(response.as_dict())
+rx.text(response.as_dict())
 ```
 
 ## Resources
@@ -154,9 +145,9 @@ See [Manage permissions on your model serving endpoint](https://docs.databricks.
 ## Dependencies
 
 - [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
-streamlit
+reflex
 ```

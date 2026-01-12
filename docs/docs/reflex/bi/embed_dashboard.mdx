@@ -9,15 +9,56 @@ This recipe embeds a [Databricks AI/BI dashboard](https://docs.databricks.com/aw
 ## Code snippet
 
 ```python title="app.py"
-import streamlit.components.v1 as components
+import reflex as rx
+import requests
+from databricks.sdk.core import Config
 
-iframe_source = "https://workspace.azuredatabricks.net/embed/dashboardsv3/dashboard-id"
+# 1. Helper to fetch published dashboards from Databricks API
+def get_published_dashboards():
+    cfg = Config()
+    headers = {"Authorization": f"Bearer {cfg.token}"}
+    # The Lakeview API endpoint for listing dashboards
+    url = f"{cfg.host}/api/2.0/lakeview/dashboards"
 
-components.iframe(
-    src=iframe_source,
-    height=600,
-    scrolling=True
-)
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+
+    data = response.json()
+    published = {}
+    for d in data.get("dashboards", []):
+        if d.get("published"):
+            published[d.get("display_name")] = d.get("dashboard_id")
+    return published
+
+class AiBiDashboardState(rx.State):
+    dashboard_options: dict[str, str] = {}
+    selected_dashboard: str = ""
+    iframe_source: str = ""
+
+    @rx.var
+    def dashboard_names(self) -> list[str]:
+        return list(self.dashboard_options.keys())
+
+    @rx.event
+    def on_load(self):
+        # Fetch available dashboards on load
+        self.dashboard_options = get_published_dashboards()
+        if self.dashboard_options:
+            # Default to the first one
+            self.selected_dashboard = self.dashboard_names[0]
+            self.update_src()
+
+    @rx.event
+    def set_selected_dashboard(self, value: str):
+        self.selected_dashboard = value
+        self.update_src()
+
+    def update_src(self):
+        # Construct the embed URL
+        cfg = Config()
+        dash_id = self.dashboard_options.get(self.selected_dashboard)
+        if dash_id:
+            self.iframe_source = f"{cfg.host}/dashboardsv3/{dash_id}/published?embed=true"
 ```
 
 :::info
@@ -44,8 +85,8 @@ A workspace admin needs to enable dashboard embedding in the Security settings o
 
 ## Dependencies
 
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
-streamlit
+reflex
 ```

@@ -9,88 +9,132 @@ This app connects to a [Databricks Lakebase](https://docs.databricks.com/aws/en/
 ## Code snippet
 
 ```python title="app.py"
+import reflex as rx
 import uuid
-import streamlit as st
 import pandas as pd
-
 from databricks.sdk import WorkspaceClient
 import psycopg
 from psycopg_pool import ConnectionPool
+from typing import Union, Optional
+import datetime
 
+# This module-level variable will cache the connection pool across the app.
+_pool: Optional[ConnectionPool] = None
 
-w = WorkspaceClient()
-
-
+# Define a custom connection class to handle token rotation.
 class RotatingTokenConnection(psycopg.Connection):
-    @classmethod
-    def connect(cls, conninfo: str = "", **kwargs):
-        kwargs["password"] = w.database.generate_database_credential(
-            request_id=str(uuid.uuid4()),
-            instance_names=[kwargs.pop("_instance_name")]
-        ).token
-        kwargs.setdefault("sslmode", "require")
-        return super().connect(conninfo, **kwargs)
+    def __init__(self, *args, **kwargs):
+        self._instance_name = kwargs.pop("_instance_name")
+        super().__init__(*args, **kwargs)
 
-        
-@st.cache_resource
+    @classmethod
+    def connect(cls, *args, **kwargs):
+        if "_instance_name" in kwargs:
+            instance_name = kwargs["_instance_name"]
+            # Generate a fresh OAuth token for each new connection.
+            w = WorkspaceClient()
+            credential = w.database.generate_database_credential(
+                request_id=str(uuid.uuid4()), instance_names=[instance_name]
+            )
+            kwargs["password"] = credential.token
+        return super().connect(*args, **kwargs)
+
+
 def build_pool(instance_name: str, host: str, user: str, database: str) -> ConnectionPool:
+    """Builds and returns a new connection pool with token rotation."""
+    # Note: sslmode is set to require to ensure encrypted connections.
     return ConnectionPool(
-        conninfo=f"host={host} dbname={database} user={user}",
-        connection_class=RotatingTokenConnection,
-        kwargs={"_instance_name": instance_name},
+        conninfo=f"host={host} dbname={database} user={user} sslmode=require",
         min_size=1,
         max_size=5,
         open=True,
+        kwargs={"_instance_name": instance_name},
+        connection_class=RotatingTokenConnection,
     )
 
-
-def query_df(pool: ConnectionPool, sql: str) -> pd.DataFrame:
-    with pool.connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            if cur.description is None:
+def query_df(query: str, params=None) -> pd.DataFrame:
+    """Executes a query using the global pool and returns a DataFrame."""
+    global _pool
+    if _pool is None:
+        raise ConnectionError("Connection pool is not initialized.")
+    with _pool.connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            if cursor.description is None:
                 return pd.DataFrame()
-            cols = [d.name for d in cur.description]
-            rows = cur.fetchall()
-    return pd.DataFrame(rows, columns=cols)
+            cols = [desc[0] for desc in cursor.description]
+            return pd.DataFrame(cursor.fetchall(), columns=cols)
 
 
-session_id = str(uuid.uuid4())
-if "session_id" not in st.session_state:
-    st.session_state["session_id"] = session_id
+def upsert_app_state(schema: str, table: str, session_id: str, key: str, value: str):
+    """Helper to create a table and upsert a key-value pair for a session."""
+    create_sql = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.{table} (
+        session_id TEXT,
+        key TEXT,
+        value TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (session_id, key)
+    );
+    """
+    query_df(create_sql)
 
-    
-instance_name = "dbase_instance"
-database = "databricks_postgres"
-schema = "public"
-table = "app_state"
-user = w.current_user.me().user_name
-host = w.database.get_database_instance(name=instance_name).read_write_dns
+    upsert_sql = f"""
+    INSERT INTO {schema}.{table} (session_id, key, value, updated_at) 
+    VALUES (%(session_id)s, %(key)s, %(value)s, CURRENT_TIMESTAMP)
+    ON CONFLICT (session_id, key) DO UPDATE SET
+        value = EXCLUDED.value,
+        updated_at = EXCLUDED.updated_at;
+    """
+    query_df(upsert_sql, params={"session_id": session_id, "key": key, "value": value})
 
-pool = build_pool(instance_name, host, user, database)
 
-with pool.connection() as conn:
-    with conn.cursor() as cur:
-        cur.execute(f"""
-        CREATE TABLE IF NOT EXISTS {schema}.{table} (
-            session_id TEXT,
-            key TEXT,
-            value TEXT,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (session_id, key)
-        )
-        """)
+class OltpDatabaseState(rx.State):
+    session_id: str = str(uuid.uuid4())
+    selected_instance: str = "your_instance_name"
+    database: str = "databricks_postgres"
+    schema_name: str = "public"
+    table_name: str = "app_state"
+    result_data: list[dict[str, Union[str, int, float, bool, None, datetime.datetime]]] = []
+    is_loading: bool = False
+    error_message: str = ""
 
-        cur.execute(f"""
-            INSERT INTO app_state (session_id, key, value, updated_at)
-            VALUES ('{session_id}', 'feedback_message', 'true', CURRENT_TIMESTAMP)
-            ON CONFLICT (session_id, key) DO UPDATE
-            SET value = EXCLUDED.value,
-                updated_at = CURRENT_TIMESTAMP
-        """)
+    @rx.event(background=True)
+    async def run_query(self):
+        global _pool
+        async with self:
+            self.is_loading = True
+            self.error_message = ""
+        try:
+            # Initialize the pool if it's the first run.
+            if _pool is None:
+                w = WorkspaceClient()
+                user = w.current_user.me().user_name
+                instance = w.database.get_database_instance(name=self.selected_instance)
+                host = instance.read_write_dns
+                _pool = build_pool(
+                    instance_name=self.selected_instance,
+                    host=host, user=user, database=self.database
+                )
 
-df = query_df(pool, f"SELECT * FROM {schema}.{table} WHERE session_id = '{session_id}'")
-st.dataframe(df)
+            # Create table and insert/update a record for this session.
+            upsert_app_state(
+                self.schema_name, self.table_name, self.session_id, "feedback_message", "true"
+            )
+
+            # Fetch the data to display.
+            select_sql = f"SELECT * FROM {self.schema_name}.{self.table_name} WHERE session_id = %(session_id)s"
+            df = query_df(select_sql, params={"session_id": self.session_id})
+
+            async with self:
+                self.result_data = df.to_dict("records")
+
+        except Exception as e:
+            async with self:
+                self.error_message = f"An error occurred: {e}"
+        finally:
+            async with self:
+                self.is_loading = False
 ```
 
 :::info
@@ -125,13 +169,13 @@ See [this guide](https://docs.databricks.com/aws/en/oltp/pg-roles?language=Postg
 - [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk>=0.60.0`
 - [`psycopg[binary]`](https://pypi.org/project/psycopg/), [`psycopg-pool`](https://pypi.org/project/psycopg-pool/)
 - [Pandas](https://pypi.org/project/pandas/) - `pandas`
-- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
 databricks-sql-connector
 pandas
-streamlit
+reflex
 psycopg[binary]
 psycopg-pool
 ```
