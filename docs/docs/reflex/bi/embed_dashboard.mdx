@@ -1,0 +1,92 @@
+---
+sidebar_position: 1
+---
+
+# Embed a dashboard
+
+This recipe embeds a [Databricks AI/BI dashboard](https://docs.databricks.com/aws/en/dashboards/) into a Databricks App.
+
+## Code snippet
+
+```python title="app.py"
+import reflex as rx
+import requests
+from databricks.sdk.core import Config
+
+# 1. Helper to fetch published dashboards from Databricks API
+def get_published_dashboards():
+    cfg = Config()
+    headers = {"Authorization": f"Bearer {cfg.token}"}
+    # The Lakeview API endpoint for listing dashboards
+    url = f"{cfg.host}/api/2.0/lakeview/dashboards"
+
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+
+    data = response.json()
+    published = {}
+    for d in data.get("dashboards", []):
+        if d.get("published"):
+            published[d.get("display_name")] = d.get("dashboard_id")
+    return published
+
+class AiBiDashboardState(rx.State):
+    dashboard_options: dict[str, str] = {}
+    selected_dashboard: str = ""
+    iframe_source: str = ""
+
+    @rx.var
+    def dashboard_names(self) -> list[str]:
+        return list(self.dashboard_options.keys())
+
+    @rx.event
+    def on_load(self):
+        # Fetch available dashboards on load
+        self.dashboard_options = get_published_dashboards()
+        if self.dashboard_options:
+            # Default to the first one
+            self.selected_dashboard = self.dashboard_names[0]
+            self.update_src()
+
+    @rx.event
+    def set_selected_dashboard(self, value: str):
+        self.selected_dashboard = value
+        self.update_src()
+
+    def update_src(self):
+        # Construct the embed URL
+        cfg = Config()
+        dash_id = self.dashboard_options.get(self.selected_dashboard)
+        if dash_id:
+            self.iframe_source = f"{cfg.host}/dashboardsv3/{dash_id}/published?embed=true"
+```
+
+:::info
+
+Copy and paste the dashoard embedding URL from the dashboard UI **Share** -> **Embed iframe**.
+
+:::
+
+## Resources
+
+- [AI/BI dashboard](https://docs.databricks.com/aws/en/dashboards/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN VIEW` permission on the dashboard
+
+:::info
+
+A workspace admin needs to enable dashboard embedding in the Security settings of your Databricks workspace for specific domains (e.g., databricksapps.com) or all domains for this sample to work.
+
+:::
+
+## Dependencies
+
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
+
+```python title="requirements.txt"
+reflex
+```

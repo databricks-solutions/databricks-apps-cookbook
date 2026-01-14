@@ -1,0 +1,138 @@
+---
+sidebar_position: 3
+---
+
+# Edit a Delta table
+
+Use this recipe to read, edit, and write back data in a [Unity Catalog table](https://docs.databricks.com/aws/en/tables/) using the [Databricks SQL Connector](https://docs.databricks.com/en/dev-tools/python-sql-connector.html).
+
+## Code snippet
+
+```python title="app.py"
+import reflex as rx
+from typing import Any
+import pandas as pd
+import datetime
+from databricks import sql
+from databricks.sdk.core import Config
+
+_connection = None
+
+def get_connection(http_path: str):
+    global _connection
+    if _connection:
+        return _connection
+    cfg = Config()
+    connection = sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        credentials_provider=cfg.authenticate,
+    )
+    _connection = connection
+    return connection
+
+def insert_overwrite_table(table_name: str, df: pd.DataFrame, connection):
+    if df.empty:
+        # If the dataframe is empty, we skip the overwrite to avoid
+        # accidentally truncating the table if the UI state was not fully loaded.
+        return
+
+    def format_val(x):
+        if x is None or pd.isna(x):
+            return "NULL"
+        if isinstance(x, str):
+            return f"'{x.replace("'", "''")}'"
+        if isinstance(x, (datetime.date, datetime.datetime, pd.Timestamp)):
+            return f"'{x}'"
+        return str(x)
+
+    values = []
+    for _, row in df.iterrows():
+        row_values = [format_val(val) for val in row]
+        values.append(f"({', '.join(row_values)})")
+
+    sql_query = f"INSERT OVERWRITE TABLE {table_name} VALUES {', '.join(values)}"
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql_query)
+
+class EditDeltaTableState(rx.State):
+    # Key state fields for managing selection and data
+    warehouse_paths: dict[str, str] = {}
+    selected_warehouse: str = ""
+    selected_catalog: str = ""
+    selected_schema: str = ""
+    selected_table: str = ""
+
+    # Data for the editor
+    columns: list[dict[str, str]] = []
+    table_data: list[list[Any]] = []
+    original_table_data: list[list[Any]] = []
+
+    is_saving: bool = False
+
+    @rx.event
+    def handle_cell_change(
+        self, new_value: Any, row_index: int, col_index: int
+    ):
+        "Update table data when a cell is edited."
+        if row_index < len(self.table_data):
+            row = self.table_data[row_index]
+            if col_index < len(row):
+                self.table_data[row_index][col_index] = new_value
+
+    @rx.event
+    async def save_changes(self):
+        self.is_saving = True
+        yield
+        try:
+            col_names = [col["title"] for col in self.columns]
+            df = pd.DataFrame(self.table_data, columns=col_names)
+
+            http_path = self.warehouse_paths.get(self.selected_warehouse)
+            full_table_name = f"{self.selected_catalog}.{self.selected_schema}.{self.selected_table}"
+            conn = get_connection(http_path)
+
+            insert_overwrite_table(full_table_name, df, conn)
+
+            self.original_table_data = [row[:] for row in self.table_data]
+            yield rx.toast(f"Successfully saved changes to {full_table_name}.")
+        except Exception as e:
+            yield rx.toast(f"Error saving changes: {e}", level="error")
+        finally:
+            self.is_saving = False
+```
+
+:::info
+
+This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) to cache the database connection across users, sessions, and reruns. Use Streamlit's caching decorators to implement a caching strategy that works for your use case.
+
+:::
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/)
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `MODIFY` on the Unity Catalog table
+- `CAN USE` on the SQL warehouse
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [Pandas](https://pypi.org/project/pandas/) - `pandas`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
+
+```python title="requirements.txt"
+databricks-sdk
+databricks-sql-connector
+pandas
+reflex
+```

@@ -1,0 +1,130 @@
+---
+sidebar_position: 2
+---
+
+# Read a Delta table
+
+This recipe reads a [Unity Catalog table](https://docs.databricks.com/aws/en/tables/) using the [Databricks SQL Connector](https://docs.databricks.com/en/dev-tools/python-sql-connector.html).
+
+## Code snippet
+
+```python title="app.py"
+import reflex as rx
+from databricks import sql
+from databricks.sdk.core import Config
+import logging
+import pandas as pd
+from typing import Any
+
+_connection = None
+
+
+def get_connection(http_path: str):
+    global _connection
+    if _connection:
+        return _connection
+    cfg = Config()
+    connection = sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        credentials_provider=cfg.authenticate,
+    )
+    _connection = connection
+    return connection
+
+
+def read_table(table_name: str, conn) -> pd.DataFrame:
+    with conn.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM {table_name}")
+        return cursor.fetchall_arrow().to_pandas()
+
+
+def pandas_to_editor_format(
+    df: pd.DataFrame,
+) -> tuple[list[list[Any]], list[dict[str, str]]]:
+    """Convert a pandas DataFrame to the format required by rx.data_editor."""
+    if df.empty:
+        return ([], [])
+    data = df.values.tolist()
+    columns = [{"title": col, "id": col, "type": "str"} for col in df.columns]
+    return (data, columns)
+
+
+class ReadTableState(rx.State):
+    http_path_input: str = ""
+    table_name: str = "samples.nyctaxi.trips"
+    df_data: list[list[Any]] = []
+    df_columns: list[dict] = []
+    is_loading: bool = False
+    error_message: str = ""
+
+    @rx.var
+    def columns_for_editor(self) -> list[dict]:
+        return self.df_columns
+
+    @rx.var
+    def data_for_editor(self) -> list[list[str]]:
+        """Return data directly as it is already formatted for the editor."""
+        return self.df_data
+
+    @rx.event(background=True)
+    async def load_table(self):
+        async with self:
+            self.is_loading = True
+            self.error_message = ""
+            self.df_data = []
+            self.df_columns = []
+            http_path = self.http_path_input
+            table_name = self.table_name
+        if not http_path:
+            async with self:
+                self.error_message = "Please enter an HTTP Path."
+                self.is_loading = False
+            return
+        try:
+            conn = get_connection(http_path)
+            df = read_table(table_name, conn)
+            data, cols = pandas_to_editor_format(df)
+            async with self:
+                self.df_data = data
+                self.df_columns = cols
+        except Exception as e:
+            logging.exception(f"Error loading Delta table: {e}")
+            async with self:
+                self.error_message = f"Error: {e}"
+        finally:
+            async with self:
+                self.is_loading = False
+```
+
+:::info
+
+This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) to cache the database connection across users, sessions, and reruns. Use Streamlit's caching decorators to implement a caching strategy that works for your use case.
+
+:::
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/)
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `SELECT` on the Unity Catalog table
+- `CAN USE` on the SQL warehouse
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
+
+```python title="requirements.txt"
+databricks-sdk
+databricks-sql-connector
+reflex
+```

@@ -1,0 +1,10 @@
+command: [
+  "reflex",
+  "run",
+  "--env",
+  "prod",
+]
+
+env:
+  - name: CI
+    value: "1"

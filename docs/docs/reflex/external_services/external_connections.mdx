@@ -1,0 +1,115 @@
+---
+sidebar_position: 1
+---
+
+# External connections
+
+This recipe demonstrates how to use Unity Catalog-managed external [HTTP connections](https://docs.databricks.com/aws/en/query-federation/http) for secure and governed access to MCP and non-MCP servers, for example, to GitHub, or Jira, and Slack.
+
+## Code snippets
+
+### OAuth User to Machine Per User (On-behalf-of-user)
+
+```python title="app.py"
+import reflex as rx
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+import json
+
+def init_mcp_session(w: WorkspaceClient, connection_name: str):
+    init_payload = {
+        "jsonrpc": "2.0",
+        "id": "init-1",
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "reflex-cookbook", "version": "1.0"},
+        }
+    }
+    response = w.serving_endpoints.http_request(
+        conn=connection_name,
+        method=ExternalFunctionRequestHttpMethod.POST,
+        path="/",
+        json=init_payload,
+    )
+    return response.headers.get("mcp-session-id")
+
+class ExternalConnectionsState(rx.State):
+    response_data: str = ""
+
+    @rx.event
+    async def run(self):
+        # 1. Get token from headers
+        headers = self.router.headers
+        token = getattr(headers, "x_forwarded_access_token", "")
+
+        # 2. Initialize WorkspaceClient with the token
+        w = WorkspaceClient(token=token, auth_type="pat")
+
+        # 3. Initialize Session
+        connection_name = "github_mcp_oauth"
+        session_id = init_mcp_session(w, connection_name)
+
+        # 4. Make request with session ID
+        headers = {"Mcp-Session-Id": session_id}
+        payload = {"jsonrpc": "2.0", "id": "list-1", "method": "tools/list"}
+
+        response = w.serving_endpoints.http_request(
+            conn=connection_name,
+            method=ExternalFunctionRequestHttpMethod.POST,
+            path="/",
+            headers=headers,
+            json=payload,
+        )
+        self.response_data = json.dumps(response.as_dict(), indent=2)
+```
+
+### Bearer token
+
+```python title="app.py"
+import reflex as rx
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ExternalFunctionRequestHttpMethod
+import json
+
+class ExternalConnectionsState(rx.State):
+    response_data: str = ""
+
+    @rx.event
+    async def run(self):
+        # 1. Initialize WorkspaceClient (uses environment or default auth)
+        w = WorkspaceClient()
+
+        # 2. Direct HTTP GET request
+        response = w.serving_endpoints.http_request(
+            conn="github_u2m_connection",
+            method=ExternalFunctionRequestHttpMethod.GET,
+            path="/",
+            headers={"Accept": "application/vnd.github+json"},
+        )
+
+        self.response_data = json.dumps(response.as_dict(), indent=2)
+```
+
+## Resources
+
+- [Unity Catalog HTTP Connection](https://docs.databricks.com/aws/en/query-federation/http), either MCP or non-MCP
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `USE CONNECTION` permission on the HTTP Connection
+
+When using OAuth User to Machine Per User (On-behalf-of-user), you need to configure [User authorization](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth#user-authorization) by adding the Unity Catalog connection or other scopes.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
+
+```python title="requirements.txt"
+databricks-sdk
+reflex
+```

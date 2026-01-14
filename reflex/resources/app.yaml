@@ -1,0 +1,6 @@
+resources:
+  apps:
+    reflex_app:
+      name: 'reflex_demo_app'
+      source_code_path: ../app # This assumes the app source code is at the root of the project.
+      description: 'A Databricks app'

@@ -1,0 +1,153 @@
+---
+sidebar_position: 1
+---
+
+# Invoke a model
+
+This recipe invokes a model hosted on [Mosaic AI Model Serving](https://docs.databricks.com/aws/en/machine-learning/model-serving/) using the [Databricks SDK for Python](https://databricks-sdk-py.readthedocs.io/en/latest/) and returns the result. Choose either a traditional ML model or a large language model (LLM).
+
+## Code snippets
+
+### Traditional Machine Learning
+
+#### Using `dataframe_split` (JSON-serialized DataFrame in split orientation)
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import DataframeSplitInput
+import reflex as rx
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="traditional-model",
+    dataframe_split={
+        "columns": ["feature1", "feature2"],
+        "data": [[1, 2], [3, 4]]
+    }
+)
+rx.text(response.as_dict())
+```
+
+#### Using `dataframe_records` (JSON-serialized DataFrame in records orientation)
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+import reflex as rx
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="traditional-model",
+    dataframe_records=[
+        {"feature1": 1, "feature2": 2},
+        {"feature1": 3, "feature2": 4}
+    ]
+)
+rx.text(response.as_dict())
+```
+
+#### Using `instances` (Tensor inputs in row format for TensorFlow/PyTorch models)
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+import reflex as rx
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="tf-model",
+    instances=[
+        [1, 2], [3, 4]
+    ]
+)
+rx.text(response.as_dict())
+```
+
+#### Using `inputs` (Tensor inputs in columnar format for TensorFlow/PyTorch models)
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+import reflex as rx
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="pytorch-model",
+    inputs={"input_ids": [1, 2, 3]}
+)
+rx.text(response.as_dict())
+```
+
+### Large language models (LLMs)
+
+#### Using `prompt` (Input text for completion tasks)
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+import reflex as rx
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="completion-model",
+    prompt="Once upon a time"
+)
+rx.text(response.as_dict())
+```
+
+#### Using `messages` (List of chat messages for conversational models)
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
+import reflex as rx
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="chat-model",
+    messages=[
+        {"role": "user", "content": "Hello!"},
+        {"role": "assistant", "content": "Hi there!"}
+    ]
+)
+rx.text(response.as_dict())
+```
+
+#### Using `input` (Input text for embedding tasks)
+
+```python title="app.py"
+from databricks.sdk import WorkspaceClient
+import reflex as rx
+
+w = WorkspaceClient()
+
+response = w.serving_endpoints.query(
+    name="embeddings-model",
+    input=["text to embed"]
+)
+rx.text(response.as_dict())
+```
+
+## Resources
+
+- [Model Serving endpoint](https://docs.databricks.com/aws/en/machine-learning/model-serving/manage-serving-endpoints)
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN QUERY` on the model serving endpoint
+
+See [Manage permissions on your model serving endpoint](https://docs.databricks.com/aws/en/machine-learning/model-serving/manage-serving-endpoints#manage-permissions-on-your-model-serving-endpoint) for more information.
+
+## Dependencies
+
+- [Databricks SDK for Python](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Reflex](https://pypi.org/project/reflex/) - `reflex`
+
+```python title="requirements.txt"
+databricks-sdk
+reflex
+```
