@@ -52,13 +52,13 @@ class TriggerJobState(rx.State):
                     self.result_data = json.dumps(result, indent=2)
                     yield rx.toast(f"Run started: {result.get('run_id')}", level="success")
         except json.JSONDecodeError:
-             async with self:
+            async with self:
                 yield rx.toast("Invalid JSON parameters", level="error")
         except Exception as e:
-             async with self:
+            async with self:
                 self.error_message = str(e)
         finally:
-             async with self:
+            async with self:
                 self.is_loading = False
 ```
 
