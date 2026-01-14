@@ -63,7 +63,7 @@ class AiBiDashboardState(rx.State):
 
 :::info
 
-Copy and paste the dashoard embedding URL from the dashboard UI **Share** -> **Embed iframe**.
+Copy and paste the dashboard embedding URL from the dashboard UI **Share** -> **Embed iframe**.
 
 :::
 
@@ -85,8 +85,12 @@ A workspace admin needs to enable dashboard embedding in the Security settings o
 
 ## Dependencies
 
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
+- [Requests](https://pypi.org/project/requests/) - `requests`
 - [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
+databricks-sdk
+requests
 reflex
 ```

@@ -29,6 +29,7 @@ class GetCurrentUserState(rx.State):
     user_external_id: str = ""
     groups_count: int = 0
     entitlements_count: int = 0
+    all_headers_json: str = ""
     user_json: str = ""
     is_loading: bool = False
     error_message: str = ""

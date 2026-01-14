@@ -41,7 +41,7 @@ def insert_overwrite_table(table_name: str, df: pd.DataFrame, connection):
         if x is None or pd.isna(x):
             return "NULL"
         if isinstance(x, str):
-            return f"'{x.replace("'", "''")}'"
+            return "'" + x.replace("'", "''") + "'"
         if isinstance(x, (datetime.date, datetime.datetime, pd.Timestamp)):
             return f"'{x}'"
         return str(x)
@@ -105,7 +105,7 @@ class EditDeltaTableState(rx.State):
 
 :::info
 
-This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) to cache the database connection across users, sessions, and reruns. Use Streamlit's caching decorators to implement a caching strategy that works for your use case.
+This sample caches the SQL connection in a module-level `_connection` variable so it can be reused within the same app process. For multi-worker deployments, consider a proper pooling strategy or per-request connections depending on your workload.
 
 :::
 

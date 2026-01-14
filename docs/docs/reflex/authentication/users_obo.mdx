@@ -83,7 +83,7 @@ class OboState(rx.State):
 
 :::info
 
-This sample uses Streamlit's [st.cache_resource](https://docs.streamlit.io/develop/concepts/architecture/caching#stcache_resource) to cache the database connection across users, sessions, and reruns. The app will only work when deployed to Databricks Apps with on-behalf-of-user authentication enabled.
+This sample caches the SQL connection in a module-level `_connection` variable so it can be reused within the same app process. The app will only work when deployed to Databricks Apps with on-behalf-of-user authentication enabled.
 
 :::
 
@@ -116,10 +116,12 @@ See [Databricks Apps authorization model](https://docs.databricks.com/aws/en/dev
 
 - [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk`
 - [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector`
+- [Pandas](https://pypi.org/project/pandas/) - `pandas`
 - [Reflex](https://pypi.org/project/reflex/) - `reflex`
 
 ```python title="requirements.txt"
 databricks-sdk
 databricks-sql-connector
+pandas
 reflex
 ``` 

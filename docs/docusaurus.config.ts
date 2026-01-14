@@ -99,6 +99,12 @@ const config: Config = {
           activeBasePath: "docs/category/dash",
         },
         {
+          to: "docs/category/reflex",
+          label: "Reflex",
+          position: "left",
+          activeBasePath: "docs/category/reflex",
+        },
+        {
           to: "docs/category/fastapi",
           label: "FastAPI",
           position: "left",

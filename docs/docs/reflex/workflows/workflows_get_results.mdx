@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Retrieve workflow results
 
-This recipe retreives the results of a [Databricks Workflows](https://docs.databricks.com/en/jobs/index.html) job task run using the [Databricks SDK for Python](https://databricks-sdk-py.readthedocs.io/en/latest/)..
+This recipe retrieves the results of a [Databricks Workflows](https://docs.databricks.com/en/jobs/index.html) job run using the [Databricks SDK for Python](https://databricks-sdk-py.readthedocs.io/en/latest/).
 
 ## Code snippet
 
@@ -15,7 +15,7 @@ from databricks.sdk import WorkspaceClient
 w = WorkspaceClient()
 
 class RetrieveJobResultsState(rx.State):
-    task_run_id: str = ""
+    run_id: str = ""
     results: str = ""
     is_loading: bool = False
     error_message: str = ""
@@ -27,23 +27,23 @@ class RetrieveJobResultsState(rx.State):
             self.error_message = ""
             self.results = ""
 
-            if not self.task_run_id:
-                yield rx.toast("Please specify a Task Run ID.", level="warning")
+            if not self.run_id:
+                yield rx.toast("Please specify a Run ID.", level="warning")
                 self.is_loading = False
                 return
 
         try:
             # Ensure ID is an integer
-            run_id = int(self.task_run_id)
+            run_id = int(self.run_id)
             run_output = w.jobs.get_run_output(run_id=run_id)
 
             async with self:
                 self.results = str(run_output)
                 yield rx.toast("Results retrieved successfully.", level="success")
         except ValueError:
-             async with self:
-                self.error_message = "Task Run ID must be a valid number."
-                yield rx.toast("Task Run ID must be a valid number.", level="error")
+            async with self:
+                self.error_message = "Run ID must be a valid number."
+                yield rx.toast("Run ID must be a valid number.", level="error")
         except Exception as e:
             async with self:
                 self.error_message = str(e)
