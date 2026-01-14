@@ -10,7 +10,7 @@ Learn more about the Databricks Apps Cookbook on **[apps-cookbook.dev](https://a
 - **Try recipes in the Cookbook app** and simply copy a code snippet to build your own.
 - **Description of requirements** (permissions, resources, dependencies) for each recipe.
 - Deploy to Databricks Apps or run locally.
-- Snippets for **Dash, Streamlit, and FastAPI** are available.
+- Snippets for **Dash, Streamlit, Reflex, and FastAPI** are available.
 
 ![Databricks Apps Cookbook](docs/docs/assets/demo.gif)
 
