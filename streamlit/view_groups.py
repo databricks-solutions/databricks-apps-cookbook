@@ -116,9 +116,15 @@ groups = [
         "title": "Compute",
         "views": [
             {
-                "label": "Connect",
+                "label": "Connect to shared cluster",
                 "help": "Transform data at scale with UI inputs.",
                 "page": "views/compute_connect.py",
+                "icon": ":material/lan:",
+            },
+            {
+                "label": "Connect to serverless cluster",
+                "help": "Transform data at scale with UI inputs.",
+                "page": "views/compute_connect_serverless.py",
                 "icon": ":material/lan:",
             },
         ],
