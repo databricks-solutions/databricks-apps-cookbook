@@ -20,7 +20,7 @@ google-auth==2.40.3
 greenlet==3.2.3
 h11==0.16.0
 idna==3.10
-pyasn1==0.6.1
+pyasn1==0.6.2
 pyasn1-modules==0.4.2
 pydantic-core==2.33.2
 python-dotenv==1.1.0
