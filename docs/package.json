@@ -44,7 +44,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
     "typescript": "~5.6.2",
-    "wrangler": "^4.31.0"
+    "wrangler": "^4.59.1"
   },
   "browserslist": {
     "production": [
