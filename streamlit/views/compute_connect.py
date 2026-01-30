@@ -4,15 +4,17 @@ import pandas as pd
 from databricks.connect import DatabricksSession
 
 st.header("Compute", divider=True)
-st.subheader("Connect")
+st.subheader("Connect to shared cluster")
 st.write(
     """
     This recipe uses [Databricks Connect](https://docs.databricks.com/en/dev-tools/databricks-connect/python/index.html) to execute pre-defined Python or SQL code on a **shared** cluster with UI inputs. 
     """
 )
-tab_a, tab_b, tab_c = st.tabs(["**Try it**", "**Code snippet**", "**Requirements**"])
+tab_a, tab_b, tab_c = st.tabs(
+    ["**Try it**", "**Code snippet**", "**Requirements**"])
 
-server_hostname = os.getenv("DATABRICKS_HOST") or os.getenv("DATABRICKS_HOSTNAME")
+server_hostname = os.getenv(
+    "DATABRICKS_HOST") or os.getenv("DATABRICKS_HOSTNAME")
 
 
 def connect_to_cluster(cluster_id: str):
@@ -32,9 +34,9 @@ with tab_a:
         spark = connect_to_cluster(cluster_id)
         st.success("Successfully connected to Spark:", icon="✅")
         session_info = {
-                "App Name": spark.conf.get("spark.app.name", "Unknown"),
-                "Master URL": spark.conf.get("spark.master", "Unknown"),
-            }
+            "App Name": spark.conf.get("spark.app.name", "Unknown"),
+            "Master URL": spark.conf.get("spark.master", "Unknown"),
+        }
         st.json(session_info)
 
     sub_tab_1, sub_tab_2 = st.tabs(["**Python**", "**SQL**"])
@@ -79,7 +81,7 @@ with tab_a:
                     query = f"SELECT a.id, a.value AS value_a, b.value AS value_b FROM {a} {operation} {b} ON a.id = b.id"
                 else:
                     query = f"SELECT * FROM {a} {operation} SELECT * FROM {b}"
-            
+
                 result = spark.sql(query)
                 st.write("Output:")
                 st.dataframe(result.toPandas(), hide_index=True)
