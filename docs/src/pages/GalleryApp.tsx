@@ -62,6 +62,7 @@ function GalleryAppPage() {
   const [relatedApps, setRelatedApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const [readme, setReadme] = useState<string | null>(null);
+  const [readmeBaseUrl, setReadmeBaseUrl] = useState<string | null>(null);
 
   const slug = location.pathname.split("/").filter(Boolean).pop() || "";
 
@@ -225,23 +226,27 @@ function GalleryAppPage() {
         );
       };
 
+      const urlParts = app.githubUrl.split("/");
+      // Handle https://github.com/owner/repo
+      const ownerIndex = urlParts.indexOf("github.com") + 1;
+      if (ownerIndex === 0 || ownerIndex + 1 >= urlParts.length) return;
+
+      const owner = urlParts[ownerIndex];
+      const repo = urlParts[ownerIndex + 1];
+
       // 1. CACHE CHECK: Do we have this in local storage?
       const cacheKey = `readme-${app.slug}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
+        // Default to main branch for cached READMEs
+        setReadmeBaseUrl(
+          `https://github.com/${owner}/${repo}/blob/main/`,
+        );
         setReadme(preprocessReadme(cached));
         return;
       }
 
       try {
-        const urlParts = app.githubUrl.split("/");
-        // Handle https://github.com/owner/repo
-        const ownerIndex = urlParts.indexOf("github.com") + 1;
-        if (ownerIndex === 0 || ownerIndex + 1 >= urlParts.length) return;
-
-        const owner = urlParts[ownerIndex];
-        const repo = urlParts[ownerIndex + 1];
-
         const branches = ["main", "master"];
         const filenames = ["README.md", "readme.md"];
 
@@ -254,6 +259,10 @@ function GalleryAppPage() {
               const text = await res.text();
               // Save RAW text to cache so we can improve preprocessing later if needed
               localStorage.setItem(cacheKey, text);
+              // Store the base URL for resolving relative links in the README
+              setReadmeBaseUrl(
+                `https://github.com/${owner}/${repo}/blob/${branch}/`,
+              );
               // Render PROCESSED text
               setReadme(preprocessReadme(text));
               return; // Exit completely once found
@@ -455,6 +464,33 @@ function GalleryAppPage() {
                     rehypePlugins={[rehypeRaw]}
                     components={{
                       img: () => null, // Explicitly exclude images
+                      a: ({ href, children, ...props }) => {
+                        let resolvedHref = href || "";
+                        // Rewrite relative URLs to point to the GitHub repo
+                        if (
+                          readmeBaseUrl &&
+                          resolvedHref &&
+                          !resolvedHref.startsWith("http://") &&
+                          !resolvedHref.startsWith("https://") &&
+                          !resolvedHref.startsWith("//") &&
+                          !resolvedHref.startsWith("#") &&
+                          !resolvedHref.startsWith("mailto:")
+                        ) {
+                          // Strip leading "./" if present
+                          const cleanPath = resolvedHref.replace(/^\.\//, "");
+                          resolvedHref = `${readmeBaseUrl}${cleanPath}`;
+                        }
+                        return (
+                          <a
+                            href={resolvedHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            {...props}
+                          >
+                            {children}
+                          </a>
+                        );
+                      },
                     }}
                   >
                     {readme}
