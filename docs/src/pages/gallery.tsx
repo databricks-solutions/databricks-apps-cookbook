@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@theme/Layout";
-import { Github } from "lucide-react";
+import { Github, BadgeCheck } from "lucide-react";
 import { useHistory, useLocation } from "@docusaurus/router";
 import FilterPills from "../components/FilterPills";
 import { createClient } from "@sanity/client";
@@ -20,6 +20,13 @@ interface Author {
   linkedinUrl?: string;
 }
 
+interface Provider {
+  name: string;
+  slug: string;
+  color: string;
+  url: string;
+}
+
 interface ImageAsset {
   asset: {
     _id: string;
@@ -34,12 +41,50 @@ interface App {
   title: string;
   slug: string;
   summary: string;
+  featured?: boolean;
   useCase: Tag;
   industries: Tag[];
   technologies: Tag[];
+  provider?: Provider;
   githubUrl: string;
   authors: Author[];
   previewImage: ImageAsset;
+}
+
+function ProviderBadge({
+  provider,
+  featured = false,
+}: {
+  provider: Provider;
+  featured?: boolean;
+}) {
+  const badgeColor = featured ? "#B45309" : provider.color;
+  const badgeBackground = featured ? "#EAB30820" : `${provider.color}20`;
+  const badgeBorder = featured ? "#EAB30866" : `${provider.color}40`;
+
+  return (
+    <div className="group relative z-10">
+      <a
+        href={provider.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex w-full items-center justify-center gap-1 border-x-0 border-t border-b-0 border-solid px-4 py-2 text-xs font-semibold no-underline"
+        style={{
+          backgroundColor: badgeBackground,
+          borderColor: badgeBorder,
+          color: badgeColor,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <BadgeCheck size={14} />
+        {provider.name}
+      </a>
+      <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded bg-gray-900 px-3 py-1.5 text-xs whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-gray-700">
+        Provided and maintained by the{" "}
+        <span className="font-bold">{provider.name}</span> team
+      </div>
+    </div>
+  );
 }
 
 const client = createClient({
@@ -58,11 +103,13 @@ function GalleryPage() {
   const [useCases, setUseCases] = useState<string[]>([]);
   const [industries, setIndustries] = useState<string[]>([]);
   const [technologies, setTechnologies] = useState<string[]>([]);
+  const [providers, setProviders] = useState<string[]>([]);
   const [selectedUseCases, setSelectedUseCases] = useState<string[]>([]);
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>(
     [],
   );
+  const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
 
   // Check if we're on a detail page (e.g., /gallery/pixels)
   const pathParts = location.pathname.split("/").filter(Boolean);
@@ -72,6 +119,28 @@ function GalleryPage() {
   if (isDetailPage) {
     return <GalleryAppPage />;
   }
+
+  const getPreviewFrameColor = (app: App) => {
+    const hasNonDatabricksProvider =
+      app.provider &&
+      app.provider.name.trim().toLowerCase() !== "databricks";
+
+    if (hasNonDatabricksProvider) {
+      return app.provider.color;
+    }
+
+    if (app.useCase.frameColor) {
+      return app.useCase.frameColor;
+    }
+
+    return ["#FF5F47", "#01A770", "#2373B4", "#FFAB00"][
+      Math.abs(
+        app._id
+          .split("")
+          .reduce((acc, char) => acc + char.charCodeAt(0), 0),
+      ) % 4
+    ];
+  };
 
   const filteredApps = apps.filter((app) => {
     const authorString = app.authors.map((a) => a.name).join(" ");
@@ -92,11 +161,16 @@ function GalleryPage() {
       selectedTechnologies.length === 0 ||
       app.technologies.some((tech) => selectedTechnologies.includes(tech.name));
 
+    const providerMatch =
+      selectedProviders.length === 0 ||
+      (app.provider && selectedProviders.includes(app.provider.name));
+
     return (
       searchString.includes(searchTerm.toLowerCase()) &&
       useCaseMatch &&
       industryMatch &&
-      technologyMatch
+      technologyMatch &&
+      providerMatch
     );
   });
 
@@ -105,12 +179,13 @@ function GalleryPage() {
       try {
         setLoading(true);
         const data: App[] = await client.fetch(`
-          *[_type == "galleryApp"] | order(_createdAt desc) {
+          *[_type == "galleryApp"] | order(coalesce(featured, false) desc, _createdAt desc) {
             _id,
             _createdAt,
             title,
             "slug": slug.current,
             summary,
+            featured,
             previewImage {
               asset->{
                 _id,
@@ -140,6 +215,12 @@ function GalleryPage() {
               borderColor,
               darkBorderColor
             },
+            "provider": provider->{
+              name,
+              "slug": slug.current,
+              color,
+              url
+            },
             githubUrl,
             "authors": authors[]->{
               name,
@@ -161,10 +242,18 @@ function GalleryPage() {
             data.flatMap((app) => app.technologies.map((t) => t.name)),
           ),
         ].filter((name): name is string => typeof name === "string");
+        const allProviders = [
+          ...new Set(
+            data
+              .map((app) => app.provider?.name)
+              .filter((name): name is string => Boolean(name)),
+          ),
+        ];
 
         setUseCases(allUseCases.sort());
         setIndustries(allIndustries.sort());
         setTechnologies(allTechnologies.sort());
+        setProviders(allProviders.sort());
       } catch (error) {
         console.error("Error fetching apps:", error);
       } finally {
@@ -227,6 +316,18 @@ function GalleryPage() {
                   className="mb-4"
                 />
               </div>
+
+              <div className="mt-2">
+                <h3 className="mb-2 border-l-4 border-[#805AD5] pl-2 font-semibold dark:border-[#A78BFA]">
+                  Provider
+                </h3>
+                <FilterPills
+                  options={providers}
+                  selected={selectedProviders}
+                  onChange={setSelectedProviders}
+                  className="mb-4"
+                />
+              </div>
             </aside>
             <main className="w-full md:w-4/5">
               {loading ? (
@@ -276,25 +377,18 @@ function GalleryPage() {
                   {filteredApps.map((app) => (
                     <div
                       key={app._id}
-                      className="flex cursor-pointer flex-col border bg-[#F9F7F4] shadow-lg transition-shadow hover:shadow-xl dark:border-gray-700 dark:bg-[#242526]"
+                      className={`flex cursor-pointer flex-col bg-[#F9F7F4] shadow-lg transition-shadow hover:shadow-xl dark:bg-[#242526] ${
+                        app.featured
+                          ? "border-[4px] border-[#EAB308] dark:border-[#FDE047]"
+                          : "border dark:border-gray-700"
+                      }`}
                       onClick={() => history.push(`/gallery/${app.slug}`)}
                     >
                       {/* Preview Image with Frame */}
                       <div
                         className="w-full overflow-hidden p-8 pb-0"
                         style={{
-                          backgroundColor:
-                            app.useCase.frameColor ||
-                            ["#FF5F47", "#01A770", "#2373B4", "#FFAB00"][
-                              Math.abs(
-                                app._id
-                                  .split("")
-                                  .reduce(
-                                    (acc, char) => acc + char.charCodeAt(0),
-                                    0,
-                                  ),
-                              ) % 4
-                            ],
+                          backgroundColor: getPreviewFrameColor(app),
                         }}
                       >
                         <div className="mx-auto w-full overflow-hidden rounded-t-md border-t border-r border-l border-gray-300 bg-white shadow-sm dark:border-gray-600 dark:bg-gray-800">
@@ -320,7 +414,17 @@ function GalleryPage() {
                       {/* Card Content */}
                       <div className="flex flex-1 flex-col p-6">
                         {/* Title */}
-                        <h2 className="mb-2 text-xl font-bold">{app.title}</h2>
+                        <h2 className="mb-2 text-xl font-bold">
+                          {app.featured && (
+                            <span
+                              className="mr-2 inline align-middle text-[1.1em] leading-none text-[#FBBF24] dark:text-[#FDE047]"
+                              aria-label="Featured app"
+                            >
+                              ★
+                            </span>
+                          )}
+                          <span className="align-middle">{app.title}</span>
+                        </h2>
 
                         {/* Summary */}
                         <p className="mb-4 flex-1 text-sm text-gray-700 dark:text-gray-400">
@@ -389,6 +493,14 @@ function GalleryPage() {
                           </a>
                         </div>
                       </div>
+
+                      {/* Provider Badge */}
+                      {app.provider && (
+                        <ProviderBadge
+                          provider={app.provider}
+                          featured={Boolean(app.featured)}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
