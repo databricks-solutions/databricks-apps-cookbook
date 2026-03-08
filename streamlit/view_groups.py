@@ -59,7 +59,7 @@ groups = [
                 "icon": ":material/experiment:",
             },
             {
-                "label": "Invoke amulti-modal LLM",
+                "label": "Invoke a multi-modal LLM",
                 "help": "Send text and images for visual-language LLM tasks.",
                 "page": "views/ml_serving_invoke_mllm.py",
                 "icon": ":material/sensors:",
