@@ -246,16 +246,24 @@ function GalleryAppPage() {
 
       const pathPrefix = folderPath ? `${folderPath}/` : "";
 
-      // 1. CACHE CHECK: Do we have this in local storage?
+      const README_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
       const cacheKey = `readme-${app.slug}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
-        const cacheBranch = detectedBranch || "main";
-        setReadmeBaseUrl(
-          `https://github.com/${owner}/${repo}/blob/${cacheBranch}/${pathPrefix}`,
-        );
-        setReadme(preprocessReadme(cached));
-        return;
+        try {
+          const { text, ts } = JSON.parse(cached);
+          if (ts && Date.now() - ts < README_CACHE_TTL) {
+            const cacheBranch = detectedBranch || "main";
+            setReadmeBaseUrl(
+              `https://github.com/${owner}/${repo}/blob/${cacheBranch}/${pathPrefix}`,
+            );
+            setReadme(preprocessReadme(text));
+            return;
+          }
+        } catch {
+          // Malformed or old-format cache entry -- fall through to re-fetch
+        }
+        localStorage.removeItem(cacheKey);
       }
 
       try {
@@ -269,7 +277,7 @@ function GalleryAppPage() {
 
             if (res.ok) {
               const text = await res.text();
-              localStorage.setItem(cacheKey, text);
+              localStorage.setItem(cacheKey, JSON.stringify({ text, ts: Date.now() }));
               setReadmeBaseUrl(
                 `https://github.com/${owner}/${repo}/blob/${branch}/${pathPrefix}`,
               );
