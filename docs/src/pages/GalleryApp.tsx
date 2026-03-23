@@ -448,7 +448,7 @@ function GalleryAppPage() {
                 loop={false}
                 className="h-[250px] md:h-[350px] lg:h-[400px]"
               >
-                {app.previewImages.map((image, index) => (
+                {[...app.previewImages].reverse().map((image, index) => (
                   <SwiperSlide key={image.asset._id || index}>
                     <img
                       src={image.asset.url}
