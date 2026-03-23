@@ -227,50 +227,58 @@ function GalleryAppPage() {
       };
 
       const urlParts = app.githubUrl.split("/");
-      // Handle https://github.com/owner/repo
+      // Handle https://github.com/owner/repo or https://github.com/owner/repo/tree/branch/folder
       const ownerIndex = urlParts.indexOf("github.com") + 1;
       if (ownerIndex === 0 || ownerIndex + 1 >= urlParts.length) return;
 
       const owner = urlParts[ownerIndex];
       const repo = urlParts[ownerIndex + 1];
 
+      // Detect subfolder URLs: /tree/{branch}/{folderPath}
+      const remaining = urlParts.slice(ownerIndex + 2);
+      let detectedBranch: string | null = null;
+      let folderPath = "";
+
+      if (remaining[0] === "tree" && remaining.length >= 2) {
+        detectedBranch = remaining[1];
+        folderPath = remaining.slice(2).join("/");
+      }
+
+      const pathPrefix = folderPath ? `${folderPath}/` : "";
+
       // 1. CACHE CHECK: Do we have this in local storage?
       const cacheKey = `readme-${app.slug}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
-        // Default to main branch for cached READMEs
+        const cacheBranch = detectedBranch || "main";
         setReadmeBaseUrl(
-          `https://github.com/${owner}/${repo}/blob/main/`,
+          `https://github.com/${owner}/${repo}/blob/${cacheBranch}/${pathPrefix}`,
         );
         setReadme(preprocessReadme(cached));
         return;
       }
 
       try {
-        const branches = ["main", "master"];
+        const branches = detectedBranch ? [detectedBranch] : ["main", "master"];
         const filenames = ["README.md", "readme.md"];
 
         for (const branch of branches) {
           for (const filename of filenames) {
-            const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filename}`;
+            const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${pathPrefix}${filename}`;
             const res = await fetch(rawUrl);
 
             if (res.ok) {
               const text = await res.text();
-              // Save RAW text to cache so we can improve preprocessing later if needed
               localStorage.setItem(cacheKey, text);
-              // Store the base URL for resolving relative links in the README
               setReadmeBaseUrl(
-                `https://github.com/${owner}/${repo}/blob/${branch}/`,
+                `https://github.com/${owner}/${repo}/blob/${branch}/${pathPrefix}`,
               );
-              // Render PROCESSED text
               setReadme(preprocessReadme(text));
-              return; // Exit completely once found
+              return;
             }
           }
         }
       } catch (err) {
-        // 3. SILENT FAILURE: Just log it, UI will default to Sanity description
         console.warn(
           "Could not fetch README from GitHub, falling back to description.",
         );
