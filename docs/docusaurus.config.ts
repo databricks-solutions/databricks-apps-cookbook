@@ -67,6 +67,17 @@ const config: Config = {
         ],
       },
     ],
+    [
+      "docusaurus-plugin-llms",
+      {
+        generateLLMsTxt: true,
+        generateLLMsFullTxt: true,
+        generateMarkdownFiles: true,
+        preserveDirectoryStructure: true,
+        excludeImports: true,
+        removeDuplicateHeadings: true,
+      },
+    ],
   ],
 
   themeConfig: {
