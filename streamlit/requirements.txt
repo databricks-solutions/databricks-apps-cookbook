@@ -1,7 +1,7 @@
-databricks-connect==16.1.7
-databricks-sdk[openai]==0.73.0
-databricks-sql-connector==4.1.4
-pandas==2.2.3
-psycopg[binary]==3.2.12
-streamlit==1.51.0
-streamlit-folium==0.25.3
+databricks-connect~=18.1
+databricks-sdk[openai]~=0.105
+databricks-sql-connector~=4.2
+pandas~=3.0
+psycopg[binary]~=3.3
+streamlit~=1.56
+streamlit-folium~=0.27
