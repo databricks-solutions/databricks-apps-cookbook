@@ -5,7 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "docusaurus build && node scripts/fix-llms-md.mjs",
     "swizzle": "docusaurus swizzle",
     "deploy": "wrangler deploy",
     "deploy:preview": "wrangler deploy --dry-run",
@@ -38,6 +38,7 @@
     "@docusaurus/tsconfig": "^3.9.2",
     "@docusaurus/types": "^3.9.2",
     "@tailwindcss/postcss": "^4.1.11",
+    "docusaurus-plugin-llms": "^0.3.0",
     "postcss": "^8.5.6",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
