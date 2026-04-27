@@ -33,7 +33,7 @@ st.markdown(
     
     Explore the recipes via the sidebar to quickly build flexible and engaging data apps directly on Databricks.
 
-    Have a great recipe to share? Raise a pull request on the [GitHub repository](https://github.com/pbv0/databricks-apps-cookbook)!
+    Have a great recipe to share? Raise a pull request on the [GitHub repository](https://github.com/databricks-solutions/databricks-apps-cookbook)!
     """
 )
 

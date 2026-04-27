@@ -127,7 +127,7 @@ def layout():
                             html.Br(),
                             "Have a great recipe to share? Raise a pull request on the ",
                     html.A("GitHub repository", 
-                          href="https://github.com/pbv0/databricks-apps-cookbook",
+                          href="https://github.com/databricks-solutions/databricks-apps-cookbook",
                                 target="_blank",
                           className="text-primary"),
                     "!"

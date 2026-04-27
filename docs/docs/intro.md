@@ -61,10 +61,10 @@ Currently, we offer snippets for [Streamlit](/docs/category/streamlit), [Dash](/
 
 ## Interactive samples
 
-You can find **interactive sample implementations** for each snippet in the [databricks-apps-cookbook](https://github.com/pbv0/databricks-apps-cookbook) GitHub repository. Take a look at the [deployment instructions](/docs/deploy) to **run them locally** or **deploy to your Databricks workspace**.
+You can find **interactive sample implementations** for each snippet in the [databricks-apps-cookbook](https://github.com/databricks-solutions/databricks-apps-cookbook) GitHub repository. Take a look at the [deployment instructions](/docs/deploy) to **run them locally** or **deploy to your Databricks workspace**.
 
 ![Example banner](./assets/demo.gif)
 
 ## Contributing
 
-We welcome contributions! Submit a [pull request](https://github.com/pbv0/databricks-apps-cookbook/pulls) to add or improve recipes. Raise an [issue](https://github.com/pbv0/databricks-apps-cookbook/issues) to report a bug or raise a feature request.
+We welcome contributions! Submit a [pull request](https://github.com/databricks-solutions/databricks-apps-cookbook/pulls) to add or improve recipes. Raise an [issue](https://github.com/databricks-solutions/databricks-apps-cookbook/issues) to report a bug or raise a feature request.
