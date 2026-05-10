@@ -126,7 +126,29 @@ w.files.upload(volume_file_path, binary_data, overwrite=True)
                                   href="https://docs.databricks.com/en/volumes/privileges.html#privileges-required-for-volume-operations",
                                   target="_blank"),
                             " for more information."
-                        ])
+                        ]),
+                        html.P([
+                            "If you declare volume access in a Databricks Asset Bundle, ",
+                            html.Code("resources.apps[*].resources[*].uc_securable"),
+                            " may not grant ",
+                            html.Code("USE_CATALOG"),
+                            " and ",
+                            html.Code("USE_SCHEMA"),
+                            " on the parent catalog and schema (the app still needs them at runtime). ",
+                            "As a temporary workaround until bundles can declare those parent grants, add the privileges manually, or see ",
+                            html.A("apps_grants_sync",
+                                   href="https://github.com/salihbout/apps_grants_sync",
+                                   target="_blank"),
+                            ": an example Databricks App and Asset Bundle that wires ",
+                            html.Code("experimental.scripts.postdeploy"),
+                            " so parent privileges are applied after each ",
+                            html.Code("databricks bundle deploy"),
+                            " (copy its ",
+                            html.Code("tools/"),
+                            " into your bundle or mirror the same pattern in ",
+                            html.Code("databricks.yml"),
+                            ")."
+                        ], className="mb-0")
                     ]),
                     dbc.Col([
                         html.H4("Databricks resources", className="mb-3"),

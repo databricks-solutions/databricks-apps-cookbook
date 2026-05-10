@@ -205,6 +205,8 @@ Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databr
 
 See [Unity Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
 
+If you declare volume access in a Databricks Asset Bundle, `resources.apps[*].resources[*].uc_securable` may not grant `USE_CATALOG` and `USE_SCHEMA` on the parent catalog and schema (the app still needs them at runtime). As a temporary workaround until bundles can declare those parent grants, add the privileges manually, or see [apps_grants_sync](https://github.com/salihbout/apps_grants_sync): an example Databricks App and Asset Bundle that wires `experimental.scripts.postdeploy` so parent privileges are applied after each `databricks bundle deploy` (copy its `tools/` into your bundle or mirror the same pattern in `databricks.yml`).
+
 ## Dependencies
 
 - [FastAPI](https://pypi.org/project/fastapi/) - `fastapi`

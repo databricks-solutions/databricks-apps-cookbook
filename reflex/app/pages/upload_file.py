@@ -95,6 +95,8 @@ def upload_file_requirements() -> rx.Component:
 * `READ VOLUME` and `WRITE VOLUME` on the volume
 
 See [Privileges required for volume operations](https://docs.databricks.com/en/volumes/privileges.html#privileges-required-for-volume-operations) for more information.
+
+If you declare volume access in a Databricks Asset Bundle, `resources.apps[*].resources[*].uc_securable` may not grant `USE_CATALOG` and `USE_SCHEMA` on the parent catalog and schema (the app still needs them at runtime). As a temporary workaround until bundles can declare those parent grants, add the privileges manually, or see [apps_grants_sync](https://github.com/salihbout/apps_grants_sync): an example Databricks App and Asset Bundle that wires `experimental.scripts.postdeploy` so parent privileges are applied after each `databricks bundle deploy` (copy its `tools/` into your bundle or mirror the same pattern in `databricks.yml`).
 """,
                 class_name="text-sm text-gray-600",
             ),
