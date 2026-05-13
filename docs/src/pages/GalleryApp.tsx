@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@theme/Layout";
 import { useLocation, useHistory } from "@docusaurus/router";
-import { ArrowLeft, Github } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import GithubIcon from "../components/GithubIcon";
 import { PortableText } from "@portabletext/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -433,7 +434,7 @@ function GalleryAppPage() {
               rel="noopener noreferrer"
               className="flex w-full flex-shrink-0 items-center justify-center gap-2 bg-lava-600 px-4 py-2 text-sm font-semibold whitespace-nowrap text-white! transition-colors hover:bg-lava-700 md:w-auto"
             >
-              <Github size={16} />
+              <GithubIcon size={16} />
               View Source
             </a>
           </div>

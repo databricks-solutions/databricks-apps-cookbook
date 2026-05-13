@@ -21,8 +21,14 @@ import { createRequire } from "node:module";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = resolve(__dirname, "..");
 const SRC_DIR = join(DOCS_ROOT, "src");
+const BUILD_DIR = join(DOCS_ROOT, "build");
 const PORT = Number(process.env.PORT || 4321);
-const PAGES_TO_RENDER = ["/", "/gallery/", "/gallery/pixels", "/resources"];
+// Fallback if the build directory hasn't been produced yet — keeps the smoke
+// test useful in CI configurations that skip the build.
+const FALLBACK_PAGES = ["/", "/gallery/", "/gallery/pixels", "/resources"];
+// Path segments that indicate a template route (e.g. /gallery/:id) which
+// docusaurus emits during build but which can't be visited directly.
+const TEMPLATE_SEGMENT = /:/;
 const BASE = `http://127.0.0.1:${PORT}`;
 const SERVE_START_TIMEOUT_MS = 60_000;
 
@@ -82,6 +88,48 @@ function auditLucideImports() {
     }
   }
   return missing;
+}
+
+// Enumerate every static route from the build output. Each generated route
+// lives at `build/<path>/index.html`. Falls back to a small hand-picked list
+// if the build hasn't been produced.
+function discoverPages() {
+  let stat;
+  try {
+    stat = statSync(BUILD_DIR);
+  } catch {
+    console.warn(
+      `Render check: ${BUILD_DIR} not found, using fallback page list.`,
+    );
+    return FALLBACK_PAGES;
+  }
+  if (!stat.isDirectory()) return FALLBACK_PAGES;
+
+  const pages = new Set();
+  const stack = [BUILD_DIR];
+  while (stack.length) {
+    const dir = stack.pop();
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry);
+      const s = statSync(full);
+      if (s.isDirectory()) {
+        stack.push(full);
+      } else if (entry === "index.html") {
+        const rel = dir.slice(BUILD_DIR.length) || "/";
+        const route = (rel.endsWith("/") ? rel : rel + "/").replace(/^\/*/, "/");
+        if (TEMPLATE_SEGMENT.test(route)) continue; // skip /gallery/:id etc.
+        pages.add(route);
+      }
+    }
+  }
+  // Drop the docusaurus 404 page — visiting it directly always returns the
+  // error page, which would confuse the crash detector.
+  pages.delete("/404.html/");
+  // Union the fallback list so dynamic routes that only exist as templates
+  // (e.g. /gallery/:id is emitted but unvisitable; /gallery/pixels is a
+  // concrete instance of it) still get exercised.
+  for (const p of FALLBACK_PAGES) pages.add(p);
+  return [...pages].sort();
 }
 
 function findChrome() {
@@ -170,10 +218,12 @@ async function renderCheck() {
     process.exit(130);
   });
 
+  const pages = discoverPages();
+  console.log(`Render check: ${pages.length} pages to visit`);
   const failures = [];
   try {
     await waitForServer(`${BASE}/`, SERVE_START_TIMEOUT_MS);
-    for (const path of PAGES_TO_RENDER) {
+    for (const path of pages) {
       const url = `${BASE}${path}`;
       const html = renderDom(chrome, url);
       const crashed = /This page crashed|Minified React error/.test(html);
