@@ -12,6 +12,7 @@
     "dev:workers": "wrangler dev",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
+    "smoke": "node scripts/smoke-test.mjs",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc"
