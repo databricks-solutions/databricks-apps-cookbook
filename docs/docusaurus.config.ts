@@ -98,6 +98,12 @@ const config: Config = {
           activeBasePath: "docs/intro",
         },
         {
+          to: "docs/coding-agents",
+          label: "Coding agents",
+          position: "left",
+          activeBasePath: "docs/coding-agents",
+        },
+        {
           to: "docs/category/streamlit",
           label: "Streamlit",
           position: "left",

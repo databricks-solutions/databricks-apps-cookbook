@@ -65,6 +65,12 @@ You can find **interactive sample implementations** for each snippet in the [dat
 
 ![Example banner](./assets/demo.gif)
 
+## Use with coding agents
+
+If you use **Cursor**, **Claude Code**, or another coding assistant, you can install cookbook skills and a small recipe MCP so the agent copies these snippets instead of inventing code. That is separate from Databricks **workspace** MCP (SQL, Genie, Unity Catalog).
+
+See **[Use with coding agents](/docs/coding-agents)** for install, a from-scratch Cursor and Claude walkthrough, and how to upgrade on the next GitHub release.
+
 ## Contributing
 
 We welcome contributions! Submit a [pull request](https://github.com/databricks-solutions/databricks-apps-cookbook/pulls) to add or improve recipes. Raise an [issue](https://github.com/databricks-solutions/databricks-apps-cookbook/issues) to report a bug or raise a feature request.
