@@ -73,4 +73,4 @@ See **[Use with coding agents](/docs/coding-agents)** for install, a from-scratc
 
 ## Contributing
 
-We welcome contributions! Submit a [pull request](https://github.com/databricks-solutions/databricks-apps-cookbook/pulls) to add or improve recipes. Raise an [issue](https://github.com/databricks-solutions/databricks-apps-cookbook/issues) to report a bug or raise a feature request.
+We welcome contributions! A new snippet is a **recipe** (sample + docs + the README index), not a new skill. See **[CONTRIBUTING.md](https://github.com/databricks-solutions/databricks-apps-cookbook/blob/main/CONTRIBUTING.md)**. Submit a [pull request](https://github.com/databricks-solutions/databricks-apps-cookbook/pulls) or raise an [issue](https://github.com/databricks-solutions/databricks-apps-cookbook/issues).

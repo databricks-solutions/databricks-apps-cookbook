@@ -13,7 +13,7 @@ A **recipe does not become a skill.** They are different layers:
 
 | If you add… | You also… | You do **not**… |
 | ----------- | --------- | ---------------- |
-| A recipe in an **existing** category (for example another tables pattern) | Sample + `.mdx` + README checkmark. After merge, MCP `list_cookbook_recipes` / `get_cookbook_recipe` pick it up from `docs/docs/` on the next `git pull` (no MCP code change). Update the matching category skill **only if** agents need new compose notes (extra grants, a different sample path, FastAPI vs Streamlit split). | Create a new `SKILL.md` per recipe |
+| A recipe in an **existing** category (for example another tables pattern) | Sample + `.mdx` + README checkmark. After merge, MCP `list_cookbook_recipes` / `get_cookbook_recipe` pick it up from `docs/docs/` on the next `git pull` (no MCP code change). Update the matching category skill **only if** it should mention extra grants, a different sample path, or a FastAPI vs Streamlit split. | Create a new `SKILL.md` per recipe |
 | A **new category** (new docs folder that is not one of the existing skills) | New `databricks-skills/<name>/`, plugin path, skills README — see **[CLAUDE.md](CLAUDE.md)** | Leave agents with no category skill |
 | Skill-only (`build-app`, `productionize-app-dab`) | Follow **[CLAUDE.md](CLAUDE.md)** | Add a recipe unless there is new sample/docs behavior |
 
@@ -27,11 +27,11 @@ For each framework you support:
 
 1. **Sample code** in the app folder for that framework.
 2. **Documentation** at `docs/docs/<framework>/…/<slug>.mdx`, using the same sections as sibling pages (code snippet, resources, permissions, dependencies).
-3. **[README recipe table](readme.md#recipe-index-by-framework)** updated: checkmarks, **Doc path**, and when Dash and Streamlit/Reflex disagree on folder names (for example secrets under `external_services/` versus `authentication/`).
+3. **[README recipe table](readme.md#recipe-index-by-framework)** updated: checkmarks and **Doc path**. If the `.mdx` is not in the same folder for every framework, list each path in that cell and label it (today: secrets are `external_services/` in Dash vs `authentication/` in Streamlit and Reflex; Lakebase OLTP is `tables/oltp_database` in Dash vs `tables/oltp_database_connect` in Reflex). FastAPI endpoint pages usually go under `docs/docs/fastapi/building_endpoints/`.
 4. **`APP_DESCRIPTION.md`** in each UI sample app you changed, when users see new or renamed pages. For FastAPI, update **`README.md`** or **`APP_DESCRIPTION.md`** when routes or setup change.
 5. Category **skill** touch only when the table above says so. Naming: [`databricks-skills/README.md`](databricks-skills/README.md).
 
-Preview documentation locally: `cd docs`, `npm install`, `npm run start`.
+Preview the docs site locally (Node.js 20+, **public** npm — `docs/.npmrc` pins `registry.npmjs.org` so the lockfile works on GitHub Actions and laptops outside Databricks): `cd docs`, `npm install`, `npm run start`.
 
 A recipe may target only one framework (the README shows — for the others). If you add coverage across frameworks, finish every column you mark with a checkmark.
 

@@ -71,4 +71,4 @@ No Databricks profile is required. The server only reads this repository.
 ./mcp-server/tests/test_install_paths.sh
 ```
 
-Uses a temp `$HOME` and project dir (does not rewrite your real Claude/Cursor configs). Checks the root README launch/upgrade strings, catalog, kit-layout MCP + skills install/uninstall, and FastMCP tools if `mcp-server/.venv` exists.
+Uses a temp `$HOME` and project dir (does not rewrite your real Claude/Cursor configs). Checks the root README launch/upgrade strings, catalog, MCP + skills install/uninstall on the same client paths as AI Dev Kit, and FastMCP tools if `mcp-server/.venv` exists.

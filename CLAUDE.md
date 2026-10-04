@@ -14,7 +14,7 @@ This repository packages Databricks Apps skills for both Claude Code and Cursor.
 - `.claude-plugin/setup.sh`: Session bootstrap message for Claude Code.
 - `hooks/hooks.json`: Runs setup on `SessionStart`.
 - `install.sh`: Installs skills for Claude, Cursor, Copilot, Codex, Gemini, Antigravity, Windsurf, OpenCode, and Kiro. Default is **project** (current dir / `--target-dir`); `-g` / `--global` writes `$HOME` paths (same layout as AI Dev Kit). Re-run after `git pull` to upgrade.
-- `mcp-server/`: Optional recipe MCP for coding agents (`./mcp-server/mcp_install.sh`). Not Databricks workspace MCP.
+- `mcp-server/`: Optional recipe MCP for coding agents (`./mcp-server/mcp_install.sh`). Not Databricks workspace MCP. Docs site (`docs/`): public npm (`docs/.npmrc`); Node.js 20+.
 
 ## Conventions
 

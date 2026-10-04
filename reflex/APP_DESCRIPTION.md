@@ -6,7 +6,7 @@ An interactive cookbook application that demonstrates common Databricks integrat
 
 | Resource | Where |
 | -------- | ----- |
-| **Which recipes exist per framework (✓/—)** | [Recipe index by framework](../README.md#recipe-index-by-framework) |
+| **Which recipes exist per framework (✓/—)** | [Recipe index by framework](../readme.md#recipe-index-by-framework) |
 | **Published docs & snippets** | [apps-cookbook.dev](https://apps-cookbook.dev/) — paths mirror `docs/docs/<framework>/<category>/…` |
 | **Add or port a recipe** | [CONTRIBUTING.md](../CONTRIBUTING.md) (code + `docs/docs/` + README table) |
 | **Run / deploy** | [Deploy guide](../docs/docs/deploy.md) |

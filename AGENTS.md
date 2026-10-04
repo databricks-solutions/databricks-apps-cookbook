@@ -12,7 +12,7 @@ Do **not** use this cookbook if the user wants:
 - React + FastAPI toolkit → [apx](https://github.com/databricks-solutions/apx)
 - Databricks **workspace tools** for the coding agent (SQL, UC functions, Genie, AI Search) → official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) / Unity Gateway (`ug mcp add`), plus AI Dev Kit skills.
 
-Cookbook in-app MCP: [`databricks-skills/aiml`](databricks-skills/aiml/SKILL.md). Recipe MCP for agents: [`mcp-server/`](mcp-server/) (`./mcp-server/mcp_install.sh`). Upgrade after a GitHub release: [readme.md § Upgrade](readme.md#upgrade).
+Cookbook in-app MCP: [`databricks-skills/aiml`](databricks-skills/aiml/SKILL.md). Recipe MCP for agents: [`mcp-server/`](mcp-server/) (`./mcp-server/mcp_install.sh`). Clone and install from public GitHub (no Databricks-internal npm). Upgrade after a GitHub release: [readme.md § Upgrade](readme.md#upgrade).
 
 ## When to use this repo
 

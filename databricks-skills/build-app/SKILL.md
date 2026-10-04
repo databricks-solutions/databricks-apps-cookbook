@@ -51,7 +51,7 @@ Order matters—especially **categories before individual recipes**.
 
 1. **Gather constraints** — Audience, browser vs API consumers, maintenance expectations.
 
-2. **Select one primary framework** — Dash, Streamlit, Reflex, or FastAPI using the [recipe index](../../../README.md#recipe-index-by-framework) and **Framework matrix** so planned capabilities have **✓**.
+2. **Select one primary framework** — Dash, Streamlit, Reflex, or FastAPI using the [recipe index](../../../readme.md#recipe-index-by-framework) and **Framework matrix** so planned capabilities have **✓**.
 
 3. **Identify documentation categories first** — Before copying specific `.mdx` files, determine which **`docs/docs/<framework>/<category>/`** folders apply (authentication, tables, workflows, …). Use **Recipe categories** below as the taxonomy: each category groups related permissions, dependencies, and patterns. Skipping this step produces mismatched grants and duplicate connection logic.
 
@@ -220,6 +220,6 @@ When the app **works** from **`dash/`**, **`streamlit/`**, **`reflex/`**, or **`
 
 ## Related files
 
-- [`README.md`](../../../README.md) — Recipe index.
+- [`readme.md`](../../../readme.md) — Recipe index.
 - [`CONTRIBUTING.md`](../../../CONTRIBUTING.md) — Porting or adding recipes.
 - [`databricks-skills/README.md`](../../README.md) — Skill sections index (all skills live under **`databricks-skills/`**, not under framework folders).

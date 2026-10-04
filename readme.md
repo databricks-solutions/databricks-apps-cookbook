@@ -38,6 +38,8 @@ This repo is the **Python recipe** layer for Dash, Streamlit, Reflex, and FastAP
 
 Cookbook **skills** teach Dash/Streamlit/Reflex/FastAPI composition. The **recipe MCP** (`list_cookbook_recipes`, `get_cookbook_recipe`) is how an agent in an empty app folder gets snippets without guessing. Official platform skills (AppKit, `apps deploy`) still come from [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools`. Human walkthrough (Cursor, Claude, upgrade): **[Use with coding agents](https://apps-cookbook.dev/docs/coding-agents)** on the docs site.
 
+You only need **git**, **bash**, and **Python 3**. Clone from GitHub; skills and the recipe MCP install from this repo (public PyPI for the MCP venv). You do **not** need a Databricks VPN or internal npm. Node.js 20+ is only if you [preview the docs site](CONTRIBUTING.md#what-to-include-recipe).
+
 ### Install — project vs global
 
 Same idea as AI Dev Kit: **project** (default) is the folder you run from; **`--global`** is this user on this machine.
@@ -65,9 +67,16 @@ mkdir -p ~/tmp/cookbook-scratch && cd ~/tmp/cookbook-scratch && git init
 "$COOKBOOK/mcp-server/mcp_install.sh" --target-dir "$PWD"
 ```
 
-That writes kit-layout paths, including `.claude/skills/`, `.cursor/skills/`, `.mcp.json`, and `.cursor/mcp.json`. Default `--tools` is Claude, Cursor, Copilot, Codex, Gemini, Antigravity, Windsurf, OpenCode, and Kiro. Narrow it with `--tools claude,cursor`.
+That writes the same skill and MCP files AI Dev Kit uses, including `.claude/skills/`, `.cursor/skills/`, `.mcp.json`, and `.cursor/mcp.json`. Default `--tools` is Claude, Cursor, Copilot, Codex, Gemini, Antigravity, Windsurf, OpenCode, and Kiro. Narrow it with `--tools claude,cursor`.
 
-Claude Code can instead use the [plugin marketplace](databricks-skills/README.md) (`/plugin install databricks-skills@databricks-skills`) so skills update without a copy. How to pick up the **next repo release**: [Upgrade](#upgrade).
+Claude Code can load skills as a plugin (no copied folders). In Claude:
+
+```text
+/plugin marketplace add databricks-solutions/databricks-apps-cookbook
+/plugin install databricks-skills@databricks-skills
+```
+
+How to pick up the **next repo release**: [Upgrade](#upgrade). Full plugin commands: [`databricks-skills/README.md`](databricks-skills/README.md).
 
 ### Try it in Cursor
 
@@ -77,13 +86,13 @@ Claude Code can instead use the [plugin marketplace](databricks-skills/README.md
 
    > Build a Streamlit Databricks App that reads a Unity Catalog table. Use Databricks Apps Cookbook recipes only. Do not invent code.
 
-   Pass: `build-app` then `tables`; MCP `list_cookbook_recipes` / `get_cookbook_recipe`; `app.yaml` + Streamlit sample shape.
+   You should see the `build-app` and `tables` skills, cookbook MCP (`list_cookbook_recipes` / `get_cookbook_recipe`), then `app.yaml` and Streamlit table-read code from this repo.
 
 4. Prompt that **should not** scaffold from this cookbook:
 
    > I want a TypeScript/React Databricks App.
 
-   Pass: points at AppKit / AI Dev Kit (`databricks apps init`). Does not copy Dash/Streamlit from here.
+   The assistant should point at AppKit / AI Dev Kit (`databricks apps init`) instead of copying Dash or Streamlit from here.
 
 ### Try it in Claude Code
 
@@ -158,11 +167,18 @@ Find **deployment instructions** and all **code snippets** on [apps-cookbook.dev
 - **Recipe write-ups:** `.mdx` files under [`docs/docs/<framework>/…`](docs/docs/), published at [apps-cookbook.dev](https://apps-cookbook.dev/).
 - **Agent skills:** [`databricks-skills/README.md`](databricks-skills/README.md) — each **`SKILL.md`** is under **`databricks-skills/<skill-name>/`** (for example [`databricks-skills/build-app`](databricks-skills/build-app/SKILL.md), [`databricks-skills/productionize-app-dab`](databricks-skills/productionize-app-dab/SKILL.md)), not under framework folders.
 - **Runnable sample apps:** [`dash/APP_DESCRIPTION.md`](dash/APP_DESCRIPTION.md), [`streamlit/APP_DESCRIPTION.md`](streamlit/APP_DESCRIPTION.md), [`reflex/APP_DESCRIPTION.md`](reflex/APP_DESCRIPTION.md), [`fastapi/APP_DESCRIPTION.md`](fastapi/APP_DESCRIPTION.md). Each describes this app’s pages and links back to the [recipe index](#recipe-index-by-framework), docs site, contributing guide, and deploy instructions. FastAPI also has [`fastapi/README.md`](fastapi/README.md) for run commands and endpoints.
-- **Paths:** Prefix **Doc path** below with `docs/docs/<framework>/`, then append `.mdx` for the file on disk.
+### How to read **Doc path**
+
+Every cell is relative to `docs/docs/<framework>/`. On disk, add `.mdx`. Example: Streamlit “Read Delta table” is `docs/docs/streamlit/tables/tables_read.mdx` (site: `/docs/streamlit/tables/tables_read`).
+
+Most recipes use that **same relative path** in every framework that has a checkmark. A few do not; those cells list each path and which frameworks it applies to. Today that is:
+
+- **Retrieve secrets** — Dash: `external_services/secrets_retrieve`. Streamlit and Reflex: `authentication/secrets_retrieve`.
+- **OLTP / Postgres** — Dash: `tables/oltp_database`. Reflex: `tables/oltp_database_connect`.
+
+FastAPI endpoint recipes usually live under `building_endpoints/` instead of `tables/` or `aiml/`.
 
 ### Shared recipes (Dash, Streamlit, Reflex, FastAPI)
-
-Doc paths are relative to `docs/docs/<framework>/`. When Dash and Streamlit/Reflex use different paths, both appear in the **Doc path** column. FastAPI often uses `building_endpoints/` instead of folders such as `tables/` or `aiml/`.
 
 | Recipe | Doc path | Dash | Streamlit | Reflex | FastAPI |
 | ------ | -------- | :--: | :-------: | :----: | :-----: |

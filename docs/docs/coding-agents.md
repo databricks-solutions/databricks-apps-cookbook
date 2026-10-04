@@ -8,6 +8,8 @@ This page is for **you** (not for the agent). If you use Cursor, Claude Code, or
 
 The GitHub repository is [databricks-solutions/databricks-apps-cookbook](https://github.com/databricks-solutions/databricks-apps-cookbook). Full flags and client path tables live in that [README](https://github.com/databricks-solutions/databricks-apps-cookbook/blob/main/readme.md#coding-agents-cursor-claude-code-and-others).
 
+You need **git**, **bash**, and **Python 3**. Everything below installs from this public clone (the MCP virtualenv uses PyPI). You do **not** need a Databricks VPN. **Node.js 20+** is only if you build the docs website.
+
 :::info When *not* to use this cookbook
 
 | You want | Use instead |

@@ -20,7 +20,7 @@ These samples are experimental and meant for demonstration purposes only. They a
 1. Under **Choose how to start**, select **Custom** and choose **Next**.
 1. Provide a name for your app and choose **Create app**.
 1. Once your app compute has started, choose **Deploy**.
-1. Navigate to your new Git folder and select either the `dash` or `streamlit` folder.
+1. Navigate to your new Git folder and select the `dash`, `streamlit`, `reflex`, or `fastapi` folder.
 1. Choose **Deploy**.
 
 :::info
@@ -36,7 +36,7 @@ Check the Requirements tab of each recipe to understand what [service principal 
    git clone https://github.com/databricks-solutions/databricks-apps-cookbook.git
    cd databricks-apps-cookbook
    ```
-1. Navigate to the sub-folder for the cookbook framework you want to run (either `dash` or `streamlit` or `reflex`). Create and activate a Python virtual environment in this folder [`venv`](https://docs.python.org/3/library/venv.html). We recommend using separate environments for each framework:
+1. Navigate to the sub-folder for the cookbook framework you want to run (`dash`, `streamlit`, `reflex`, or `fastapi`). Create and activate a Python virtual environment in this folder [`venv`](https://docs.python.org/3/library/venv.html). We recommend using separate environments for each framework:
    ```bash
    cd reflex
    python3 -m venv .venv
