@@ -18,35 +18,35 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.10.1",
-    "@docusaurus/preset-classic": "^3.10.1",
+    "@docusaurus/core": "^3.10.2",
+    "@docusaurus/preset-classic": "^3.10.2",
     "@mdx-js/react": "^3.1.1",
-    "@portabletext/react": "^6.0.3",
-    "@sanity/client": "^7.22.0",
+    "@portabletext/react": "^6.2.0",
+    "@sanity/client": "^7.27.0",
     "clsx": "^2.1.1",
     "docusaurus-lunr-search": "^3.6.0",
-    "lucide-react": "^1.14.0",
+    "lucide-react": "^1.49.0",
     "prism-react-renderer": "^2.4.1",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "swiper": "^12.1.4"
+    "swiper": "^12.2.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.10.1",
-    "@docusaurus/tsconfig": "^3.10.1",
-    "@docusaurus/types": "^3.10.1",
-    "@tailwindcss/postcss": "^4.2.4",
+    "@docusaurus/module-type-aliases": "^3.10.2",
+    "@docusaurus/tsconfig": "^3.10.2",
+    "@docusaurus/types": "^3.10.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "docusaurus-plugin-llms": "^0.4.0",
-    "postcss": "^8.5.13",
-    "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.8.0",
-    "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.4",
+    "postcss": "^8.5.28",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
-    "wrangler": "^4.87.0"
+    "wrangler": "^4.144.0"
   },
   "browserslist": {
     "production": [
@@ -62,5 +62,14 @@
   },
   "engines": {
     "node": ">=18.0"
+  },
+  "overrides": {
+    "@types/node": "26.6.3",
+    "serialize-javascript": "7.1.2",
+    "uuid": "11.1.1",
+    "ws": "8.22.0",
+    "websocket-driver": "0.7.5",
+    "braces": "3.0.3",
+    "micromatch": "4.0.8"
   }
 }
