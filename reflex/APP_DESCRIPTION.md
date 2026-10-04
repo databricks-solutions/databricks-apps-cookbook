@@ -2,6 +2,21 @@
 
 An interactive cookbook application that demonstrates common Databricks integration patterns through hands-on "recipes". The app provides a sidebar-navigated, multi-page experience where each recipe page has three tabs: **Try It** (interactive demo), **Code Snippet** (implementation reference), and **Requirements/Details** (permissions and resources needed).
 
+## How this sample fits the cookbook
+
+| Resource | Where |
+| -------- | ----- |
+| **Which recipes exist per framework (✓/—)** | [Recipe index by framework](../README.md#recipe-index-by-framework) |
+| **Published docs & snippets** | [apps-cookbook.dev](https://apps-cookbook.dev/) — paths mirror `docs/docs/<framework>/<category>/…` |
+| **Add or port a recipe** | [CONTRIBUTING.md](../CONTRIBUTING.md) (code + `docs/docs/` + README table) |
+| **Run / deploy** | [Deploy guide](../docs/docs/deploy.md) |
+
+**Reflex in this repo:** Recipes map to **`docs/docs/reflex/<category>/`**. This app implements the rows marked **✓** for **Reflex**. Page components live under **`app/pages/`**; sidebar structure is **`app/states/cookbook_state.py`** (paths such as `/read-delta-table`). **`app.yaml`** at the Reflex project root runs **`reflex run --env prod`** for the **whole** app; optional **`databricks.yml`** may accompany bundle workflows.
+
+**Workflow for contributors:** README index → **doc categories** → `.mdx` + **`app/pages/`** modules (filenames differ from doc slugs—grep or search this file’s page list).
+
+**Agent-oriented checklist:** [`databricks-skills/workflow/build-app/SKILL.md`](../databricks-skills/workflow/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks.
+
 ## Layout and Navigation
 
 - **Sidebar** (left, hidden on mobile): Displays the Databricks logo and a collapsible navigation menu organized by category

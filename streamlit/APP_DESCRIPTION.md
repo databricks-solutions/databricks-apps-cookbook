@@ -2,6 +2,21 @@
 
 An interactive cookbook application that demonstrates common Databricks integration patterns through hands-on "recipes". The app provides a sidebar-navigated, multi-page experience where each recipe page has three tabs: **Try it** (interactive demo), **Code snippet** (implementation reference), and **Requirements** (permissions and resources needed).
 
+## How this sample fits the cookbook
+
+| Resource | Where |
+| -------- | ----- |
+| **Which recipes exist per framework (✓/—)** | [Recipe index by framework](../README.md#recipe-index-by-framework) |
+| **Published docs & snippets** | [apps-cookbook.dev](https://apps-cookbook.dev/) — paths mirror `docs/docs/<framework>/<category>/…` |
+| **Add or port a recipe** | [CONTRIBUTING.md](../CONTRIBUTING.md) (code + `docs/docs/` + README table) |
+| **Run / deploy** | [Deploy guide](../docs/docs/deploy.md) |
+
+**Streamlit in this repo:** Recipes are documented under **`docs/docs/streamlit/<category>/`** (including **visualizations/** and **tables/lakebase_read**, which are not available for every framework—see README). This app implements the rows marked **✓** for **Streamlit**. Screen modules live under **`views/`**; navigation groups and labels are declared in **`view_groups.py`**, and **`app.py`** wires **`st.navigation`** across all screens—**one** process and **one** **`app.yaml`** entrypoint.
+
+**Workflow for contributors:** README index → **doc categories** first → specific `.mdx` files and matching **`views/*.py`** files.
+
+**Agent-oriented checklist:** [`databricks-skills/workflow/build-app/SKILL.md`](../databricks-skills/workflow/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks.
+
 ## Layout and Navigation
 
 - **Sidebar** (left): Grouped navigation sections with recipe links, organized into 10+ categories

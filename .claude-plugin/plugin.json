@@ -1,0 +1,32 @@
+{
+  "name": "databricks-skills",
+  "version": "1.0.0",
+  "description": "Databricks Apps development skills for Claude Code and Cursor.",
+  "author": {
+    "name": "Databricks",
+    "email": "noreply@databricks.com"
+  },
+  "homepage": "https://github.com/databricks-solutions/databricks-apps-cookbook",
+  "repository": "https://github.com/databricks-solutions/databricks-apps-cookbook",
+  "keywords": [
+    "databricks",
+    "apps",
+    "skills",
+    "claude-code",
+    "cursor"
+  ],
+  "skills": [
+    "./databricks-skills/aiml",
+    "./databricks-skills/authentication",
+    "./databricks-skills/bi",
+    "./databricks-skills/build-app",
+    "./databricks-skills/compute",
+    "./databricks-skills/external_services",
+    "./databricks-skills/productionize-app-dab",
+    "./databricks-skills/tables",
+    "./databricks-skills/unity_catalog",
+    "./databricks-skills/visualizations",
+    "./databricks-skills/volumes",
+    "./databricks-skills/workflows"
+  ]
+}

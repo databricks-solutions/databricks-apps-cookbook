@@ -2,6 +2,21 @@
 
 A headless REST API application that demonstrates backend integration patterns with Databricks. The API uses bearer token authentication and provides endpoints for querying Unity Catalog tables, managing a Lakebase (PostgreSQL-compatible) transactional database, and performing CRUD operations on an orders dataset. The app features automatic API documentation at `/docs`.
 
+## How this sample fits the cookbook
+
+| Resource | Where |
+| -------- | ----- |
+| **Which recipes exist per framework (✓/—)** | [Recipe index by framework](../README.md#recipe-index-by-framework) — shared recipes + **FastAPI-only** table |
+| **Published docs & snippets** | [apps-cookbook.dev](https://apps-cookbook.dev/) — UI recipes under `docs/docs/dash|streamlit|reflex/…`; FastAPI under **`docs/docs/fastapi/`** (`getting_started/`, `building_endpoints/`) |
+| **Add or port a recipe** | [CONTRIBUTING.md](../CONTRIBUTING.md) |
+| **Run / deploy** | [Deploy guide](../docs/docs/deploy.md); API overview in [README.md](../README.md) |
+
+**FastAPI in this repo:** There is **no** bundled SPA—only REST samples + docs. Implementations live under **`routes/`** (included from **`app.py`**). **`app.yaml`** uses **`uvicorn`**; **`env`** entries should use **`valueFrom`** for workspace resources (see [Databricks Apps resources](https://docs.databricks.com/en/dev-tools/databricks-apps/resources.html))—align with the sample file and product docs.
+
+**Workflow for contributors:** README index → FastAPI **getting_started** vs **building_endpoints** areas → matching `.mdx` + route modules.
+
+**Agent-oriented checklist:** [`databricks-skills/workflow/build-app/SKILL.md`](../databricks-skills/workflow/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks.
+
 ## Architecture
 
 The app uses a dual-database architecture:

@@ -1,0 +1,31 @@
+{
+  "name": "databricks-skills",
+  "owner": {
+    "name": "Databricks",
+    "email": "noreply@databricks.com"
+  },
+  "metadata": {
+    "description": "Databricks Apps cookbook skills plugin for Claude Code and Cursor.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "databricks-skills",
+      "source": "./",
+      "description": "Databricks Apps development skills (authentication, tables, unity_catalog, volumes, visualizations, aiml, bi, compute, external_services, workflows, build-app, productionize-app-dab).",
+      "version": "1.0.0",
+      "author": {
+        "name": "Databricks",
+        "email": "noreply@databricks.com"
+      },
+      "category": "development",
+      "keywords": [
+        "databricks",
+        "apps",
+        "skills",
+        "claude-code",
+        "cursor"
+      ]
+    }
+  ]
+}

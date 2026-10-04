@@ -2,6 +2,21 @@
 
 An interactive cookbook application that demonstrates common Databricks integration patterns through hands-on "recipes". The app provides a sidebar-navigated, multi-page experience where each recipe page has three tabs: **Try it** (interactive demo), **Code snippet** (implementation reference), and **Requirements** (permissions and resources needed).
 
+## How this sample fits the cookbook
+
+| Resource | Where |
+| -------- | ----- |
+| **Which recipes exist per framework (✓/—)** | [Recipe index by framework](../README.md#recipe-index-by-framework) |
+| **Published docs & snippets** | [apps-cookbook.dev](https://apps-cookbook.dev/) — paths mirror `docs/docs/<framework>/<category>/…` |
+| **Add or port a recipe** | [CONTRIBUTING.md](../CONTRIBUTING.md) (code + `docs/docs/` + README table) |
+| **Run / deploy** | [Deploy guide](../docs/docs/deploy.md) |
+
+**Dash in this repo:** Written-up recipes target **`docs/docs/dash/<category>/`** (e.g. `tables/tables_read`, `authentication/users_get_current`). This app implements the rows marked **✓** for **Dash** in the README index. Implementation modules live under **`pages/`**; navigation and section order are defined in **`app.py`** (sidebar). **`app.yaml`** at this folder root defines the single **`command`** that serves the **entire** multi-page app—one process, all routes.
+
+**Workflow for contributors:** Choose capabilities from the README table → align with **documentation categories** (authentication, tables, workflows, …) → open the matching `.mdx` files and **`pages/*.py`** modules.
+
+**Agent-oriented checklist:** [`databricks-skills/workflow/build-app/SKILL.md`](../databricks-skills/workflow/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks.
+
 ## Layout and Navigation
 
 - **Sidebar** (left, ~10% width): Persistent navigation with categorized recipe links grouped into sections (Tables, Volumes, AI/ML, Business Intelligence, Workflows, Compute, Authentication, External Services)
