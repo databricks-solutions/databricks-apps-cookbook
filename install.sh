@@ -1,129 +1,202 @@
 #!/usr/bin/env bash
+# Install cookbook skills using the same project vs --global layout as AI Dev Kit.
+# Source of truth is databricks-skills/<name>/SKILL.md in this clone.
+#
+# Upgrade: git pull this repo, then re-run the same command (overwrites in place).
+# Claude Code plugin users: /plugin marketplace update databricks-skills
+#
 set -euo pipefail
 
-MODE="${1:-all}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_SKILLS_DIR="${SCRIPT_DIR}/databricks-skills"
 
-# Allow overrides for testing/dry-runs.
-CLAUDE_SKILLS_DIR="${CLAUDE_SKILLS_DIR:-${HOME}/.claude/skills}"
-CURSOR_RULES_DIR="${CURSOR_RULES_DIR:-${HOME}/.cursor/rules}"
+DEFAULT_TOOLS="claude,cursor,copilot,codex,gemini,antigravity,windsurf,opencode,kiro"
+TOOLS="${DEFAULT_TOOLS}"
+SCOPE="project"
+TARGET_DIR="$(pwd)"
+UNINSTALL=false
+DRY_RUN=false
 
 usage() {
   cat <<'EOF'
-Usage: ./install.sh [claude|cursor|all]
+Usage: ./install.sh [options] [claude|cursor|all]
 
-Modes:
-  claude   Copy databricks skills directories into ~/.claude/skills/
-  cursor   Convert SKILL.md files into Cursor rules under ~/.cursor/rules/
-  all      Install for both Claude Code and Cursor (default)
+Install Dash/Streamlit/Reflex/FastAPI cookbook skills. Paths match AI Dev Kit
+(project vs --global). Re-run after `git pull` to upgrade.
+
+  --tools LIST     claude,cursor,copilot,codex,gemini,antigravity,windsurf,opencode,kiro
+                   (default: all of the above)
+  -g, --global     User-level dirs under $HOME (all repos on this machine)
+  --target-dir DIR Project-scope root (default: current directory)
+  --uninstall      Remove cookbook skill folders only (same scope/tools)
+  --dry-run        Print target directories and exit
+  -h, --help
+
+Legacy: ./install.sh claude|cursor|all  (same as --tools)
+
+Claude Code plugin (no copy): see databricks-skills/README.md
+Recipe MCP: ./mcp-server/mcp_install.sh
 EOF
 }
 
-ensure_source_exists() {
-  if [[ ! -d "${SOURCE_SKILLS_DIR}" ]]; then
-    echo "ERROR: Skills source directory not found: ${SOURCE_SKILLS_DIR}" >&2
-    exit 1
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --tools) TOOLS="$2"; shift 2 ;;
+    -g|--global) SCOPE="global"; shift ;;
+    --target-dir) TARGET_DIR="$2"; shift 2 ;;
+    --uninstall) UNINSTALL=true; shift ;;
+    --dry-run) DRY_RUN=true; shift ;;
+    -h|--help|help) usage; exit 0 ;;
+    claude|cursor|copilot|codex|gemini|antigravity|windsurf|opencode|kiro)
+      TOOLS="$1"
+      shift
+      ;;
+    all)
+      TOOLS="${DEFAULT_TOOLS}"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ ! -d "${SOURCE_SKILLS_DIR}" ]]; then
+  echo "ERROR: Skills source directory not found: ${SOURCE_SKILLS_DIR}" >&2
+  exit 1
+fi
+
+if [[ "${SCOPE}" == "global" ]]; then
+  BASE_DIR="${HOME}"
+else
+  mkdir -p "${TARGET_DIR}"
+  TARGET_DIR="$(cd "${TARGET_DIR}" && pwd)"
+  BASE_DIR="${TARGET_DIR}"
+fi
+
+# Same dest layout as AI Dev Kit install.sh agent_skill_target_dirs.
+skill_dir_for_tool() {
+  local tool="$1"
+  case "${tool}" in
+    claude) echo "${BASE_DIR}/.claude/skills" ;;
+    cursor) echo "${BASE_DIR}/.cursor/skills" ;;
+    copilot) echo "${BASE_DIR}/.github/skills" ;;
+    codex) echo "${BASE_DIR}/.agents/skills" ;;
+    gemini) echo "${BASE_DIR}/.gemini/skills" ;;
+    antigravity)
+      if [[ "${SCOPE}" == "global" ]]; then
+        echo "${HOME}/.gemini/antigravity/skills"
+      else
+        echo "${BASE_DIR}/.agents/skills"
+      fi
+      ;;
+    windsurf)
+      if [[ "${SCOPE}" == "global" ]]; then
+        echo "${HOME}/.codeium/windsurf/skills"
+      else
+        echo "${BASE_DIR}/.windsurf/skills"
+      fi
+      ;;
+    opencode)
+      if [[ "${SCOPE}" == "global" ]]; then
+        echo "${HOME}/.config/opencode/skills"
+      else
+        echo "${BASE_DIR}/.opencode/skills"
+      fi
+      ;;
+    kiro)
+      if [[ "${SCOPE}" == "global" ]]; then
+        echo "${HOME}/.kiro/skills"
+      else
+        echo "${BASE_DIR}/.kiro/skills"
+      fi
+      ;;
+    *)
+      echo "Unknown tool: ${tool}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+skill_names() {
+  local d
+  for d in "${SOURCE_SKILLS_DIR}"/*; do
+    [[ -d "${d}" && -f "${d}/SKILL.md" ]] || continue
+    basename "${d}"
+  done
+}
+
+legacy_cursor_rules_cleanup() {
+  local rules_dir="${HOME}/.cursor/rules"
+  [[ -d "${rules_dir}" ]] || return 0
+  local name
+  while IFS= read -r name; do
+    [[ -n "${name}" ]] || continue
+    rm -f "${rules_dir}/${name}.mdc" "${rules_dir}/cookbook-${name}.mdc"
+  done < <(skill_names)
+}
+
+echo "Cookbook skills"
+echo "  source: ${SOURCE_SKILLS_DIR}"
+echo "  scope:  ${SCOPE}"
+echo "  target: ${BASE_DIR}"
+echo "  tools:  ${TOOLS}"
+
+IFS=',' read -r -a TOOL_ARR <<< "${TOOLS}"
+
+DEST_DIRS_FILE="$(mktemp)"
+trap 'rm -f "${DEST_DIRS_FILE}"' EXIT
+for tool in "${TOOL_ARR[@]}"; do
+  tool="${tool// /}"
+  [[ -n "${tool}" ]] || continue
+  skill_dir_for_tool "${tool}"
+done | sort -u > "${DEST_DIRS_FILE}"
+
+if [[ "${DRY_RUN}" == true ]]; then
+  while IFS= read -r dest; do
+    echo " - ${dest}"
+  done < "${DEST_DIRS_FILE}"
+  exit 0
+fi
+
+if [[ "${UNINSTALL}" == true ]]; then
+  while IFS= read -r dest; do
+    while IFS= read -r name; do
+      [[ -n "${name}" ]] || continue
+      if [[ -e "${dest}/${name}" ]]; then
+        rm -rf "${dest}/${name}"
+        echo " - removed ${dest}/${name}"
+      fi
+    done < <(skill_names)
+  done < "${DEST_DIRS_FILE}"
+  for tool in "${TOOL_ARR[@]}"; do
+    tool="${tool// /}"
+    if [[ "${tool}" == "cursor" ]]; then
+      legacy_cursor_rules_cleanup
+    fi
+  done
+  echo "Done."
+  exit 0
+fi
+
+while IFS= read -r name; do
+  [[ -n "${name}" ]] || continue
+  src="${SOURCE_SKILLS_DIR}/${name}"
+  while IFS= read -r dest; do
+    mkdir -p "${dest}"
+    rm -rf "${dest}/${name}"
+    cp -R "${src}" "${dest}/${name}"
+    echo " - ${dest}/${name}"
+  done < "${DEST_DIRS_FILE}"
+done < <(skill_names)
+
+for tool in "${TOOL_ARR[@]}"; do
+  tool="${tool// /}"
+  if [[ "${tool}" == "cursor" ]]; then
+    legacy_cursor_rules_cleanup
   fi
-}
+done
 
-strip_skill_frontmatter() {
-  local skill_file="$1"
-  awk '
-    NR == 1 && $0 == "---" { in_frontmatter = 1; next }
-    in_frontmatter && $0 == "---" { in_frontmatter = 0; next }
-    !in_frontmatter { print }
-  ' "${skill_file}"
-}
-
-extract_frontmatter_value() {
-  local skill_file="$1"
-  local key="$2"
-  awk -v lookup_key="${key}" '
-    NR == 1 && $0 == "---" { in_frontmatter = 1; next }
-    in_frontmatter && $0 == "---" { exit }
-    in_frontmatter && $1 == (lookup_key ":") {
-      sub(/^[^:]+:[[:space:]]*/, "")
-      print
-      exit
-    }
-  ' "${skill_file}"
-}
-
-install_for_claude() {
-  mkdir -p "${CLAUDE_SKILLS_DIR}"
-  echo "Installing skills to ${CLAUDE_SKILLS_DIR}"
-
-  for skill_dir in "${SOURCE_SKILLS_DIR}"/*; do
-    [[ -d "${skill_dir}" ]] || continue
-    skill_name="$(basename "${skill_dir}")"
-    target_dir="${CLAUDE_SKILLS_DIR}/${skill_name}"
-    rm -rf "${target_dir}"
-    cp -R "${skill_dir}" "${target_dir}"
-    echo " - Installed Claude skill: ${skill_name}"
-  done
-}
-
-install_for_cursor() {
-  mkdir -p "${CURSOR_RULES_DIR}"
-  echo "Installing transformed rules to ${CURSOR_RULES_DIR}"
-
-  for skill_dir in "${SOURCE_SKILLS_DIR}"/*; do
-    [[ -d "${skill_dir}" ]] || continue
-    skill_name="$(basename "${skill_dir}")"
-    skill_file="${skill_dir}/SKILL.md"
-    [[ -f "${skill_file}" ]] || continue
-
-    frontmatter_name="$(extract_frontmatter_value "${skill_file}" "name")"
-    frontmatter_description="$(extract_frontmatter_value "${skill_file}" "description")"
-    frontmatter_name="${frontmatter_name%\"}"
-    frontmatter_name="${frontmatter_name#\"}"
-    frontmatter_description="${frontmatter_description%\"}"
-    frontmatter_description="${frontmatter_description#\"}"
-
-    if [[ -z "${frontmatter_name}" ]]; then
-      frontmatter_name="${skill_name}"
-    fi
-    if [[ -z "${frontmatter_description}" ]]; then
-      frontmatter_description="Imported rule from databricks-skills/${skill_name}/SKILL.md"
-    fi
-
-    escaped_description="${frontmatter_description//\"/\\\"}"
-    target_rule="${CURSOR_RULES_DIR}/${frontmatter_name}.mdc"
-
-    {
-      echo "---"
-      echo "description: \"${escaped_description}\""
-      echo "alwaysApply: false"
-      echo "---"
-      strip_skill_frontmatter "${skill_file}"
-    } > "${target_rule}"
-
-    echo " - Installed Cursor rule: $(basename "${target_rule}")"
-  done
-}
-
-ensure_source_exists
-
-case "${MODE}" in
-  claude)
-    install_for_claude
-    ;;
-  cursor)
-    install_for_cursor
-    ;;
-  all)
-    install_for_claude
-    install_for_cursor
-    ;;
-  -h|--help|help)
-    usage
-    ;;
-  *)
-    echo "ERROR: Invalid mode '${MODE}'" >&2
-    usage
-    exit 1
-    ;;
-esac
-
-echo "Done."
+echo "Done. Re-run this command after git pull to upgrade. Recipe MCP: ./mcp-server/mcp_install.sh"

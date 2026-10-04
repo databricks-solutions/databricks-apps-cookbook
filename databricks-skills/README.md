@@ -1,8 +1,10 @@
 # Databricks Apps Skills
 
-AI coding assistant skills for building Databricks Apps. Works with **Cursor** and **Claude Code**.
+AI coding assistant skills for composing **Dash, Streamlit, FastAPI, and Reflex** apps from this cookbook. Works with **Cursor**, **Claude Code**, and the other clients listed in the [root README](../readme.md#coding-agents-cursor-claude-code-and-others).
 
-Each skill teaches your AI assistant how to handle a specific aspect of Databricks Apps development — authentication, table access, volume operations, and more — with framework-specific guidance for Dash, Streamlit, FastAPI, and Reflex.
+These skills are **recipe composition**, not a replacement for official Databricks AI Tools. For AppKit, platform auth/deploy, jobs, pipelines, and **workspace MCP** (SQL, UC, Genie), install [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools install` and [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp). For natural-language apps in the Databricks UI, use [Genie App Builder](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/genie-app-builder). In-app **MCP connect** (`aiml`) is the app calling an MCP server. To let the coding agent **query this cookbook**, run [`../mcp-server/mcp_install.sh`](../mcp-server/mcp_install.sh). When this repo is the right path, start with [`build-app`](build-app/SKILL.md) — see the [root README](../readme.md#choose-a-path).
+
+Each skill covers one aspect of cookbook Apps development — authentication, table access, volume operations, and more — with framework-specific guidance for Dash, Streamlit, FastAPI, and Reflex.
 
 ## Available Skills
 
@@ -23,9 +25,37 @@ Each skill teaches your AI assistant how to handle a specific aspect of Databric
 
 ## Installation
 
-### Option 0a: Claude Code plugin marketplace (recommended for Claude Code)
+**Project vs `--global`, upgrade, and Cursor/Claude launch examples** are in the [root README](../readme.md#coding-agents-cursor-claude-code-and-others).
 
-The repo ships as a Claude Code plugin. Add it as a marketplace and install with two commands — no symlinks, no copies, and the bundled `SessionStart` hook runs automatically.
+```bash
+# From the cookbook clone (project = this folder)
+./install.sh
+./mcp-server/mcp_install.sh
+
+# All repos on this machine
+./install.sh --global
+./mcp-server/mcp_install.sh --global
+```
+
+`./install.sh` copies `databricks-skills/<name>/` into the same skill directories AI Dev Kit uses:
+
+| Client | Project (default / `--target-dir`) | Global (`-g`) |
+| ------ | ---------------------------------- | ------------- |
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| Cursor | `.cursor/skills/` | `~/.cursor/skills/` |
+| GitHub Copilot | `.github/skills/` | `~/.github/skills/` |
+| Codex | `.agents/skills/` | `~/.agents/skills/` |
+| Gemini CLI | `.gemini/skills/` | `~/.gemini/skills/` |
+| Antigravity | `.agents/skills/` | `~/.gemini/antigravity/skills/` |
+| Windsurf | `.windsurf/skills/` | `~/.codeium/windsurf/skills/` |
+| OpenCode | `.opencode/skills/` | `~/.config/opencode/skills/` |
+| Kiro | `.kiro/skills/` | `~/.kiro/skills/` |
+
+**Upgrade:** see the [root README Upgrade](../readme.md#upgrade) section (`git pull` + re-run install, or `/plugin marketplace update`). Subscribe to [GitHub Releases](https://github.com/databricks-solutions/databricks-apps-cookbook/releases) via **Watch → Custom → Releases**.
+
+### Claude Code plugin marketplace
+
+Add this repo as a marketplace so skills stay in the plugin instead of a copied folder.
 
 **From GitHub:**
 
@@ -35,13 +65,7 @@ The repo ships as a Claude Code plugin. Add it as a marketplace and install with
 /reload-plugins
 ```
 
-**From a local clone (offline / for editing):**
-
-```bash
-git clone https://github.com/databricks-solutions/databricks-apps-cookbook.git
-```
-
-Then in Claude Code:
+**From a local clone:**
 
 ```text
 /plugin marketplace add /absolute/path/to/databricks-apps-cookbook
@@ -49,84 +73,11 @@ Then in Claude Code:
 /reload-plugins
 ```
 
-After install, all 12 skills appear under the `databricks-skills:` namespace (e.g. `databricks-skills:cookbook-authentication`). Manage with:
+After install, skills appear under the `databricks-skills:` namespace. Manage with:
 
-- `/plugin list` — see installed plugins
-- `/plugin marketplace update databricks-skills` — pull latest
-- `/plugin uninstall databricks-skills@databricks-skills` — remove
-
-### Option 0b: One-command installer (recommended for Cursor, or for Claude Code without plugins)
-
-Use the included installer to install for Claude Code, Cursor, or both:
-
-```bash
-# From repository root
-./install.sh claude   # Install skills under ~/.claude/skills/
-./install.sh cursor   # Install transformed rules under ~/.cursor/rules/
-./install.sh all      # Install for both tools
-```
-
-### Option A: Symlink (recommended)
-
-Symlink the entire `databricks-skills` directory so skills stay in sync when you pull updates.
-
-**For Cursor:**
-
-```bash
-# Clone the cookbook (if you haven't already)
-git clone https://github.com/databricks-solutions/databricks-apps-cookbook.git
-
-# Symlink all skills at once
-ln -s "$(pwd)/databricks-apps-cookbook/databricks-skills/authentication" ~/.cursor/skills/cookbook-authentication
-ln -s "$(pwd)/databricks-apps-cookbook/databricks-skills/tables" ~/.cursor/skills/cookbook-tables
-# ... repeat for each skill you need
-```
-
-**For Claude Code:**
-
-```bash
-ln -s "$(pwd)/databricks-apps-cookbook/databricks-skills/authentication" ~/.claude/skills/cookbook-authentication
-ln -s "$(pwd)/databricks-apps-cookbook/databricks-skills/tables" ~/.claude/skills/cookbook-tables
-# ... repeat for each skill you need
-```
-
-**Or link all skills at once:**
-
-```bash
-# Cursor
-for skill in databricks-apps-cookbook/databricks-skills/*/; do
-  name=$(basename "$skill")
-  ln -sf "$(pwd)/$skill" ~/.cursor/skills/cookbook-"$name"
-done
-
-# Claude Code
-for skill in databricks-apps-cookbook/databricks-skills/*/; do
-  name=$(basename "$skill")
-  ln -sf "$(pwd)/$skill" ~/.claude/skills/cookbook-"$name"
-done
-```
-
-### Option B: Copy
-
-Copy skills into your tool's skill directory. You'll need to re-copy after updates.
-
-```bash
-# Cursor
-cp -r databricks-apps-cookbook/databricks-skills/authentication ~/.cursor/skills/cookbook-authentication
-
-# Claude Code
-cp -r databricks-apps-cookbook/databricks-skills/authentication ~/.claude/skills/cookbook-authentication
-```
-
-### Option C: Project-level skills
-
-Place skills directly in your app project so every contributor gets them automatically.
-
-```bash
-# Inside your app project
-cp -r /path/to/databricks-apps-cookbook/databricks-skills/authentication .cursor/skills/authentication
-cp -r /path/to/databricks-apps-cookbook/databricks-skills/authentication .claude/skills/authentication
-```
+- `/plugin list`
+- `/plugin marketplace update databricks-skills` — pull the next release
+- `/plugin uninstall databricks-skills@databricks-skills`
 
 ## Usage
 

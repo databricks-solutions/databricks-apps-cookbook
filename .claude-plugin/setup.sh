@@ -17,10 +17,6 @@ else
   echo "[databricks-skills] Skills directory not found: ${SKILLS_DIR}"
 fi
 
-if [[ -d "${HOME}/.cursor" || -d "${HOME}/.cursor/rules" ]]; then
-  echo "[databricks-skills] Cursor detected."
-  echo "[databricks-skills] Run ./install.sh cursor to install transformed rules for Cursor."
-else
-  echo "[databricks-skills] Run ./install.sh claude to install skills for Claude Code."
-  echo "[databricks-skills] Run ./install.sh all to install for both Claude Code and Cursor."
-fi
+echo "[databricks-skills] Cursor/Claude copies: ./install.sh --global   (or --target-dir for one repo)"
+echo "[databricks-skills] Recipe MCP: ./mcp-server/mcp_install.sh"
+echo "[databricks-skills] Upgrade: git pull, then re-run the same install command (or /plugin marketplace update databricks-skills)."
