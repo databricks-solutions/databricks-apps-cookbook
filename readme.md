@@ -1,18 +1,151 @@
 # 📖 Databricks Apps Cookbook 🍳
 
-Ready-to-use code snippets for building data and AI applications using [Databricks Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html).
+Ready-to-use code snippets for building **Dash, Streamlit, Reflex, and FastAPI** apps on [Databricks Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html).
 
-Learn more about the Databricks Apps Cookbook on **[apps-cookbook.dev](https://apps-cookbook.dev/)**.
+Learn more on **[apps-cookbook.dev](https://apps-cookbook.dev/)**. Coding agents: start with **[AGENTS.md](AGENTS.md)** and the path below.
 
 ## What is the Databricks Apps Cookbook?
 
-- **10+ recipes for common Apps use cases** such as reading and writing to and from tables and volumes, invoking traditional ML models and GenAI, or triggering workflows.
-- **Try recipes in the Cookbook app** and simply copy a code snippet to build your own.
-- **Description of requirements** (permissions, resources, dependencies) for each recipe.
+- **10+ recipes for common Apps use cases** such as reading and writing tables and volumes, invoking ML / GenAI, or triggering workflows.
+- **Try recipes in the Cookbook app** and copy a snippet into your own app.
+- **Requirements** (permissions, resources, dependencies) for each recipe.
 - Deploy to Databricks Apps or run locally.
-- Snippets for **Dash, Streamlit, Reflex, and FastAPI** are available.
+- Snippets for **Dash, Streamlit, Reflex, and FastAPI** only.
+
+## Choose a path
+
+This repo is the **Python recipe** layer for Dash, Streamlit, Reflex, and FastAPI.
+
+| If you want… | Use | Why |
+| ------------ | --- | --- |
+| A dashboard of charts/KPIs, no custom app | [AI/BI (Lakeview) dashboards](https://docs.databricks.com/aws/en/dashboards/) | Managed; not a Databricks App |
+| Natural-language app in the Databricks UI, data stays on-platform, App Spaces / scale-to-zero (Beta) | [Genie App Builder](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/genie-app-builder) | In-workspace NL builder; generates **AppKit**. Not this repo |
+| IDE coding on Databricks (jobs, pipelines, AppKit, Python platform rules) | [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) → `databricks aitools install` | Installs **official** skills (`databricks-apps`, `databricks-apps-python`, …). The kit `app-developer` profile is the platform layer |
+| Default **new** custom-code app (TypeScript/React) | Official **AppKit** skill `databricks-apps` (`databricks apps init`) | Recommended Apps path; recipes here do not cover AppKit |
+| React + FastAPI full-stack toolkit | [apx](https://github.com/databricks-solutions/apx) | Separate from this cookbook |
+| **Dash, Streamlit, Reflex, or FastAPI** recipes (tables, volumes, Genie API, jobs, in-app MCP, …) | **This repo** | Tested snippets + [`databricks-skills/`](databricks-skills/) for agents |
+
+## MCP
+
+| If you want… | Use | Why |
+| ------------ | --- | --- |
+| Your **coding agent** (Cursor, Claude Code, …) to call Databricks data/tools (SQL, UC functions, Genie, AI Search) | Official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) via [Unity Gateway](https://docs.databricks.com/aws/en/agents/mcp-tools/connect-clients) (`ug mcp add`). Pair with [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools` **skills** | Tools for the *agent* against the workspace. Kit recommends skills over its own [MCP server](https://github.com/databricks-solutions/ai-dev-kit/tree/main/databricks-mcp-server) unless you need a custom server |
+| Your **coding agent** to look up this cookbook’s recipes and skills | **This repo** — [`mcp-server/`](mcp-server/) (`./mcp-server/mcp_install.sh`) | Same client files as AI Dev Kit (project vs `--global`). Server name `cookbook` |
+| Your **Databricks App** to call an MCP server (GitHub, Jira, …) over a governed UC HTTP connection | **This repo** — [MCP connect](#recipe-index-by-framework) recipe + [`databricks-skills/aiml`](databricks-skills/aiml/SKILL.md) | Feature *inside* Dash/Streamlit/Reflex/FastAPI |
+| Your FastAPI app to **host** an MCP server | This repo’s FastAPI [MCP connect](docs/docs/fastapi/building_endpoints/mcp_connect.mdx) guide | App-as-MCP-server |
+
+## Coding agents (Cursor, Claude Code, and others)
+
+Cookbook **skills** teach Dash/Streamlit/Reflex/FastAPI composition. The **recipe MCP** (`list_cookbook_recipes`, `get_cookbook_recipe`) is how an agent in an empty app folder gets snippets without guessing. Official platform skills (AppKit, `apps deploy`) still come from [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools`. Human walkthrough (Cursor, Claude, upgrade): **[Use with coding agents](https://apps-cookbook.dev/docs/coding-agents)** on the docs site.
+
+### Install — project vs global
+
+Same idea as AI Dev Kit: **project** (default) is the folder you run from; **`--global`** is this user on this machine.
+
+From this cookbook clone:
+
+```bash
+# This repo only
+./install.sh
+./mcp-server/mcp_install.sh
+
+# Every repo on this machine
+./install.sh --global
+./mcp-server/mcp_install.sh --global
+```
+
+Cursor MCP has **no global config file** (same as the kit). Use project `.cursor/mcp.json` or Cursor Settings → MCP. After install, enable the **cookbook** server if it is off.
+
+**New app folder** (keep the cookbook clone on disk — MCP runs from there):
+
+```bash
+COOKBOOK=/path/to/databricks-apps-cookbook   # this clone
+mkdir -p ~/tmp/cookbook-scratch && cd ~/tmp/cookbook-scratch && git init
+"$COOKBOOK/install.sh" --target-dir "$PWD"
+"$COOKBOOK/mcp-server/mcp_install.sh" --target-dir "$PWD"
+```
+
+That writes kit-layout paths, including `.claude/skills/`, `.cursor/skills/`, `.mcp.json`, and `.cursor/mcp.json`. Default `--tools` is Claude, Cursor, Copilot, Codex, Gemini, Antigravity, Windsurf, OpenCode, and Kiro. Narrow it with `--tools claude,cursor`.
+
+Claude Code can instead use the [plugin marketplace](databricks-skills/README.md) (`/plugin install databricks-skills@databricks-skills`) so skills update without a copy. How to pick up the **next repo release**: [Upgrade](#upgrade).
+
+### Try it in Cursor
+
+1. **File → Open Folder** on the app (for a from-scratch test: `~/tmp/cookbook-scratch`, not this cookbook).
+2. Settings → MCP: turn on **cookbook**. Restart Cursor if the server is missing.
+3. Prompt that **should** use cookbook recipes:
+
+   > Build a Streamlit Databricks App that reads a Unity Catalog table. Use Databricks Apps Cookbook recipes only. Do not invent code.
+
+   Pass: `build-app` then `tables`; MCP `list_cookbook_recipes` / `get_cookbook_recipe`; `app.yaml` + Streamlit sample shape.
+
+4. Prompt that **should not** scaffold from this cookbook:
+
+   > I want a TypeScript/React Databricks App.
+
+   Pass: points at AppKit / AI Dev Kit (`databricks apps init`). Does not copy Dash/Streamlit from here.
+
+### Try it in Claude Code
+
+```bash
+cd ~/tmp/cookbook-scratch && claude
+```
+
+Confirm a `cookbook` MCP server, then use the same two prompts as Cursor.
+
+### Build a Python app with an agent
+
+1. Clone or open **this repository**, or a target app with `--target-dir` as above, so the agent can load skills (and MCP, if registered).
+2. Tell the agent the **framework**: Dash, Streamlit, Reflex, or FastAPI.
+3. The agent should load [`databricks-skills/build-app/SKILL.md`](databricks-skills/build-app/SKILL.md), then the matching category skill (`tables`, `authentication`, …).
+4. Implementations must come from the [recipe index](#recipe-index-by-framework) → `docs/docs/<framework>/…` plus the sample modules (or MCP `get_cookbook_recipe`). Do not invent AppKit, Gradio, or Flask (no tested recipes here).
+5. When the app runs, optionally follow [`databricks-skills/productionize-app-dab/SKILL.md`](databricks-skills/productionize-app-dab/SKILL.md) for Databricks Asset Bundles.
+
+Client path tables: [`databricks-skills/README.md`](databricks-skills/README.md), [`mcp-server/README.md`](mcp-server/README.md). Isolated installer test: `./mcp-server/tests/test_install_paths.sh`.
 
 ![Databricks Apps Cookbook](docs/docs/assets/demo.gif)
+
+## Upgrade
+
+Official Databricks skills (AppKit, jobs, …) are **not** this repo: `databricks aitools update`.
+
+This cookbook versions with **git** (and GitHub Releases). Copied skills do not auto-update; the recipe MCP reads whatever is in **this clone**.
+
+### Subscribe to releases
+
+1. Open [databricks-solutions/databricks-apps-cookbook](https://github.com/databricks-solutions/databricks-apps-cookbook).
+2. **Watch** → **Custom** → enable **Releases** (and **Releases** only if you do not want all issues/PRs).
+3. Release notes: [Releases](https://github.com/databricks-solutions/databricks-apps-cookbook/releases).
+
+### On the next repo release
+
+Use the **same flags** as the first install (`--global`, `--target-dir`, `--tools`).
+
+```bash
+cd /path/to/databricks-apps-cookbook
+git fetch --tags
+git pull                         # or: git checkout <release-tag>
+./install.sh                     # overwrites skill copies in place
+./mcp-server/mcp_install.sh      # refreshes mcp-server/.venv; catalog is the pulled docs
+```
+
+Claude Code plugin (no skill copies):
+
+```text
+/plugin marketplace update databricks-skills
+/reload-plugins
+```
+
+Restart Cursor / Claude Code. MCP `list_cookbook_recipes` then sees new `.mdx` recipes from the pull; you do not re-register MCP unless the installer or venv changed.
+
+Uninstall only cookbook entries:
+
+```bash
+./install.sh --uninstall
+./mcp-server/mcp_install.sh --uninstall
+# add --global if that is how you installed
+```
+
 
 ## Documentation
 
@@ -23,7 +156,7 @@ Find **deployment instructions** and all **code snippets** on [apps-cookbook.dev
 ### Where things live
 
 - **Recipe write-ups:** `.mdx` files under [`docs/docs/<framework>/…`](docs/docs/), published at [apps-cookbook.dev](https://apps-cookbook.dev/).
-- **Agent skills:** [`databricks-skills/README.md`](databricks-skills/README.md) — all **`SKILL.md`** files live under **`databricks-skills/<section>/…`** (for example **`workflow/build-app`**, **`workflow/productionize-app-dab`**), not under framework folders.
+- **Agent skills:** [`databricks-skills/README.md`](databricks-skills/README.md) — each **`SKILL.md`** is under **`databricks-skills/<skill-name>/`** (for example [`databricks-skills/build-app`](databricks-skills/build-app/SKILL.md), [`databricks-skills/productionize-app-dab`](databricks-skills/productionize-app-dab/SKILL.md)), not under framework folders.
 - **Runnable sample apps:** [`dash/APP_DESCRIPTION.md`](dash/APP_DESCRIPTION.md), [`streamlit/APP_DESCRIPTION.md`](streamlit/APP_DESCRIPTION.md), [`reflex/APP_DESCRIPTION.md`](reflex/APP_DESCRIPTION.md), [`fastapi/APP_DESCRIPTION.md`](fastapi/APP_DESCRIPTION.md). Each describes this app’s pages and links back to the [recipe index](#recipe-index-by-framework), docs site, contributing guide, and deploy instructions. FastAPI also has [`fastapi/README.md`](fastapi/README.md) for run commands and endpoints.
 - **Paths:** Prefix **Doc path** below with `docs/docs/<framework>/`, then append `.mdx` for the file on disk.
 
@@ -76,7 +209,7 @@ All under `docs/docs/fastapi/`:
 
 ## Contributions
 
-We welcome contributions! See **[`CONTRIBUTING.md`](CONTRIBUTING.md)** for how to add or port a recipe (code, docs, README index), testing expectations, and the pull request process. Submit a [pull request](https://github.com/databricks-solutions/databricks-apps-cookbook/pulls) or raise an [issue](https://github.com/databricks-solutions/databricks-apps-cookbook/issues) to report a bug or feature request.
+We welcome contributions! See **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — a recipe is sample + docs + the index below; it **does not become a skill**. Add or change a category `SKILL.md` only when agents need new composition notes (or a new category). Submit a [pull request](https://github.com/databricks-solutions/databricks-apps-cookbook/pulls) or raise an [issue](https://github.com/databricks-solutions/databricks-apps-cookbook/issues). After a release, users [upgrade](#upgrade) from GitHub Releases.
 
 Not sure what to contribute? Here are some commonly requested samples:
 
