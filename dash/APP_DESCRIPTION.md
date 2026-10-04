@@ -15,7 +15,7 @@ An interactive cookbook application that demonstrates common Databricks integrat
 
 **Workflow for contributors:** Choose capabilities from the README table → align with **documentation categories** (authentication, tables, workflows, …) → open the matching `.mdx` files and **`pages/*.py`** modules.
 
-**Agent-oriented checklist:** [`databricks-skills/workflow/build-app/SKILL.md`](../databricks-skills/workflow/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks.
+**Agent-oriented checklist:** [`databricks-skills/build-app/SKILL.md`](../databricks-skills/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks. See also the [root README choose-a-path](../readme.md#choose-a-path).
 
 ## Layout and Navigation
 

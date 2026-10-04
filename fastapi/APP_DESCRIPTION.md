@@ -15,7 +15,7 @@ A headless REST API application that demonstrates backend integration patterns w
 
 **Workflow for contributors:** README index → FastAPI **getting_started** vs **building_endpoints** areas → matching `.mdx` + route modules.
 
-**Agent-oriented checklist:** [`databricks-skills/workflow/build-app/SKILL.md`](../databricks-skills/workflow/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks.
+**Agent-oriented checklist:** [`databricks-skills/build-app/SKILL.md`](../databricks-skills/build-app/SKILL.md) — category-first ordering, minimum layout, and `app.yaml` expectations for these stacks. See also the [root README choose-a-path](../readme.md#choose-a-path).
 
 ## Architecture
 
