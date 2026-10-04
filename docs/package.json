@@ -19,12 +19,13 @@
   },
   "dependencies": {
     "@docusaurus/core": "^3.10.2",
+    "@docusaurus/faster": "^3.10.2",
     "@docusaurus/preset-classic": "^3.10.2",
     "@mdx-js/react": "^3.1.1",
-    "@portabletext/react": "^6.2.0",
-    "@sanity/client": "^7.27.0",
+    "@portabletext/react": "^8.0.1",
+    "@sanity/client": "^8.9.0",
     "clsx": "^2.1.1",
-    "docusaurus-lunr-search": "^3.6.0",
+    "docusaurus-lunr-search": "^3.6.1",
     "lucide-react": "^1.49.0",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.3.0",
@@ -32,14 +33,14 @@
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "swiper": "^12.2.0"
+    "swiper": "^14.3.0"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.10.2",
     "@docusaurus/tsconfig": "^3.10.2",
     "@docusaurus/types": "^3.10.2",
     "@tailwindcss/postcss": "^4.3.3",
-    "docusaurus-plugin-llms": "^0.4.0",
+    "docusaurus-plugin-llms": "^0.6.0",
     "postcss": "^8.5.28",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
@@ -61,7 +62,7 @@
     ]
   },
   "engines": {
-    "node": ">=18.0"
+    "node": ">=20.0"
   },
   "overrides": {
     "@types/node": "26.6.3",
@@ -70,6 +71,8 @@
     "ws": "8.22.0",
     "websocket-driver": "0.7.5",
     "braces": "3.0.3",
-    "micromatch": "4.0.8"
+    "micromatch": "4.0.8",
+    "minimatch@9.0.3": "9.0.9",
+    "yaml": "2.9.1"
   }
 }
