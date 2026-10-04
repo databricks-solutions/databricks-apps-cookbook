@@ -172,6 +172,12 @@ groups = [
                 "page": "views/visualizations_map.py",
                 "icon": ":material/globe:",
             },
+            {
+                "label": "Map display for H3",
+                "help": "Display geo information on a map with the geo spatial index H3.",
+                "page": "views/visualizations_map_h3.py",
+                "icon": ":material/globe:",
+            },
         ],
     },
     {

@@ -5,3 +5,5 @@ pandas~=3.0
 psycopg[binary]~=3.3
 streamlit~=1.56
 streamlit-folium~=0.27
+streamlit-hexviz~=0.2
+numpy

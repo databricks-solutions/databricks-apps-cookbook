@@ -1,0 +1,87 @@
+---
+sidebar_position: 3
+---
+
+# Map display with geo spatial index H3
+
+This recipe enables you to display geographic data on a map with H3
+
+## Code snippet
+
+### Display geo data from a table
+
+```python title="app.py"
+import streamlit as st
+import streamlit_hexviz as shv
+from databricks import sql
+from databricks.sdk.core import Config
+from databricks.sdk import WorkspaceClient
+import pandas as pd
+
+cfg = Config()
+w = WorkspaceClient()
+
+# List available SQL warehouses
+warehouses = w.warehouses.list()
+warehouse_paths = {wh.name: wh.odbc_params.path for wh in warehouses}
+
+# Connect to SQL warehouse
+def get_connection(http_path):
+    return sql.connect(
+        server_hostname=cfg.host,
+        http_path=http_path,
+        credentials_provider=lambda: cfg.authenticate,
+    )
+
+# Read table
+def read_table(table_name, conn):
+    with conn.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM {table_name}")
+        return cursor.fetchall_arrow().to_pandas()
+
+# Get data and display on map
+warehouse_name = "your_warehouse_name"
+table_name = "samples.accuweather.forecast_daily_calendar_metric"
+
+http_path = warehouse_paths[warehouse_name]
+conn = get_connection(http_path)
+df = read_table(table_name, conn)
+
+# Display map with latitude/longitude columns
+shv.h3_map(df, lat="latitude", lon="longitude")
+
+# Display map in case table contains H3 index
+h3_col= 'your_h3_column_name'
+shv.h3_choropleth(df, h3_col=h3_col)
+```
+
+## Resources
+
+- [SQL warehouse](https://docs.databricks.com/aws/en/compute/sql-warehouse/) _(optional, only for reading table data)_
+- [Unity Catalog table](https://docs.databricks.com/aws/en/tables/) _(optional, only for reading table data)_
+- [H3 SQL reference](https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-h3-geospatial-functions) _(optional, only for reading table data)_
+- [H3](https://h3geo.org/) _(optional, only for reference to the concept H3)_
+
+## Permissions
+
+Your [app service principal](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/#how-does-databricks-apps-manage-authorization) needs the following permissions:
+
+- `CAN USE` on the SQL warehouse _(only required if reading data from tables)_
+- `SELECT` on the Unity Catalog table _(only required if reading data from tables)_
+
+See Unity [Catalog privileges and securable objects](https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/privileges) for more information.
+
+## Dependencies
+
+- [Streamlit](https://pypi.org/project/streamlit/) - `streamlit`
+- [Streamlit Hexviz](https://pypi.org/project/streamlit-hexviz/) - `streamlit-hexviz`
+- [Databricks SDK](https://pypi.org/project/databricks-sdk/) - `databricks-sdk` _(for table data)_
+- [Databricks SQL Connector](https://pypi.org/project/databricks-sql-connector/) - `databricks-sql-connector` _(for table data)_
+
+```python title="requirements.txt"
+streamlit
+streamlit-hexviz
+databricks-sdk
+databricks-sql-connector
+```
+
