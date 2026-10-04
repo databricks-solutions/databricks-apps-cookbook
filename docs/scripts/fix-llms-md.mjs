@@ -97,6 +97,16 @@ function extractFirstParagraph(mdPath) {
   let start = 0;
   if (lines[start]?.startsWith("# ")) start++;
   while (start < lines.length && lines[start].trim() === "") start++;
+  // Plugin 0.6+ puts the page description in a blockquote under the title.
+  // Use that (minus the "> ") instead of the truncated llms.txt snippet.
+  if (lines[start]?.startsWith("> ")) {
+    const quote = [];
+    while (start < lines.length && lines[start].startsWith("> ")) {
+      quote.push(lines[start].replace(/^>\s?/, "").trim());
+      start++;
+    }
+    if (quote.length > 0) return quote.join(" ");
+  }
 
   const para = [];
   for (let i = start; i < lines.length; i++) {

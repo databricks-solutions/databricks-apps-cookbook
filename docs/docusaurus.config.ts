@@ -15,6 +15,9 @@ const config: Config = {
   projectName: "databricks-apps-cookbook",
 
   onBrokenLinks: "throw",
+  future: {
+    v4: true,
+  },
   markdown: {
     hooks: {
       onBrokenMarkdownLinks: "warn",
@@ -96,6 +99,12 @@ const config: Config = {
           label: "Introduction",
           position: "left",
           activeBasePath: "docs/intro",
+        },
+        {
+          to: "docs/coding-agents",
+          label: "Coding agents",
+          position: "left",
+          activeBasePath: "docs/coding-agents",
         },
         {
           to: "docs/category/streamlit",

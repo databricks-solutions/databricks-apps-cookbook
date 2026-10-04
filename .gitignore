@@ -142,4 +142,24 @@ ml-models.ipr
 .DS_Store
 .databricks
 
-.databricks
+# MCP client configs (installer writes absolute venv paths and .bak copies)
+.mcp.json
+.mcp.json.bak
+.cursor/
+.vscode/mcp.json
+.codex/
+opencode.json
+opencode.json.bak
+
+# Project-scope skill copies from ./install.sh (source remains databricks-skills/)
+.claude/
+.github/skills/
+.agents/
+.gemini/
+.windsurf/
+.opencode/
+.kiro/
+
+# Wrangler local state (docs deploy)
+.wrangler/
+
