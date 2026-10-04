@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@theme/Layout";
-import { Github, BadgeCheck } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
 import { useHistory, useLocation } from "@docusaurus/router";
 import FilterPills from "../components/FilterPills";
+import GithubIcon from "../components/GithubIcon";
 import { createClient } from "@sanity/client";
 import GalleryAppPage from "./GalleryApp";
 
@@ -488,7 +489,7 @@ function GalleryPage() {
                             title="View source"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <Github size={18} />
+                            <GithubIcon size={18} />
                             Source code
                           </a>
                         </div>
