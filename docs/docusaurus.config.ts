@@ -15,6 +15,9 @@ const config: Config = {
   projectName: "databricks-apps-cookbook",
 
   onBrokenLinks: "throw",
+  future: {
+    v4: true,
+  },
   markdown: {
     hooks: {
       onBrokenMarkdownLinks: "warn",
