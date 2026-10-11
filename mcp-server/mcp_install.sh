@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Register the cookbook recipe MCP server using the same client config paths as
-# AI Dev Kit's databricks-mcp-server/mcp_install.sh. Server name is "cookbook"
-# so it can sit next to the kit's "databricks" server.
+# Databricks Agent Skills. Server name is "cookbook" so it can sit next to
+# managed MCP / Unity Gateway.
 #
 # Local recipes/skills only — no Databricks profile / workspace tools.
 #
@@ -28,14 +28,14 @@ Usage: ./mcp-server/mcp_install.sh [options]
 
   --tools LIST     claude,cursor,copilot,codex,gemini,antigravity,windsurf,opencode,kiro
                    (default: all of the above)
-  -g, --global     Write home-dir configs (same layout as AI Dev Kit)
+  -g, --global     Write home-dir configs (same layout as Databricks Agent Skills)
   --target-dir DIR Project-scope root (default: cookbook repo root)
   --skip-venv      Do not create/install mcp-server/.venv
   --uninstall      Remove the "cookbook" MCP entry only
   --dry-run        Print target paths and exit
   -h, --help
 
-Config paths match AI Dev Kit (project vs global). This server does not set
+Config paths match Databricks Agent Skills (project vs global). This server does not set
 DATABRICKS_CONFIG_PROFILE.
 EOF
 }
@@ -203,7 +203,7 @@ p.write_text(json.dumps(cfg, indent=2) + "\n")
 PY
 }
 
-# Same layout as AI Dev Kit mcp_install.sh (kit server name is "databricks").
+# Same layout as Databricks Agent Skills MCP client files (workspace tools stay on managed MCP).
 config_for_tool() {
   local tool="$1"
   case "${tool}" in
@@ -274,7 +274,7 @@ apply_spec() {
   local mode="$2"
   IFS='|' read -r path kind extra <<< "${spec}"
   if [[ "${path}" == "MANUAL" ]]; then
-    echo " - ${kind}: configure MCP in the client UI (same as AI Dev Kit)"
+    echo " - ${kind}: configure MCP in the client UI (same as Databricks Agent Skills)"
     return 0
   fi
   if [[ "${DRY_RUN}" == true ]]; then

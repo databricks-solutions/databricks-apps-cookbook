@@ -20,29 +20,28 @@ This repo is the **Python recipe** layer for Dash, Streamlit, Reflex, and FastAP
 | ------------ | --- | --- |
 | A dashboard of charts/KPIs, no custom app | [AI/BI (Lakeview) dashboards](https://docs.databricks.com/aws/en/dashboards/) | Managed; not a Databricks App |
 | Natural-language app in the Databricks UI, data stays on-platform, App Spaces / scale-to-zero (Beta) | [Genie App Builder](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/genie-app-builder) | In-workspace NL builder; generates **AppKit**. Not this repo |
-| IDE coding on Databricks (jobs, pipelines, AppKit, Python platform rules) | [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) → `databricks aitools install` | Installs **official** skills (`databricks-apps`, `databricks-apps-python`, …). The kit `app-developer` profile is the platform layer |
-| Default **new** custom-code app (TypeScript/React) | Official **AppKit** skill `databricks-apps` (`databricks apps init`) | Recommended Apps path; recipes here do not cover AppKit |
-| React + FastAPI full-stack toolkit | [apx](https://github.com/databricks-solutions/apx) | Separate from this cookbook |
+| IDE coding on Databricks (jobs, pipelines, AppKit, Python platform rules) | [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills) → `databricks aitools install` | Official skills (`databricks-apps`, `databricks-apps-python`, `databricks-core`, …) |
+| Default **new** custom-code app (TypeScript/React) | Official **[AppKit](https://github.com/databricks/appkit)** (`databricks apps init`, skill `databricks-apps`) | Node.js + React SDK; recipes here do not cover AppKit |
 | **Dash, Streamlit, Reflex, or FastAPI** recipes (tables, volumes, Genie API, jobs, in-app MCP, …) | **This repo** | Tested snippets + [`databricks-skills/`](databricks-skills/) for agents |
 
 ## MCP
 
 | If you want… | Use | Why |
 | ------------ | --- | --- |
-| Your **coding agent** (Cursor, Claude Code, …) to call Databricks data/tools (SQL, UC functions, Genie, AI Search) | Official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) via [Unity Gateway](https://docs.databricks.com/aws/en/agents/mcp-tools/connect-clients) (`ug mcp add`). Pair with [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools` **skills** | Tools for the *agent* against the workspace. Kit recommends skills over its own [MCP server](https://github.com/databricks-solutions/ai-dev-kit/tree/main/databricks-mcp-server) unless you need a custom server |
-| Your **coding agent** to look up this cookbook’s recipes and skills | **This repo** — [`mcp-server/`](mcp-server/) (`./mcp-server/mcp_install.sh`) | Same client files as AI Dev Kit (project vs `--global`). Server name `cookbook` |
+| Your **coding agent** (Cursor, Claude Code, …) to call Databricks data/tools (SQL, UC functions, Genie, AI Search) | Official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) via [Unity Gateway](https://docs.databricks.com/aws/en/agents/mcp-tools/connect-clients) (`ug mcp add`). Pair with [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills) / `databricks aitools` | Tools for the *agent* against the workspace |
+| Your **coding agent** to look up this cookbook’s recipes and skills | **This repo** — [`mcp-server/`](mcp-server/) (`./mcp-server/mcp_install.sh`) | Same client files as Agent Skills (project vs `--global`). Server name `cookbook` |
 | Your **Databricks App** to call an MCP server (GitHub, Jira, …) over a governed UC HTTP connection | **This repo** — [MCP connect](#recipe-index-by-framework) recipe + [`databricks-skills/aiml`](databricks-skills/aiml/SKILL.md) | Feature *inside* Dash/Streamlit/Reflex/FastAPI |
 | Your FastAPI app to **host** an MCP server | This repo’s FastAPI [MCP connect](docs/docs/fastapi/building_endpoints/mcp_connect.mdx) guide | App-as-MCP-server |
 
 ## Coding agents (Cursor, Claude Code, and others)
 
-Cookbook **skills** teach Dash/Streamlit/Reflex/FastAPI composition. The **recipe MCP** (`list_cookbook_recipes`, `get_cookbook_recipe`) is how an agent in an empty app folder gets snippets without guessing. Official platform skills (AppKit, `apps deploy`) still come from [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools`. Human walkthrough (Cursor, Claude, upgrade): **[Use with coding agents](https://apps-cookbook.dev/docs/coding-agents)** on the docs site.
+Cookbook **skills** teach Dash/Streamlit/Reflex/FastAPI composition. The **recipe MCP** (`list_cookbook_recipes`, `get_cookbook_recipe`) is how an agent in an empty app folder gets snippets without guessing. Official platform skills (AppKit, `apps deploy`) still come from [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills) / `databricks aitools`. Human walkthrough (Cursor, Claude, upgrade): **[Use with coding agents](https://apps-cookbook.dev/docs/coding-agents)** on the docs site.
 
 You only need **git**, **bash**, and **Python 3**. Clone from GitHub; skills and the recipe MCP install from this repo (public PyPI for the MCP venv). You do **not** need a Databricks VPN or internal npm. Node.js 20+ is only if you [preview the docs site](CONTRIBUTING.md#what-to-include-recipe).
 
 ### Install — project vs global
 
-Same idea as AI Dev Kit: **project** (default) is the folder you run from; **`--global`** is this user on this machine.
+Same idea as Databricks Agent Skills: **project** (default) is the folder you run from; **`--global`** is this user on this machine.
 
 From this cookbook clone:
 
@@ -56,7 +55,7 @@ From this cookbook clone:
 ./mcp-server/mcp_install.sh --global
 ```
 
-Cursor MCP has **no global config file** (same as the kit). Use project `.cursor/mcp.json` or Cursor Settings → MCP. After install, enable the **cookbook** server if it is off.
+Cursor MCP has **no global config file** (same as Databricks Agent Skills). Use project `.cursor/mcp.json` or Cursor Settings → MCP. After install, enable the **cookbook** server if it is off.
 
 **New app folder** (keep the cookbook clone on disk — MCP runs from there):
 
@@ -67,7 +66,7 @@ mkdir -p ~/tmp/cookbook-scratch && cd ~/tmp/cookbook-scratch && git init
 "$COOKBOOK/mcp-server/mcp_install.sh" --target-dir "$PWD"
 ```
 
-That writes the same skill and MCP files AI Dev Kit uses, including `.claude/skills/`, `.cursor/skills/`, `.mcp.json`, and `.cursor/mcp.json`. Default `--tools` is Claude, Cursor, Copilot, Codex, Gemini, Antigravity, Windsurf, OpenCode, and Kiro. Narrow it with `--tools claude,cursor`.
+That writes the same skill and MCP files Databricks Agent Skills uses, including `.claude/skills/`, `.cursor/skills/`, `.mcp.json`, and `.cursor/mcp.json`. Default `--tools` is Claude, Cursor, Copilot, Codex, Gemini, Antigravity, Windsurf, OpenCode, and Kiro. Narrow it with `--tools claude,cursor`.
 
 Claude Code can load skills as a plugin (no copied folders). In Claude:
 
@@ -92,7 +91,7 @@ How to pick up the **next repo release**: [Upgrade](#upgrade). Full plugin comma
 
    > I want a TypeScript/React Databricks App.
 
-   The assistant should point at AppKit / AI Dev Kit (`databricks apps init`) instead of copying Dash or Streamlit from here.
+   The assistant should point at [AppKit](https://github.com/databricks/appkit) (`databricks apps init`) instead of copying Dash or Streamlit from here.
 
 ### Try it in Claude Code
 
@@ -116,7 +115,7 @@ Client path tables: [`databricks-skills/README.md`](databricks-skills/README.md)
 
 ## Upgrade
 
-Official Databricks skills (AppKit, jobs, …) are **not** this repo: `databricks aitools update`.
+Official Databricks skills (AppKit, jobs, …) are **not** this repo: [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills) / `databricks aitools update`.
 
 This cookbook versions with **git** (and GitHub Releases). Copied skills do not auto-update; the recipe MCP reads whatever is in **this clone**.
 

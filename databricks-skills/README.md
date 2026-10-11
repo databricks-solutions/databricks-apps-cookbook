@@ -2,7 +2,7 @@
 
 AI coding assistant skills for composing **Dash, Streamlit, FastAPI, and Reflex** apps from this cookbook. Works with **Cursor**, **Claude Code**, and the other clients listed in the [root README](../readme.md#coding-agents-cursor-claude-code-and-others).
 
-These skills are **recipe composition**, not a replacement for official Databricks AI Tools. For AppKit, platform auth/deploy, jobs, pipelines, and **workspace MCP** (SQL, UC, Genie), install [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools install` and [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp). For natural-language apps in the Databricks UI, use [Genie App Builder](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/genie-app-builder). In-app **MCP connect** (`aiml`) is the app calling an MCP server. To let the coding agent **query this cookbook**, run [`../mcp-server/mcp_install.sh`](../mcp-server/mcp_install.sh). When this repo is the right path, start with [`build-app`](build-app/SKILL.md) — see the [root README](../readme.md#choose-a-path).
+These skills are **recipe composition**, not a replacement for official [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills). For AppKit, platform auth/deploy, jobs, pipelines, and **workspace MCP** (SQL, UC, Genie), install Agent Skills (`databricks aitools install`) and [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp). For a TypeScript/React app, use **[AppKit](https://github.com/databricks/appkit)** (`databricks apps init`). For natural-language apps in the Databricks UI, use [Genie App Builder](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/genie-app-builder). In-app **MCP connect** (`aiml`) is the app calling an MCP server. To let the coding agent **query this cookbook**, run [`../mcp-server/mcp_install.sh`](../mcp-server/mcp_install.sh). When this repo is the right path, start with [`build-app`](build-app/SKILL.md) — see the [root README](../readme.md#choose-a-path).
 
 Each skill covers one aspect of cookbook Apps development — authentication, table access, volume operations, and more — with framework-specific guidance for Dash, Streamlit, FastAPI, and Reflex.
 
@@ -37,7 +37,7 @@ Each skill covers one aspect of cookbook Apps development — authentication, ta
 ./mcp-server/mcp_install.sh --global
 ```
 
-`./install.sh` copies `databricks-skills/<name>/` into the same skill directories AI Dev Kit uses:
+`./install.sh` copies `databricks-skills/<name>/` into the same skill directories Databricks Agent Skills uses:
 
 | Client | Project (default / `--target-dir`) | Global (`-g`) |
 | ------ | ---------------------------------- | ------------- |

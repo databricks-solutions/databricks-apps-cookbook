@@ -1,6 +1,6 @@
 # Contributing
 
-For humans and coding agents. For when to use this cookbook vs AppKit or Genie App Builder, see **[readme.md](readme.md#choose-a-path)** and **[AGENTS.md](AGENTS.md)**. After a change lands in a **release**, consumers follow **[readme.md § Upgrade](readme.md#upgrade)** (`git pull`, re-run install, or `/plugin marketplace update`).
+For humans and coding agents. For when to use this cookbook vs [AppKit](https://github.com/databricks/appkit), [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills), or Genie App Builder, see **[readme.md](readme.md#choose-a-path)** and **[AGENTS.md](AGENTS.md)**. After a change lands in a **release**, consumers follow **[readme.md § Upgrade](readme.md#upgrade)** (`git pull`, re-run install, or `/plugin marketplace update`).
 
 ## Recipes vs skills
 

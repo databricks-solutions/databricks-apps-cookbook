@@ -7,7 +7,7 @@ description: >-
   Feature code only from repo samples and docs/docs/*.mdx. After the app runs,
   follow [`productionize-app-dab`](../productionize-app-dab/SKILL.md)
   for Databricks Asset Bundles (DABs). Do not use for AppKit, Genie App Builder,
-  apx, AI/BI dashboards, or coding-agent MCP config — see When not to use this skill.
+  AI/BI dashboards, or coding-agent MCP config — see When not to use this skill.
 ---
 
 # Build a Databricks App
@@ -20,11 +20,10 @@ Stop and point the user at the other product. Do not scaffold Dash/Streamlit/Ref
 | ---------- | ----------- |
 | Charts/KPIs only, no custom app | [AI/BI (Lakeview) dashboards](https://docs.databricks.com/aws/en/dashboards/) / skill `databricks-aibi-dashboards` |
 | Natural-language app in the Databricks UI, App Spaces, scale-to-zero (Beta) | [Genie App Builder](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/genie-app-builder) |
-| Default new custom-code app (TypeScript/React), `databricks apps init` | Official **AppKit** skill `databricks-apps` via [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools install` |
-| React + FastAPI toolkit | [apx](https://github.com/databricks-solutions/apx) |
-| MCP **tools for Cursor/Claude** (SQL, UC functions, Genie, AI Search) | Official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) + Unity Gateway; pair with AI Dev Kit skills. Not cookbook MCP recipes |
+| Default new custom-code app (TypeScript/React), `databricks apps init` | Official **[AppKit](https://github.com/databricks/appkit)** skill `databricks-apps` via [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills) / `databricks aitools install` |
+| MCP **tools for Cursor/Claude** (SQL, UC functions, Genie, AI Search) | Official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) + Unity Gateway; pair with [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills). Not cookbook MCP recipes |
 
-If ambiguous (new app, no framework named), ask: cookbook Python (this skill) vs AppKit vs Genie App Builder. Platform rules (OAuth scopes, `apps deploy`) still come from official AI Tools; this skill supplies **recipes**.
+If ambiguous (new app, no framework named), ask: cookbook Python (this skill) vs AppKit vs Genie App Builder. Platform rules (OAuth scopes, `apps deploy`) still come from [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills); this skill supplies **recipes**.
 
 If the **cookbook MCP** is connected (`list_cookbook_recipes` / `get_cookbook_recipe`), use it to resolve snippets and permissions. Otherwise read `docs/docs/` and sample trees as in **Constraints**.
 
@@ -39,7 +38,7 @@ Implementations **must** trace to:
 
 Those pairs are **tested together**. Do not treat generic tutorials or external snippets as authoritative.
 
-**Outside scope:** React/Vue/Angular SPAs, Gradio-only, Flask-only, etc.—**no tested recipes in this repo.** Point to [Databricks Apps docs](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html).
+**Outside scope:** TypeScript/React (use [AppKit](https://github.com/databricks/appkit)), Vue/Angular SPAs, Gradio-only, Flask-only, etc.—**no tested recipes in this repo.**
 
 **FastAPI:** This cookbook ships **API samples + docs**, not a bundled SPA under `/`.
 
