@@ -8,9 +8,8 @@ Do **not** use this cookbook if the user wants:
 
 - Charts/KPIs only → [AI/BI (Lakeview) dashboards](https://docs.databricks.com/aws/en/dashboards/)
 - Natural-language apps in the Databricks UI / App Spaces → [Genie App Builder](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/genie-app-builder) (AppKit; Beta)
-- Default new custom-code app (TypeScript/React) → official **AppKit** via [AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / `databricks aitools install` (`databricks-apps`, `databricks apps init`)
-- React + FastAPI toolkit → [apx](https://github.com/databricks-solutions/apx)
-- Databricks **workspace tools** for the coding agent (SQL, UC functions, Genie, AI Search) → official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) / Unity Gateway (`ug mcp add`), plus AI Dev Kit skills.
+- Default new custom-code app (TypeScript/React) → official **[AppKit](https://github.com/databricks/appkit)** (`databricks apps init`, skill `databricks-apps`)
+- Databricks **workspace tools** for the coding agent (SQL, UC functions, Genie, AI Search) → official [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) / Unity Gateway (`ug mcp add`), plus [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills) (`databricks aitools install`)
 
 Cookbook in-app MCP: [`databricks-skills/aiml`](databricks-skills/aiml/SKILL.md). Recipe MCP for agents: [`mcp-server/`](mcp-server/) (`./mcp-server/mcp_install.sh`). Clone and install from public GitHub (no Databricks-internal npm). Upgrade after a GitHub release: [readme.md § Upgrade](readme.md#upgrade).
 
@@ -23,7 +22,7 @@ User asked for **Dash, Streamlit, Reflex, or FastAPI** (or is extending these sa
 3. Copy from the README [recipe index](readme.md#recipe-index-by-framework) → `docs/docs/<framework>/…` and `dash/`, `streamlit/`, `reflex/`, or `fastapi/`. If the **cookbook MCP** is connected, call `list_cookbook_recipes` / `get_cookbook_recipe` instead of guessing paths. Do not invent code outside those sources.
 4. After the app runs, optionally [`databricks-skills/productionize-app-dab/SKILL.md`](databricks-skills/productionize-app-dab/SKILL.md).
 
-Official platform skills (auth scopes, `apps deploy`, AppKit) come from AI Dev Kit / `databricks aitools`. Cookbook skills are recipes only.
+Official platform skills (auth scopes, `apps deploy`, AppKit) come from [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills) / `databricks aitools`. Cookbook skills are recipes only.
 
 ## Contributing to this repo
 

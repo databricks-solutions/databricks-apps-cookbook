@@ -2,7 +2,7 @@
 
 A small [MCP](https://modelcontextprotocol.io/) server for **coding agents**. It exposes Databricks Apps Cookbook **recipes and skills** as tools so an agent can list snippets, permissions, and sample paths without guessing.
 
-This is **not** a copy of the [AI Dev Kit MCP server](https://github.com/databricks-solutions/ai-dev-kit/tree/main/databricks-mcp-server) (SQL, jobs, Unity Catalog, `manage_app`, …). For those workspace tools use [Databricks managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) / Unity Gateway, or the kit server.
+This is **not** Databricks workspace MCP (SQL, jobs, Unity Catalog, Genie, …). For those tools use [managed MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp) / Unity Gateway, plus [Databricks Agent Skills](https://github.com/databricks/databricks-agent-skills).
 
 Cursor and Claude Code launch examples (from-scratch prompts, pass/fail) live in the [root README](../readme.md#try-it-in-cursor).
 
@@ -15,7 +15,7 @@ Cursor and Claude Code launch examples (from-scratch prompts, pass/fail) live in
 | `list_cookbook_skills` | Composition skills (`build-app`, `tables`, …) |
 | `get_cookbook_skill` | Full `SKILL.md` body |
 
-## Install (same client paths as AI Dev Kit)
+## Install (same client paths as Databricks Agent Skills)
 
 From the cookbook repo root:
 
@@ -23,12 +23,12 @@ From the cookbook repo root:
 ./mcp-server/mcp_install.sh
 ```
 
-Default registers **all** clients AI Dev Kit supports. Project vs `--global`:
+Default registers **all** clients Databricks Agent Skills supports. Project vs `--global`:
 
 | Client | Project (`--target-dir`, default: this repo) | Global (`-g`) |
 | ------ | --------------------------------------------- | ------------- |
 | Claude Code | `.mcp.json` | `~/.claude.json` |
-| Cursor | `.cursor/mcp.json` | Settings UI (kit does the same) |
+| Cursor | `.cursor/mcp.json` | Settings UI (Agent Skills does the same) |
 | GitHub Copilot | `.vscode/mcp.json` (`servers`) | Settings UI |
 | Codex | `.codex/config.toml` | `~/.codex/config.toml` |
 | Gemini CLI | `.gemini/settings.json` | `~/.gemini/settings.json` |
@@ -37,7 +37,7 @@ Default registers **all** clients AI Dev Kit supports. Project vs `--global`:
 | OpenCode | `opencode.json` | `~/.config/opencode/opencode.json` |
 | Kiro | `.kiro/settings/mcp.json` | `~/.kiro/settings/mcp.json` |
 
-The MCP **server name is `cookbook`**, so it can sit next to kit’s `databricks` server. No `DATABRICKS_CONFIG_PROFILE`. The config uses **absolute paths** to this clone’s venv and `run_server.py` — keep the repo on disk.
+The MCP **server name is `cookbook`**, so it can sit next to managed MCP / Unity Gateway. No `DATABRICKS_CONFIG_PROFILE`. The config uses **absolute paths** to this clone’s venv and `run_server.py` — keep the repo on disk.
 
 ```bash
 ./mcp-server/mcp_install.sh --tools claude,cursor
@@ -71,4 +71,4 @@ No Databricks profile is required. The server only reads this repository.
 ./mcp-server/tests/test_install_paths.sh
 ```
 
-Uses a temp `$HOME` and project dir (does not rewrite your real Claude/Cursor configs). Checks the root README launch/upgrade strings, catalog, MCP + skills install/uninstall on the same client paths as AI Dev Kit, and FastMCP tools if `mcp-server/.venv` exists.
+Uses a temp `$HOME` and project dir (does not rewrite your real Claude/Cursor configs). Checks the root README launch/upgrade strings, catalog, MCP + skills install/uninstall on the same client paths as Databricks Agent Skills, and FastMCP tools if `mcp-server/.venv` exists.

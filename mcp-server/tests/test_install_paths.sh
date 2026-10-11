@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Isolated tests for MCP + skills install paths (AI Dev Kit layout) and catalog.
+# Isolated tests for MCP + skills install paths (Databricks Agent Skills layout) and catalog.
 # Does not write to the real $HOME.
 set -euo pipefail
 
@@ -66,12 +66,18 @@ assert_contains "${README}" "Watch"
 assert_contains "${README}" "github.com/databricks-solutions/databricks-apps-cookbook/releases"
 assert_contains "${README}" "Build a Streamlit Databricks App that reads a Unity Catalog table"
 assert_contains "${README}" "TypeScript/React Databricks App"
+assert_contains "${README}" "github.com/databricks/appkit"
+assert_contains "${README}" "github.com/databricks/databricks-agent-skills"
+assert_absent "${README}" "ai-dev-kit"
+assert_absent "${README}" "databricks-solutions/apx"
 assert_contains "${README}" "list_cookbook_recipes"
 assert_contains "${README}" "File → Open Folder"
 assert_contains "${README}" "cd ~/tmp/cookbook-scratch && claude"
 
 echo "== docs coding-agents page =="
 assert_contains "${ROOT}/docs/docs/coding-agents.md" "Use with coding agents"
+assert_contains "${ROOT}/docs/docs/coding-agents.md" "github.com/databricks/appkit"
+assert_contains "${ROOT}/docs/docs/coding-agents.md" "github.com/databricks/databricks-agent-skills"
 assert_contains "${ROOT}/docs/docs/coding-agents.md" "File → Open Folder"
 assert_contains "${ROOT}/docs/docs/coding-agents.md" "Watch"
 assert_contains "${ROOT}/CONTRIBUTING.md" "recipe does not become a skill"
@@ -87,7 +93,7 @@ assert "When not to use this skill" in get_skill("build-app")["body"]
 print(len(recipes), "recipes", len(list_skills()), "skills")
 PY
 
-echo "== MCP project-scope (kit client files) =="
+echo "== MCP project-scope (Agent Skills client files) =="
 "${MCP_INSTALL}" --skip-venv --target-dir "${WORKDIR}/proj" >/dev/null
 
 assert_file "${WORKDIR}/proj/.mcp.json"
@@ -122,7 +128,7 @@ echo "== MCP uninstall cookbook only =="
 assert_absent "${WORKDIR}/proj/.mcp.json" '"cookbook"'
 assert_contains "${WORKDIR}/proj/.mcp.json" '"other"'
 
-echo "== MCP global-scope (kit home paths) =="
+echo "== MCP global-scope (Agent Skills home paths) =="
 "${MCP_INSTALL}" --skip-venv --global \
   --tools claude,codex,gemini,antigravity,windsurf,opencode,kiro >/dev/null
 assert_file "${HOME}/.claude.json"
@@ -134,7 +140,7 @@ assert_file "${HOME}/.codeium/windsurf/mcp_config.json"
 assert_file "${HOME}/.config/opencode/opencode.json"
 assert_file "${HOME}/.kiro/settings/mcp.json"
 
-echo "== skills project-scope (kit .claude/skills + .cursor/skills) =="
+echo "== skills project-scope (.claude/skills + .cursor/skills) =="
 "${SKILLS_INSTALL}" --target-dir "${WORKDIR}/proj" --tools claude,cursor >/dev/null
 assert_file "${WORKDIR}/proj/.claude/skills/build-app/SKILL.md"
 assert_file "${WORKDIR}/proj/.cursor/skills/build-app/SKILL.md"

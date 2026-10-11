@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install cookbook skills using the same project vs --global layout as AI Dev Kit.
+# Install cookbook skills using the same project vs --global layout as Databricks Agent Skills.
 # Source of truth is databricks-skills/<name>/SKILL.md in this clone.
 #
 # Upgrade: git pull this repo, then re-run the same command (overwrites in place).
@@ -21,7 +21,7 @@ usage() {
   cat <<'EOF'
 Usage: ./install.sh [options] [claude|cursor|all]
 
-Install Dash/Streamlit/Reflex/FastAPI cookbook skills. Paths match AI Dev Kit
+Install Dash/Streamlit/Reflex/FastAPI cookbook skills. Paths match Databricks Agent Skills
 (project vs --global). Re-run after `git pull` to upgrade.
 
   --tools LIST     claude,cursor,copilot,codex,gemini,antigravity,windsurf,opencode,kiro
@@ -76,7 +76,7 @@ else
   BASE_DIR="${TARGET_DIR}"
 fi
 
-# Same dest layout as AI Dev Kit install.sh agent_skill_target_dirs.
+# Same dest layout as Databricks Agent Skills (aitools) skill directories.
 skill_dir_for_tool() {
   local tool="$1"
   case "${tool}" in
