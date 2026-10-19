@@ -112,4 +112,6 @@ The application uses environment variables for configuration:
 - `DB_MAX_OVERFLOW` - (Optional) Max pool overflow (default: 10)
 - `DB_POOL_TIMEOUT` - (Optional) Pool timeout in seconds (default: 10)
 - `DB_COMMAND_TIMEOUT` - (Optional) Command timeout in seconds (default: 30)
-- `DB_POOL_RECYCLE_INTERVAL` - (Optional) Connection recycle interval in seconds (default: 3600)
+- `DB_POOL_RECYCLE_INTERVAL` - (Optional) Connection recycle interval in seconds (default: 2700, below the 1-hour token life)
+- `DB_POOL_PRE_PING` - (Optional) Test each pooled connection before use (default: true)
+- `DB_CONNECT_TIMEOUT` - (Optional) Seconds to wait for a new connection (default: 10)

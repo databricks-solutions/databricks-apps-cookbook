@@ -37,7 +37,9 @@ DB_POOL_SIZE=5
 DB_MAX_OVERFLOW=10
 DB_COMMAND_TIMEOUT=30
 DB_POOL_TIMEOUT=10
-DB_POOL_RECYCLE_INTERVAL=3600
+DB_POOL_RECYCLE_INTERVAL=2700
+DB_POOL_PRE_PING=true
+DB_CONNECT_TIMEOUT=10
 DATABRICKS_DATABASE_PORT=5432
 ```
 
@@ -135,13 +137,14 @@ def init_engine():
         # Create async engine with connection pooling
         engine = create_async_engine(
             url,
-            pool_pre_ping=False,
+            pool_pre_ping=os.getenv("DB_POOL_PRE_PING", "true").lower() in ("1", "true", "yes"),
             echo=False,
             pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
             max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
             pool_timeout=int(os.getenv("DB_POOL_TIMEOUT", "10")),
-            pool_recycle=int(os.getenv("DB_POOL_RECYCLE_INTERVAL", "3600")),
+            pool_recycle=int(os.getenv("DB_POOL_RECYCLE_INTERVAL", "2700")),
             connect_args={
+                "timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "10")),
                 "command_timeout": int(os.getenv("DB_COMMAND_TIMEOUT", "30")),
                 "server_settings": {
                     "application_name": "fastapi_orders_app",
@@ -305,7 +308,8 @@ engine = create_async_engine(
     pool_size=5,           # Base number of connections
     max_overflow=10,       # Additional connections under load
     pool_timeout=10,       # Max wait time for connection
-    pool_recycle=3600,     # Recycle connections every hour
+    pool_recycle=2700,     # Recycle at 45 minutes, before the 1-hour token expires
+    pool_pre_ping=True,    # Replace a connection the server closed, instead of failing the request
 )
 ```
 
@@ -319,7 +323,9 @@ engine = create_async_engine(
 | `DB_MAX_OVERFLOW` | 10 | Additional connections under load | 2x pool_size |
 | `DB_POOL_TIMEOUT` | 10 | Max seconds to wait for connection | 10-30 seconds |
 | `DB_COMMAND_TIMEOUT` | 30 | Query timeout in seconds | 30-60 seconds |
-| `DB_POOL_RECYCLE_INTERVAL` | 3600 | Recycle connections (seconds) | 3600 (1 hour) |
+| `DB_POOL_RECYCLE_INTERVAL` | 2700 | Recycle connections (seconds) | Below the 1-hour token life |
+| `DB_POOL_PRE_PING` | true | Test each pooled connection before use | true; one round trip per checkout |
+| `DB_CONNECT_TIMEOUT` | 10 | Max seconds to open a new connection | 10 seconds |
 
 ### Performance Tuning
 
