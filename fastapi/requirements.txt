@@ -11,7 +11,7 @@ httpx~=0.28
 requests~=2.32
 
 # Database
-sqlalchemy~=2.0
+sqlalchemy[asyncio]~=2.0
 sqlmodel~=0.0.24
 asyncpg~=0.30
 psycopg[binary]~=3.3

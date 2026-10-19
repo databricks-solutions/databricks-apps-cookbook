@@ -18,7 +18,7 @@ class OrderBase(SQLModel):
 
 class Order(OrderBase, table=True):
     __tablename__ = "orders_synced"
-    __table_args__ = "public"
+    __table_args__ = {"schema": "public"}
     o_orderkey: Optional[int] = Field(default=None, primary_key=True)
 
 
