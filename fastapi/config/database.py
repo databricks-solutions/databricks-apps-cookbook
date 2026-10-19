@@ -97,14 +97,16 @@ def init_engine():
 
         engine = create_async_engine(
             url,
-            pool_pre_ping=False,
+            # Test each pooled connection before use, so one the server closed is replaced
+            pool_pre_ping=os.getenv("DB_POOL_PRE_PING", "true").lower() in ("1", "true", "yes"),
             echo=False,
             pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
             max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
             pool_timeout=int(os.getenv("DB_POOL_TIMEOUT", "30")),
-            # OPTIONAL: Recycle connections every hour (before token expires)
-            pool_recycle=int(os.getenv("DB_POOL_RECYCLE_INTERVAL", "3600")),
+            # Recycle connections at 45 minutes, before the 1-hour OAuth token expires
+            pool_recycle=int(os.getenv("DB_POOL_RECYCLE_INTERVAL", "2700")),
             connect_args={
+                "timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "10")),
                 "command_timeout": int(os.getenv("DB_COMMAND_TIMEOUT", "10")),
                 "server_settings": {
                     "application_name": "fastapi_orders_app",
